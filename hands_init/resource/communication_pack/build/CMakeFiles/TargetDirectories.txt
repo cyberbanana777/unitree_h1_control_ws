@@ -1,0 +1,3 @@
+/home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build/CMakeFiles/inspire_hand.dir
+/home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build/CMakeFiles/edit_cache.dir
+/home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build/CMakeFiles/rebuild_cache.dir

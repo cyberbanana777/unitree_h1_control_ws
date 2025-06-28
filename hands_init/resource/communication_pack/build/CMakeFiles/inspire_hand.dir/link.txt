@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++17 -O3 -DNDEBUG -fPIC -O3 -DNDEBUG CMakeFiles/inspire_hand.dir/inspire_ctrl.cpp.o -o inspire_hand  -lunitree_sdk2 -lddsc -lddscxx -lrt -lpthread -Wl,-Bstatic -lboost_program_options -Wl,-Bdynamic -lfmt

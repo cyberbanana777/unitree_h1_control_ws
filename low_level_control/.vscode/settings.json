@@ -1,0 +1,32 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/banana-killer/extensions_for_H1_ws/install/udp_listener_and_converter/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/slider_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/macros_writer/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/low_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/high_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/hands_init/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/completed_scripts/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/buttons_server/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/button_analyzer/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_hg/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_go/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_api/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/banana-killer/extensions_for_H1_ws/install/udp_listener_and_converter/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/slider_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/macros_writer/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/low_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/high_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/hands_init/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/completed_scripts/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/buttons_server/lib/python3.8/site-packages",
+        "/home/banana-killer/extensions_for_H1_ws/install/button_analyzer/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_hg/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_go/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_ros2/cyclonedds_ws/install/unitree_api/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}
