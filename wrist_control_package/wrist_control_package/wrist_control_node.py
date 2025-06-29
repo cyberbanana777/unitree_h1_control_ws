@@ -40,9 +40,11 @@ LEFT_ALIAS = 0
 RIGHT_ALIAS = 1
 
 MOTOR_LIMITS = {
-    LEFT_ALIAS: [-1.0, 1.0],
-    RIGHT_ALIAS: [-1.0, 1.0],
+    LEFT_ALIAS: [-6.0, -0.23],
+    RIGHT_ALIAS: [-1.1, 4.58],
 }
+# Левый предел - предел вращения против часовой стрелке, считая от робота
+# Правый предел - предел вращения по часовой стрелке, считая от робота
 
 class PubSubNode(Node):
     def __init__(self):
@@ -85,14 +87,12 @@ class PubSubNode(Node):
         else:
             self.get_logger().error("Ошибка включения правого мотора")
 
-        # Создаем подписчика на топик 'input_topic'
         self.subscription = self.create_subscription(
             MotorCmds,
             TOPIC_CMD,
             self.listener_callback,
             10)
 
-        # Создаем публикатора в топик 'output_topic'
         self.publisher = self.create_publisher(
             MotorStates,
             TOPIC_STATES,
@@ -124,7 +124,7 @@ class PubSubNode(Node):
             MOTOR_LIMITS[LEFT_ALIAS][1]
         )
         target_position_right = np.clip(
-            target_position_left, 
+            target_position_right, 
             MOTOR_LIMITS[RIGHT_ALIAS][0], 
             MOTOR_LIMITS[RIGHT_ALIAS][1]
         )
@@ -191,9 +191,13 @@ def main(args=None):
         rclpy.spin(node)
 
     except KeyboardInterrupt:
-        node.shutdown()
+        node.get_logger().info('Node stopped by user')
 
+    except Exception as e:
+        node.get_logger().error(f'Exception: {str(e)}')
+    
     finally:
+        node.shutdown()
         node.destroy_node()
         rclpy.shutdown()
 

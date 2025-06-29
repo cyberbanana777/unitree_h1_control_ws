@@ -1,0 +1,30 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/wrist_control_package/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/teleop_twist_keyboard/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/slider_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/low_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/high_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/hands_init/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/completed_scripts_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/cmd_to_high_level_control_package/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_hg/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_go/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_api/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/wrist_control_package/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/teleop_twist_keyboard/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/slider_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/low_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/high_level_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/hands_init/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/completed_scripts_control/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/install/cmd_to_high_level_control_package/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_hg/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_go/lib/python3.8/site-packages",
+        "/home/banana-killer/unitree_workspaces_and_repos/unitree_ros2/cyclonedds_ws/install/unitree_api/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}
