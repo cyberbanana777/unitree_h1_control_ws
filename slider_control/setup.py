@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'low_level_control'
+package_name = 'slider_control'
 
 setup(
     name=package_name,
@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'low_level_control_with_hands = low_level_control.low_level_node_with_hands:main',
-            'low_level_control_without_hands = low_level_control.low_level_node_without_hands:main',
+            'slider_control_node = slider_control.slider_control_node:main'
         ],
     },
 )

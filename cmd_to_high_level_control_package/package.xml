@@ -4,7 +4,7 @@
   <name>cmd_to_high_level_control_package</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sashagrachev@gmail.com">banana-killer</maintainer>
+  <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>geometry_msgs</depend>

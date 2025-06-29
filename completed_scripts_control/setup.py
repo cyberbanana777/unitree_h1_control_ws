@@ -1,6 +1,9 @@
+import os
 from setuptools import setup
+from glob import glob
 
-package_name = 'low_level_control'
+
+package_name = 'completed_scripts_control'
 
 setup(
     name=package_name,
@@ -10,6 +13,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*_launch.py')),  
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -20,8 +24,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'low_level_control_with_hands = low_level_control.low_level_node_with_hands:main',
-            'low_level_control_without_hands = low_level_control.low_level_node_without_hands:main',
         ],
     },
 )

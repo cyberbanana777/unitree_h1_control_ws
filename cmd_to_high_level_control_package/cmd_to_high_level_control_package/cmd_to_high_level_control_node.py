@@ -33,7 +33,7 @@ class CmdToHighLevelControlNode(Node):
             10
         )
         self.subscription  # prevent unused variable warning
-        self.get_logger().info('cmd_to_high_level_control node has been started')
+        self.get_logger().info('cmd_to_high_level_control_node has been started')
 
 
     def listener_callback(self, msg):

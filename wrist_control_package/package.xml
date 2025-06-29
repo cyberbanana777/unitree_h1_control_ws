@@ -1,11 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>hands_init</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <name>wrist_control_package</name>
+  <version>0.1.0</version>
+  <description>
+    The ROS2 node wrist_control_node controls the DM4310 motors via the CAN
+    interface, receiving commands (position/speed/torque) via the wrist/cmds
+    topic and publishing states (wrist/states, 1000 Hz) with a limited
+    operating range in MIT mode. The node uses a UART-CAN adapter
+    (/dev/ttyACM0), logs errors, and correctly terminates by disabling the
+    motors.
+  </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
+
+  <depend>rclpy</depend>
+  <depend>unitree_go</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

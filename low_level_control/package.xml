@@ -4,7 +4,7 @@
   <name>low_level_control</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sashagrachev2005@gmail.com">banana-killer</maintainer>
+  <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>

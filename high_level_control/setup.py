@@ -13,10 +13,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='banana-killer',
+    maintainer='cyberbanana777',
     maintainer_email='sashagrachev2005@gmail.com',
     description='This package includes script, which starts a high-level client that allows you to manage\
-                high-level commands. The commands are entered one by one.',
+                high-level commands. The commands are entered one by one. For robot Unitree H1.',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={

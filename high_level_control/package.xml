@@ -3,9 +3,12 @@
 <package format="3">
   <name>high_level_control</name>
   <version>1.0.0</version>
-  <description>This package includes script, which starts a high-level client that allows you to manage
-high-level commands. The commands are entered one by one.</description>
-  <maintainer email="sashagrachev2005@gmail.com">banana-killer</maintainer>
+  <description>
+    This package includes script, which starts a high-level client that allows 
+    you to manage high-level commands. The commands are entered one by one.
+    For robot Unitree H1.
+  </description>
+  <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>

@@ -5,7 +5,7 @@
 Данный скрипт запускает high-level клиента, который позволяет управлять
 high-level командами. Команды поочерёднно вводятся. 
 Если ввести "list" - выведутся все возможные команды
-Для корректной работы необходим пакет "unitree_sdk2py".
+Для корректной работы необходим python-библиотека "unitree_sdk2py".
 '''
 
 '''
@@ -13,7 +13,7 @@ ANNOTATION
 This script starts a high-level client that allows you to manage
 high-level commands. The commands are entered one by one.
 If you enter "list", all possible commands will be displayed
-For correct operation, the "unitree_sdk2py" package is required.
+For correct operation, the "unitree_sdk2py" library is required.
 '''
 
 import sys
