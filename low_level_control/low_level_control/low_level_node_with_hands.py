@@ -90,6 +90,11 @@ JOINT_INDEX_HANDS = {
     'left_thumb_rotation': 11,
 }
 
+JOINT_INDEX_WRISTS = {
+    'left_wrist' : 0,
+    'right_wrist' : 1
+}
+
 LIMITS_OF_JOINTS_UNITREE_H1 = {
     0: [-0.43, 0.43],  # right_hip_roll_joint M
     1: [-3.14, 2.53],  # right_hip_pitch_joint M
@@ -128,6 +133,11 @@ LIMITS_OF_JOINTS_UNITREE_HANDS = {
     11: [0.0, 1.0]  # left_thumb-rotation
 }
 
+LIMITS_OF_JOINTS_UNITREE_WRISTS = {
+    0: [-6.0, -0.23],  # left_wrist
+    1: [-1.1, 4.58]  # right_wrist
+}
+
 
 class LowLevelControlNode(Node):
 
@@ -160,6 +170,11 @@ class LowLevelControlNode(Node):
             JOINT_INDEX_HANDS['left_index'],
             JOINT_INDEX_HANDS['left_thumb_bend'],
             JOINT_INDEX_HANDS['left_thumb_rotation']
+        ]
+
+        self.active_joints_wrists = [
+            JOINT_INDEX_WRISTS['left_wrist'],
+            JOINT_INDEX_WRISTS['right_wrist']
         ]
 
         # целевая позиция
@@ -201,6 +216,11 @@ class LowLevelControlNode(Node):
             11: 1.0  # thumb-rotation
         }
 
+        self.target_pos_wrists = {
+            0: -1.0, # left_wrist
+            1: -1.0  # right_wrist
+        }
+
         # текущая позиция
         self.current_jpos_H1 = {
             0: 0.0,  # right_hip_roll_joint M
@@ -238,6 +258,11 @@ class LowLevelControlNode(Node):
             9: 1.0,  # index
             10: 1.0,  # thumb-bend
             11: 1.0  # thumb-rotation
+        }
+
+        self.current_jpos_wrists = {
+            0: -1.0, # left_wrist
+            1: -1.0  # right_wrist
         }
 
         # текущая позиция на максимальную дельту приближенная к целевой позиции
@@ -279,12 +304,25 @@ class LowLevelControlNode(Node):
             11: 1.0  # thumb-rotation
         }
 
-        # create control_message
+        self.current_jpos_des_wrists = {
+            0: -1.0, # left_wrist
+            1: -1.0  # right_wrist
+        }
+
+        # create control_message for hands (fingers)
         self.cmd_msg_hands = MotorCmds()
         for i in self.active_joints_hands:
             cmd_sub_msg = MotorCmd()
             self.cmd_msg_hands.cmds.append(cmd_sub_msg)
         self.get_logger().info(f'cmd_msg_hands = {str(self.cmd_msg_hands)}')
+
+        # create control_message for wrists
+
+        self.cmd_msg_wrists = MotorCmds()
+        for i in self.active_joints_wrists:
+            cmd_sub_msg = MotorCmd()
+            self.cmd_msg_wrists.cmds.append(cmd_sub_msg)
+        self.get_logger().info(f'cmd_msg_wrists = {str(self.cmd_msg_wrists)}')
 
         # create feedback_message
         self.feedback_msg = MotorStates()
@@ -320,15 +358,24 @@ class LowLevelControlNode(Node):
             10
         )
 
-        self.timer_cmds = self.create_timer(
-            self.control_dt,
-            self.timer_callback_arm_sdk
-        )
-
-        self.subscription_state = self.create_subscription(
+        self.subscription_fingers_states = self.create_subscription(
             MotorStates,
             'inspire/state',
-            self.listener_callback_states,
+            self.listener_callback_fingers_states,
+            10
+        )
+
+        # for wrists
+        self.subscription_wrist_states = self.create_subscription(
+            MotorStates,
+            'wrist/states',
+            self.listener_callback_wrist_states,
+            10
+        )
+
+        self.publisher_wrist_cmds = self.create_publisher(
+            MotorStates,
+            'wrist/cmds',
             10
         )
 
@@ -358,18 +405,28 @@ class LowLevelControlNode(Node):
         self.cmd_msg_H1.level_flag = 255
         self.cmd_msg_H1.gpio = 0
 
-        self.publisher_arm_sdk = self.create_publisher(LowCmd, 'arm_sdk', 10)
+        # publish terget pose for H1 
+        self.publisher_arm_sdk = self.create_publisher(
+            LowCmd, 
+            'arm_sdk', 
+            10
+            )
+        
         self.timer_arm_sdk = self.create_timer(
             self.control_dt,
             self.timer_callback_arm_sdk
         )
 
-        self.publisher_temperature = self.create_publisher(String, 'max_temperature', 10)
+        self.publisher_temperature = self.create_publisher(
+            String, 
+            'max_temperature', 
+            10
+            )
+        
         self.timer_temperature = self.create_timer(
             1.0,
             self.timer_callback_temperature
         )
-
 
         self.subscription_LowCmd  # prevent unused variable warning
         self.subscription_positions_to_unitree
@@ -427,10 +484,15 @@ class LowLevelControlNode(Node):
         self.max_temperature = max(temps)
      
 
-    def listener_callback_states(self, msg):
+    def listener_callback_fingers_states(self, msg):
+        '''Обновляем текущее положение пальцев'''
+        for i in self.active_joints_wrists:
+            self.current_jpos_hands[i] = msg.states[i].q
+
+    def listener_callback_wrist_states(self, msg):
         '''Обновляем текущее положение кистей'''
         for i in self.active_joints_hands:
-            self.current_jpos_hands[i] = msg.states[i].q
+            self.current_jpos_wrists[i] = msg.states[i].q
 
 
     def timer_callback_temperature(self):
@@ -440,28 +502,25 @@ class LowLevelControlNode(Node):
 
 
     def timer_callback_arm_sdk(self):
-        if self.impact == 0.0:
-            for i in self.active_joints_hands:
-                self.cmd_msg_hands.cmds[i].q = 1.0
-
-                self.publisher_cmd.publish(self.cmd_msg_hands)
 
         if self.timer_call_count <= 10 or self.impact == 0.0:
             self.current_jpos_des_H1 = self.current_jpos_H1.copy()
             self.get_logger().info(
                 f'Обновление current_jpos_des_H1 = {self.current_jpos_des_H1}')
+            
             self.current_jpos_des_hands = self.current_jpos_hands.copy()
             self.get_logger().info(
                 f'Обновление current_jpos_des_hands = {self.current_jpos_des_hands}')
             
-            if self.timer_call_count <= 5:
-                for i in self.active_joints_hands:
-                    self.cmd_msg_hands.cmds[i].q = 1.0
+            self.current_jpos_des_wrists = self.current_jpos_wrists.copy()
+            self.get_logger().info(
+                f'Обновление current_jpos_des_wrists = {self.current_jpos_des_wrists}')
+            
+            for i in self.active_joints_hands:
+                self.cmd_msg_hands.cmds[i].q = 1.0
+            self.publisher_cmd.publish(self.cmd_msg_hands)
+
         else:
-            # if 4000 >= self.timer_call_count > 5:
-            #     self.max_joint_delta_H1 = self.max_joint_delta_H1/2
-            # else:
-            #     self.max_joint_delta_H1 = MAX_JOINT_VELOCITY * self.control_dt
             
             # Установка значений для H1
             self.cmd_msg_H1.motor_cmd[JOINT_INDEX_H1['NOT USED']
@@ -484,7 +543,7 @@ class LowLevelControlNode(Node):
                 self.cmd_msg_H1.motor_cmd[j].kd = coeff_and_mode[1]
                 self.cmd_msg_H1.motor_cmd[j].mode = coeff_and_mode[2]
 
-            # Утсановка занчений для hands
+            # Установка занчений для hands
             for i in self.active_joints_hands:
                 delta_hands = self.target_pos_hands[i] - \
                     self.current_jpos_des_hands[i]
@@ -500,11 +559,28 @@ class LowLevelControlNode(Node):
             for i in self.active_joints_hands:
                 self.cmd_msg_hands.cmds[i].q = self.current_jpos_des_hands[i]
 
+            # Установка занчений для wrists
+            for i in self.active_joints_wrists:
+                delta_wrists = self.target_pos_wrists[i] - \
+                    self.current_jpos_des_wrists[i]
+                clamped_delta_wrists = np.clip(
+                    delta_wrists,
+                    -self.max_joint_delta_H1,
+                    self.max_joint_delta_H1
+                )
+                clamped_delta_wrists = round(clamped_delta_wrists, 3)
+                self.current_jpos_des_wrists[i] += clamped_delta_wrists
+            self.get_logger().info(f'{self.current_jpos_des_wrists}')
+
+            for i in self.active_joints_wrists:
+                self.cmd_msg_wrists.cmds[i].q = self.current_jpos_des_wrists[i]
+
         # Подсчет контрольной суммы, использует CRC для проверки целостности команд
         self.crc = CRC()
         self.cmd_msg_H1.crc = self.crc.Crc(self.cmd_msg_H1)
         self.publisher_arm_sdk.publish(self.cmd_msg_H1)
         self.publisher_cmd.publish(self.cmd_msg_hands)
+        self.publisher_wrist_cmds.publish(self.cmd_msg_wrists)
         self.timer_call_count += 1
 
     def return_control(self):
@@ -520,6 +596,8 @@ class LowLevelControlNode(Node):
 
             self.publisher_arm_sdk.publish(self.cmd_msg_H1)
             time.sleep(self.control_dt)
+
+# Добавить, что бы ксти поворачивались в перпендикулярное полу положение !!!!!!!!!!!
 
     def straighten_fingers(self):
         '''распрямляет пальцы'''
