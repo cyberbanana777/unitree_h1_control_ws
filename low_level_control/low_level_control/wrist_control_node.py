@@ -65,17 +65,6 @@ class PubSubNode(Node):
             self.get_logger().error(f"Serial connection error: {e}")
             raise
 
-        # 2. Переключение в MIT-режим
-        if self.motor_controler.switchControlMode(self.motor_left, Control_Type.MIT):
-            self.get_logger().info("Режим MIT успешно активирован")
-        else:
-            self.get_logger().error("Ошибка переключения режима")
-
-        if self.motor_controler.switchControlMode(self.motor_right, Control_Type.MIT):
-            self.get_logger().info("Режим MIT успешно активирован")
-        else:
-            self.get_logger().error("Ошибка переключения режима")
-
         # 3. Включение мотора
         if self.motor_controler.enable(self.motor_left):
             self.get_logger().info("Левый мотор включен")

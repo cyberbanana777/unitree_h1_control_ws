@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'teleop_twist_keyboard'
+package_name = 'teleop_twist_keyboard_custom'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teleop_twist_keyboard = teleop_twist_keyboard.teleop_twist_keyboard:main'
+            'teleop_twist_keyboard_custom = teleop_twist_keyboard_custom.teleop_twist_keyboard_custom:main'
         ],
     },
 )
