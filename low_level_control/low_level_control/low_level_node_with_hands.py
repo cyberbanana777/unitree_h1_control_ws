@@ -50,7 +50,8 @@ from unitree_sdk2py.utils.crc import CRC
 # Частота в гц для ноды
 FREQUENCY = 333.33
 # коэффициэнт на который умножается control_dt (сек), который устанавливает максимальную дельту поворота мотора
-MAX_JOINT_VELOCITY = 0.5
+MAX_JOINT_VELOCITY = 4.0
+MAX_FINGER_VELOCITY = 0.1
 
 JOINT_INDEX_H1 = {
     'right_hip_roll_joint': 0,
@@ -134,8 +135,8 @@ LIMITS_OF_JOINTS_UNITREE_HANDS = {
 }
 
 LIMITS_OF_JOINTS_UNITREE_WRISTS = {
-    0: [-6.0, -0.23],  # left_wrist
-    1: [-1.1, 4.58]  # right_wrist
+    0: [-1.1, 4.58],  # left_wrist
+    1: [-6.0, -0.23]  # right_wrist
 }
 
 
@@ -143,7 +144,6 @@ class LowLevelControlNode(Node):
 
     def __init__(self):
         super().__init__('low_level_control_node')
-        self.get_logger().info('Node started')
 
         self.active_joints_H1 = [
             JOINT_INDEX_H1['right_shoulder_roll_joint'],
@@ -217,7 +217,7 @@ class LowLevelControlNode(Node):
         }
 
         self.target_pos_wrists = {
-            0: -1.0, # left_wrist
+            0: 0.0, # left_wrist
             1: -1.0  # right_wrist
         }
 
@@ -305,7 +305,7 @@ class LowLevelControlNode(Node):
         }
 
         self.current_jpos_des_wrists = {
-            0: -1.0, # left_wrist
+            0: 0.0, # left_wrist
             1: -1.0  # right_wrist
         }
 
@@ -314,7 +314,7 @@ class LowLevelControlNode(Node):
         for i in self.active_joints_hands:
             cmd_sub_msg = MotorCmd()
             self.cmd_msg_hands.cmds.append(cmd_sub_msg)
-        self.get_logger().info(f'cmd_msg_hands = {str(self.cmd_msg_hands)}')
+        self.get_logger().debug(f'cmd_msg_hands = {str(self.cmd_msg_hands)}')
 
         # create control_message for wrists
 
@@ -322,18 +322,17 @@ class LowLevelControlNode(Node):
         for i in self.active_joints_wrists:
             cmd_sub_msg = MotorCmd()
             self.cmd_msg_wrists.cmds.append(cmd_sub_msg)
-        self.get_logger().info(f'cmd_msg_wrists = {str(self.cmd_msg_wrists)}')
+        self.get_logger().debug(f'cmd_msg_wrists = {str(self.cmd_msg_wrists)}')
 
         # create feedback_message
         self.feedback_msg = MotorStates()
         for i in self.active_joints_hands:
             feedback_sub_msg = MotorState()
             self.feedback_msg.states.append(feedback_sub_msg)
-        self.get_logger().info(f'feedback_msg = {str(self.feedback_msg)}')
+        self.get_logger().debug(f'feedback_msg = {str(self.feedback_msg)}')
 
-        self.control_dt = 1 / FREQUENCY
         # (MAX_JOINT_VELOCITY * self.control_dt)/10
-        self.max_joint_delta_hands = 0.05
+        self.max_joint_delta_hands = MAX_FINGER_VELOCITY
 
         # показывает насколько робот смещается в соторону координат с arm_sdk топика
         self.impact = 0.0
@@ -348,6 +347,7 @@ class LowLevelControlNode(Node):
 
         # максимальный угол на который может измениться целевая поза за один оборот ноды
         self.max_joint_delta_H1 = MAX_JOINT_VELOCITY * self.control_dt
+        self.max_joint_wrists = MAX_JOINT_VELOCITY * 5 * self.control_dt
 
         # считает количество итераций цикла timer_callback
         self.timer_call_count = 0
@@ -374,7 +374,7 @@ class LowLevelControlNode(Node):
         )
 
         self.publisher_wrist_cmds = self.create_publisher(
-            MotorStates,
+            MotorCmds,
             'wrist/cmds',
             10
         )
@@ -440,16 +440,19 @@ class LowLevelControlNode(Node):
 
         try:
             pose = json.loads(data)
-            self.get_logger().info(f'data = {pose}')
-            self.get_logger().info(f'impact = {impact}')
+            self.get_logger().debug(f'data = {pose}')
+            self.get_logger().debug(f'impact = {impact}')
 
             H1_pose = {}
             hands_pose = {}
+            wrists_pose = {}
 
             for key, value in pose.items():
                 if key.isdigit():  # Проверяем, является ли ключ числом в строке
                     num = int(key)
-                    if num <= 19:
+                    if num == 32 or num == 33:
+                        wrists_pose[num - 32] = value
+                    elif num <= 19:
                         H1_pose[num] = value
                     else:
                         hands_pose[num - 20] = value
@@ -465,15 +468,24 @@ class LowLevelControlNode(Node):
                     )
 
             for i in self.active_joints_hands:
-                self.get_logger().info(f'hands_pose = {hands_pose}')
+                self.get_logger().debug(f'hands_pose = {hands_pose}')
                 self.target_pos_hands[i] = np.clip(
                     hands_pose[i],  
                     LIMITS_OF_JOINTS_UNITREE_HANDS[i][0],
                     LIMITS_OF_JOINTS_UNITREE_HANDS[i][1]
                 )
 
+            for i in self.active_joints_wrists:
+                self.get_logger().debug(f'wrists_pose = {wrists_pose}')
+                self.target_pos_wrists[i] = np.clip(
+                    wrists_pose[i],  
+                    LIMITS_OF_JOINTS_UNITREE_WRISTS[i][0],
+                    LIMITS_OF_JOINTS_UNITREE_WRISTS[i][1]
+                )
+
         except Exception as e:
             self.get_logger().error(e)
+
 
     def listener_callback_LowCmd(self, msg):
         '''Обновляем текущее положение'''
@@ -486,12 +498,12 @@ class LowLevelControlNode(Node):
 
     def listener_callback_fingers_states(self, msg):
         '''Обновляем текущее положение пальцев'''
-        for i in self.active_joints_wrists:
+        for i in self.active_joints_hands:
             self.current_jpos_hands[i] = msg.states[i].q
 
     def listener_callback_wrist_states(self, msg):
         '''Обновляем текущее положение кистей'''
-        for i in self.active_joints_hands:
+        for i in self.active_joints_wrists:
             self.current_jpos_wrists[i] = msg.states[i].q
 
 
@@ -505,15 +517,15 @@ class LowLevelControlNode(Node):
 
         if self.timer_call_count <= 10 or self.impact == 0.0:
             self.current_jpos_des_H1 = self.current_jpos_H1.copy()
-            self.get_logger().info(
+            self.get_logger().debug(
                 f'Обновление current_jpos_des_H1 = {self.current_jpos_des_H1}')
             
             self.current_jpos_des_hands = self.current_jpos_hands.copy()
-            self.get_logger().info(
+            self.get_logger().debug(
                 f'Обновление current_jpos_des_hands = {self.current_jpos_des_hands}')
             
             self.current_jpos_des_wrists = self.current_jpos_wrists.copy()
-            self.get_logger().info(
+            self.get_logger().debug(
                 f'Обновление current_jpos_des_wrists = {self.current_jpos_des_wrists}')
             
             for i in self.active_joints_hands:
@@ -538,7 +550,7 @@ class LowLevelControlNode(Node):
                 coeff_and_mode = determine_coeff_and_mode(j)  # (Kp, Kd, mode)
                 self.cmd_msg_H1.motor_cmd[j].q = self.current_jpos_des_H1[j]
                 self.cmd_msg_H1.motor_cmd[j].dq = 0.0
-                self.cmd_msg_H1.motor_cmd[j].tau = 0.5
+                self.cmd_msg_H1.motor_cmd[j].tau = 0.0
                 self.cmd_msg_H1.motor_cmd[j].kp = coeff_and_mode[0]
                 self.cmd_msg_H1.motor_cmd[j].kd = coeff_and_mode[1]
                 self.cmd_msg_H1.motor_cmd[j].mode = coeff_and_mode[2]
@@ -554,7 +566,7 @@ class LowLevelControlNode(Node):
                 )
                 clamped_delta_hands = round(clamped_delta_hands, 3)
                 self.current_jpos_des_hands[i] += clamped_delta_hands
-            self.get_logger().info(f'{self.current_jpos_des_hands}')
+            self.get_logger().debug(f'{self.current_jpos_des_hands}')
 
             for i in self.active_joints_hands:
                 self.cmd_msg_hands.cmds[i].q = self.current_jpos_des_hands[i]
@@ -565,15 +577,19 @@ class LowLevelControlNode(Node):
                     self.current_jpos_des_wrists[i]
                 clamped_delta_wrists = np.clip(
                     delta_wrists,
-                    -self.max_joint_delta_H1,
-                    self.max_joint_delta_H1
+                    -self.max_joint_wrists,
+                    self.max_joint_wrists
                 )
                 clamped_delta_wrists = round(clamped_delta_wrists, 3)
                 self.current_jpos_des_wrists[i] += clamped_delta_wrists
-            self.get_logger().info(f'{self.current_jpos_des_wrists}')
+            self.get_logger().debug(f'{self.current_jpos_des_wrists}')
 
             for i in self.active_joints_wrists:
                 self.cmd_msg_wrists.cmds[i].q = self.current_jpos_des_wrists[i]
+                self.cmd_msg_wrists.cmds[i].dq = 0.0
+                self.cmd_msg_wrists.cmds[i].tau = 0.0
+                self.cmd_msg_wrists.cmds[i].kp = 10.0
+                self.cmd_msg_wrists.cmds[i].kd = 2.0
 
         # Подсчет контрольной суммы, использует CRC для проверки целостности команд
         self.crc = CRC()
@@ -610,7 +626,7 @@ class LowLevelControlNode(Node):
             )
             clamped_delta_hands = round(clamped_delta_hands, 3)
             self.current_jpos_des_hands[i] += clamped_delta_hands
-            self.get_logger().info(f'current_jpos_des_hands = {str(self.current_jpos_des_hands)}')
+            self.get_logger().debug(f'current_jpos_des_hands = {str(self.current_jpos_des_hands)}')
 
             for i in self.active_joints_hands:
                 self.cmd_msg_hands.cmds[i].q = 1.0

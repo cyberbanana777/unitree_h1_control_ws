@@ -29,19 +29,19 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from unitree_go.msg import MotorCmds, MotorState, MotorStates
-from DM_CAN import Motor, DM_Motor_Type, MotorControl, Control_Type
+from .DM_CAN import Motor, DM_Motor_Type, MotorControl, Control_Type
 
 
 TOPIC_CMD = 'wrist/cmds'
 TOPIC_STATES = 'wrist/states'
-FREQUENCY = 1000
+FREQUENCY = 333
 
 LEFT_ALIAS = 0
 RIGHT_ALIAS = 1
 
 MOTOR_LIMITS = {
-    LEFT_ALIAS: [-6.0, -0.23],
-    RIGHT_ALIAS: [-1.1, 4.58],
+    RIGHT_ALIAS: [-6.0, -0.23],
+    LEFT_ALIAS: [-1.1, 4.58],
 }
 # Левый предел - предел вращения против часовой стрелке, считая от робота
 # Правый предел - предел вращения по часовой стрелке, считая от робота
@@ -66,15 +66,10 @@ class PubSubNode(Node):
             raise
 
         # 3. Включение мотора
-        if self.motor_controler.enable(self.motor_left):
-            self.get_logger().info("Левый мотор включен")
-        else:
-            self.get_logger().error("Ошибка включения левого мотора")
-
-        if self.motor_controler.enable(self.motor_right):
-            self.get_logger().info("Правый мотор включен")
-        else:
-            self.get_logger().error("Ошибка включения правого мотора")
+        self.motor_controler.enable(self.motor_left)
+        self.get_logger().info("Левый мотор включен")
+        self.motor_controler.enable(self.motor_right)
+        self.get_logger().info("Правый мотор включен")
 
         self.subscription = self.create_subscription(
             MotorCmds,
@@ -97,6 +92,24 @@ class PubSubNode(Node):
             publishes to "{TOPIC_STATES}"'
         )
 
+        self.motor_controler.controlMIT(
+            self.motor_left,
+            10.0,
+            2.0,
+            0.0,   # Желаемая позиция
+            0.0,  # Желаемая скорость
+            0.0  # Момент 
+        )
+
+        self.motor_controler.controlMIT(
+            self.motor_right,
+            10.0,
+            2.0,
+            -2.0,   # Желаемая позиция
+            0.0,  # Желаемая скорость
+            0.0  # Момент 
+        )
+
 
     def listener_callback(self, msg):
         """Обработка полученного сообщения."""
@@ -104,8 +117,8 @@ class PubSubNode(Node):
         left_motor_cmd = msg.cmds[LEFT_ALIAS]
         right_motor_cmd = msg.cmds[RIGHT_ALIAS]
 
-        target_position_left = msg.cmds[LEFT_ALIAS].q
-        target_position_right = msg.cmds[RIGHT_ALIAS].q
+        target_position_left = float(msg.cmds[LEFT_ALIAS].q)
+        target_position_right = float(msg.cmds[RIGHT_ALIAS].q)
 
         target_position_left = np.clip(
             target_position_left, 
@@ -120,11 +133,11 @@ class PubSubNode(Node):
 
         self.motor_controler.controlMIT(
             self.motor_left,
-            left_motor_cmd.kp,
-            left_motor_cmd.kd,
+            float(left_motor_cmd.kp),
+            float(left_motor_cmd.kd),
             target_position_left,   # Желаемая позиция
-            left_motor_cmd.dq,  # Желаемая скорость
-            left_motor_cmd.tau  # Момент 
+            float(left_motor_cmd.dq),  # Желаемая скорость
+            float(left_motor_cmd.tau)  # Момент 
         )
 
         self.motor_controler.controlMIT(
@@ -143,18 +156,18 @@ class PubSubNode(Node):
         motor_left_state_msg = MotorState()
         motor_right_state_msg = MotorState()
 
-        self.motor_controler.refresh_motor_status(self.motor_left)
-        self.motor_controler.refresh_motor_status(self.motor_right)
+#        self.motor_controler.refresh_motor_status(self.motor_left)
+#        self.motor_controler.refresh_motor_status(self.motor_right)
 
         motor_left_state_msg.mode = 0x01
-        motor_left_state_msg.q = self.motor_left.getPosition()
-        motor_left_state_msg.dq = self.motor_left.getVelocity()
-        motor_left_state_msg.tau_est = self.motor_left.getTorque()
+        motor_left_state_msg.q = float(self.motor_left.getPosition())
+        motor_left_state_msg.dq = float(self.motor_left.getVelocity())
+        motor_left_state_msg.tau_est = float(self.motor_left.getTorque())
 
         motor_right_state_msg.mode = 0x01
-        motor_right_state_msg.q = self.motor_right.getPosition()
-        motor_right_state_msg.dq = self.motor_right.getVelocity()
-        motor_right_state_msg.tau_est = self.motor_right.getTorque()
+        motor_right_state_msg.q = float(self.motor_right.getPosition())
+        motor_right_state_msg.dq = float(self.motor_right.getVelocity())
+        motor_right_state_msg.tau_est = float(self.motor_right.getTorque())
 
         motor_states_msg.states.append(motor_left_state_msg)
         motor_states_msg.states.append(motor_right_state_msg)
@@ -178,7 +191,6 @@ def main(args=None):
 
     try:
         rclpy.spin(node)
-
     except KeyboardInterrupt:
         node.get_logger().info('Node stopped by user')
 

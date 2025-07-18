@@ -5,14 +5,14 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package="low_level_control",
-            executable="low_level_control_with_hands"
+            executable="low_level_control_with_hands_node"
         ),
         Node(
-            package="wrist_control_package",
+            package="low_level_control",
             executable="wrist_control_node"
         ),
         Node(
-            package="hands_init",
-            executable="hands_init"   
+            package="low_level_control",
+            executable="hands_init_node"   
         )
     ])
