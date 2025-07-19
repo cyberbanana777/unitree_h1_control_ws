@@ -2,18 +2,18 @@
 
 '''
 АННОТАЦИЯ
-Данный скрипт запускает high-level клиента, который позволяет управлять
-high-level командами. Команды поочерёднно вводятся. 
+Данный скрипт запускает high-level клиента, который позволяет управлять робоом Unitree H1 с помощью 
+high-level команд (приеревести робота в состояние демфирования, готовности и балансирования и т.д.) как с пульта. 
+Команды поочерёднно вводятся. 
 Если ввести "list" - выведутся все возможные команды
 Для корректной работы необходим python-библиотека "unitree_sdk2py".
-'''
 
-'''
 ANNOTATION
-This script starts a high-level client that allows you to manage
-high-level commands. The commands are entered one by one.
-If you enter "list", all possible commands will be displayed
-For correct operation, the "unitree_sdk2py" library is required.
+This script launches a high-level client that allows you to control the Unitree H1 robot using 
+high-level commands (such as damping, readiness, and balancing, etc.) as if it were a remote control. 
+The commands are entered one by one. 
+If you enter "list," all possible commands will be displayed.
+To use this script correctly, you will need the unitree_sdk2py python library.
 '''
 
 import sys

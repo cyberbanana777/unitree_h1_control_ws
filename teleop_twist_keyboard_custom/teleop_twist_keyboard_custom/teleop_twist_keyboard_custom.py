@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright 2011 Brown University Robotics.
 # Copyright 2017 Open Source Robotics Foundation, Inc.
 # All rights reserved.
@@ -31,155 +33,190 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+# Modifications by Alice Zenina and Alexander Grachev from RTU MIREA (Russia):
+# - Ported from ROS1 to ROS2
+# - Added Y-axis control support
+# - Added speed limits (min/max)
+# - Improved parameter handling
+# - Code structure optimization
+
+'''
+АННОТАЦИЯ
+Реализует телеоперационное управление роботом через клавиатуру, 
+публикуя сообщения geometry_msgs/msg/Twist в топик ROS2 cmd_vel. 
+Поддерживает линейное/угловое движение, режим страффинга и динамическую регулировку скоростей. 
+Зависит от ОС (Windows/Linux) для обработки ввода.
+
+ANNOTATION
+Implements teleoperation control for robots via keyboard, 
+publishing geometry_msgs/msg/Twist messages in ROS2 topic cmd_vel. Supports linear/angular motion, 
+strafing mode, and dynamic speed adjustment. OS-dependent (Windows/Linux) for input handling.
+'''
+
 import sys
 import threading
-
 import geometry_msgs.msg
 import rclpy
 
+# Platform-specific imports for keyboard input
 if sys.platform == 'win32':
     import msvcrt
 else:
     import termios
     import tty
 
-# ========== SPEED CONSTANTS ==========
-MAX_LINEAR_SPEED = 1.5      # m/s
-MIN_LINEAR_SPEED = 0.1     # m/s
-MAX_ANGULAR_SPEED = 2.0     # rad/s
-MIN_ANGULAR_SPEED = 0.1     # rad/s
-DEFAULT_LINEAR_SPEED = 0.5  # m/s
-DEFAULT_ANGULAR_SPEED = 1.0 # rad/s
-DEFAULT_Y_SPEED = 0.5       # m/s
-SPEED_INCREMENT = 0.1       # 10%
+# ====================== CONSTANTS ======================
+# Speed parameters (m/s for linear, rad/s for angular)
+MAX_LINEAR_SPEED = 1.5
+MIN_LINEAR_SPEED = 0.1
+MAX_ANGULAR_SPEED = 2.0
+MIN_ANGULAR_SPEED = 0.1
+DEFAULT_LINEAR_SPEED = 0.5
+DEFAULT_ANGULAR_SPEED = 1.0
+DEFAULT_Y_SPEED = 0.5
+SPEED_INCREMENT = 0.1  # 10% speed adjustment
 
-msg = """
-This node takes keypresses from the keyboard and publishes them
-as Twist/TwistStamped messages. It works best with a US keyboard layout.
----------------------------
-Moving around:
+# Help message for keyboard controls
+HELP_MESSAGE = """
+Keyboard Teleoperation Node
+Publishes Twist/TwistStamped messages based on keyboard input.
+Works best with US keyboard layout.
+---------------------------------------------------------
+Movement Controls:
    u    i    o
    j    k    l
    m    ,    .
 
-For Holonomic mode (strafing), hold down the shift key:
----------------------------
+Holonomic Mode (strafing) - hold Shift:
+---------------------------------------------------------
    U    I    O
    J    K    L
    M    <    >
 
-t : up (+z)
-b : down (-z)
+t : move up (+z)
+b : move down (-z)
 
-anything else : stop
+any other key : stop
 
-q/z : increase/decrease max speeds by 10%
-w/x : increase/decrease only linear speed by 10%
-e/c : increase/decrease only angular speed by 10%
-r/v : increase/decrease only y-axis speed by 10%
+Speed Controls:
+q/z : increase/decrease all speeds by 10%
+w/x : increase/decrease linear speed only
+e/c : increase/decrease angular speed only
+r/v : increase/decrease y-axis speed only
 
 CTRL-C to quit
 """
 
-moveBindings = {
-    'i': (1, 0, 0, 0),
-    'o': (1, 0, 0, -1),
-    'j': (0, 0, 0, 1),
-    'l': (0, 0, 0, -1),
-    'u': (1, 0, 0, 1),
-    ',': (-1, 0, 0, 0),
-    '.': (-1, 0, 0, 1),
-    'm': (-1, 0, 0, -1),
-    'O': (1, -1, 0, 0),
-    'I': (1, 0, 0, 0),
-    'J': (0, 1, 0, 0),
-    'L': (0, -1, 0, 0),
-    'U': (1, 1, 0, 0),
-    '<': (-1, 0, 0, 0),
-    '>': (-1, -1, 0, 0),
-    'M': (-1, 1, 0, 0),
-    't': (0, 0, 1, 0),
-    'b': (0, 0, -1, 0),
+# Key bindings for movement control
+MOVE_BINDINGS = {
+    # Standard movement
+    'i': (1, 0, 0, 0),    # forward
+    'o': (1, 0, 0, -1),    # forward + right turn
+    'j': (0, 0, 0, 1),     # left turn
+    'l': (0, 0, 0, -1),    # right turn
+    'u': (1, 0, 0, 1),     # forward + left turn
+    ',': (-1, 0, 0, 0),    # backward
+    '.': (-1, 0, 0, 1),    # backward + left turn
+    'm': (-1, 0, 0, -1),   # backward + right turn
+    
+    # Holonomic movement (with Shift)
+    'O': (1, -1, 0, 0),    # forward + left strafe
+    'I': (1, 0, 0, 0),     # forward
+    'J': (0, 1, 0, 0),     # left strafe
+    'L': (0, -1, 0, 0),    # right strafe
+    'U': (1, 1, 0, 0),     # forward + right strafe
+    '<': (-1, 0, 0, 0),    # backward
+    '>': (-1, -1, 0, 0),   # backward + right strafe
+    'M': (-1, 1, 0, 0),    # backward + left strafe
+    
+    # Vertical movement
+    't': (0, 0, 1, 0),     # up
+    'b': (0, 0, -1, 0),    # down
 }
 
-speedBindings = {
-    'q': (1 + SPEED_INCREMENT, 1 + SPEED_INCREMENT, 1 + SPEED_INCREMENT),
-    'z': (1 - SPEED_INCREMENT, 1 - SPEED_INCREMENT, 1 - SPEED_INCREMENT),
-    'w': (1 + SPEED_INCREMENT, 1, 1),
-    'x': (1 - SPEED_INCREMENT, 1, 1),
-    'e': (1, 1 + SPEED_INCREMENT, 1),
-    'c': (1, 1 - SPEED_INCREMENT, 1),
-    'r': (1, 1, 1 + SPEED_INCREMENT),
-    'v': (1, 1, 1 - SPEED_INCREMENT),
+# Key bindings for speed adjustment
+SPEED_BINDINGS = {
+    'q': (1 + SPEED_INCREMENT, 1 + SPEED_INCREMENT, 1 + SPEED_INCREMENT),  # all +
+    'z': (1 - SPEED_INCREMENT, 1 - SPEED_INCREMENT, 1 - SPEED_INCREMENT),  # all -
+    'w': (1 + SPEED_INCREMENT, 1, 1),  # linear +
+    'x': (1 - SPEED_INCREMENT, 1, 1),  # linear -
+    'e': (1, 1 + SPEED_INCREMENT, 1),  # angular +
+    'c': (1, 1 - SPEED_INCREMENT, 1),  # angular -
+    'r': (1, 1, 1 + SPEED_INCREMENT),  # y-axis +
+    'v': (1, 1, 1 - SPEED_INCREMENT),  # y-axis -
 }
 
 
 def clamp(value, min_value, max_value):
-    """Ограничение значения в заданных пределах"""
+    """Constrain a value between minimum and maximum bounds."""
     return max(min(value, max_value), min_value)
 
 
-def getKey(settings):
+def get_key(settings):
+    """Get a single key press from the keyboard."""
     if sys.platform == 'win32':
-        key = msvcrt.getwch()
+        return msvcrt.getwch()
     else:
         tty.setraw(sys.stdin.fileno())
         key = sys.stdin.read(1)
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-    return key
+        return key
 
 
-def saveTerminalSettings():
+def save_terminal_settings():
+    """Save the current terminal settings for restoration later."""
     if sys.platform == 'win32':
         return None
     return termios.tcgetattr(sys.stdin)
 
 
-def restoreTerminalSettings(old_settings):
+def restore_terminal_settings(old_settings):
+    """Restore previously saved terminal settings."""
     if sys.platform == 'win32':
         return
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
-def vels(speed, turn, y_speed):
-    return 'currently:\tspeed %s\tturn %s \ty_speed %s' % (
-        round(clamp(speed, MIN_LINEAR_SPEED, MAX_LINEAR_SPEED), 3),
-        round(clamp(turn, MIN_ANGULAR_SPEED, MAX_ANGULAR_SPEED), 3),
-        round(clamp(y_speed, MIN_LINEAR_SPEED, MAX_LINEAR_SPEED), 3)
-    )
+def format_speeds(linear_speed, angular_speed, y_speed):
+    """Format current speeds into a readable string."""
+    return (f"Current speeds:\t"
+            f"Linear: {round(clamp(linear_speed, MIN_LINEAR_SPEED, MAX_LINEAR_SPEED), 3)} m/s\t"
+            f"Angular: {round(clamp(angular_speed, MIN_ANGULAR_SPEED, MAX_ANGULAR_SPEED), 3)} rad/s\t"
+            f"Y-axis: {round(clamp(y_speed, MIN_LINEAR_SPEED, MAX_LINEAR_SPEED), 3)} m/s")
 
 
 def main():
-    settings = saveTerminalSettings()
+    """Main function to handle keyboard teleoperation."""
+    # Initialize terminal settings and ROS2 node
+    settings = save_terminal_settings()
     rclpy.init()
-    node = rclpy.create_node('teleop_twist_keyboard')
+    node = rclpy.create_node('teleop_twist_keyboard_custom')
 
-    # parameters
+    # Setup message type based on parameters
     stamped = node.declare_parameter('stamped', False).value
     frame_id = node.declare_parameter('frame_id', '').value
+    
     if not stamped and frame_id:
         raise Exception("'frame_id' can only be set when 'stamped' is True")
 
-    if stamped:
-        TwistMsg = geometry_msgs.msg.TwistStamped
-    else:
-        TwistMsg = geometry_msgs.msg.Twist
-
+    TwistMsg = geometry_msgs.msg.TwistStamped if stamped else geometry_msgs.msg.Twist
     pub = node.create_publisher(TwistMsg, 'cmd_vel', 10)
+
+    # Start ROS2 spinner in separate thread
     spinner = threading.Thread(target=rclpy.spin, args=(node,))
+    spinner.daemon = True
     spinner.start()
 
+    # Initialize movement parameters
     speed = DEFAULT_LINEAR_SPEED
     turn = DEFAULT_ANGULAR_SPEED
     y_speed = DEFAULT_Y_SPEED
-    x = 0.0
-    y = 0.0
-    z = 0.0
-    th = 0.0
-    status = 0.0
+    x, y, z, th = 0.0, 0.0, 0.0, 0.0  # Movement components
+    status_counter = 0
 
+    # Prepare Twist message
     twist_msg = TwistMsg()
-
     if stamped:
         twist = twist_msg.twist
         twist_msg.header.stamp = node.get_clock().now().to_msg()
@@ -188,44 +225,34 @@ def main():
         twist = twist_msg
 
     try:
-        print(msg)
-        print(vels(speed, turn, y_speed))
+        print(HELP_MESSAGE)
+        print(format_speeds(speed, turn, y_speed))
+        
         while True:
-            key = getKey(settings)
-            if key in moveBindings.keys():
-                x = moveBindings[key][0]
-                y = moveBindings[key][1]
-                z = moveBindings[key][2]
-                th = moveBindings[key][3]
-            elif key in speedBindings.keys():
-                speed = clamp(
-                    speed * speedBindings[key][0],
-                    MIN_LINEAR_SPEED,
-                    MAX_LINEAR_SPEED
-                )
-                turn = clamp(
-                    turn * speedBindings[key][1],
-                    MIN_ANGULAR_SPEED,
-                    MAX_ANGULAR_SPEED
-                )
-                y_speed = clamp(
-                    y_speed * speedBindings[key][2],
-                    MIN_LINEAR_SPEED,
-                    MAX_LINEAR_SPEED
-                )
+            key = get_key(settings)
+            
+            # Handle movement keys
+            if key in MOVE_BINDINGS:
+                x, y, z, th = MOVE_BINDINGS[key]
+                
+            # Handle speed adjustment keys
+            elif key in SPEED_BINDINGS:
+                speed = clamp(speed * SPEED_BINDINGS[key][0], MIN_LINEAR_SPEED, MAX_LINEAR_SPEED)
+                turn = clamp(turn * SPEED_BINDINGS[key][1], MIN_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
+                y_speed = clamp(y_speed * SPEED_BINDINGS[key][2], MIN_LINEAR_SPEED, MAX_LINEAR_SPEED)
 
-                print(vels(speed, turn, y_speed))
-                if (status == 14):
-                    print(msg)
-                status = (status + 1) % 15
+                print(format_speeds(speed, turn, y_speed))
+                if status_counter == 14:
+                    print(HELP_MESSAGE)
+                status_counter = (status_counter + 1) % 15
+                
+            # Handle stop or exit
             else:
-                x = 0.0
-                y = 0.0
-                z = 0.0
-                th = 0.0
-                if (key == '\x03'):
+                x, y, z, th = 0.0, 0.0, 0.0, 0.0
+                if key == '\x03':  # CTRL-C
                     break
 
+            # Update and publish message
             if stamped:
                 twist_msg.header.stamp = node.get_clock().now().to_msg()
 
@@ -235,12 +262,14 @@ def main():
             twist.angular.x = 0.0
             twist.angular.y = 0.0
             twist.angular.z = th * turn
+            
             pub.publish(twist_msg)
 
     except Exception as e:
-        print(e)
+        print(f"Error: {e}")
 
     finally:
+        # Clean up: stop movement and restore terminal
         if stamped:
             twist_msg.header.stamp = node.get_clock().now().to_msg()
 
@@ -250,10 +279,11 @@ def main():
         twist.angular.x = 0.0
         twist.angular.y = 0.0
         twist.angular.z = 0.0
+        
         pub.publish(twist_msg)
         rclpy.shutdown()
         spinner.join()
-        restoreTerminalSettings(settings)
+        restore_terminal_settings(settings)
 
 
 if __name__ == '__main__':

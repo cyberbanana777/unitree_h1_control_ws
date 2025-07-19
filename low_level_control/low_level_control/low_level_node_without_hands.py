@@ -42,7 +42,6 @@ from unitree_sdk2py.utils.crc import CRC
 
 
 FREQUENCY = 333.33
-MAX_JOINT_VELOCITY = 3.0
 
 JOINT_INDEX = {
     'right_hip_roll_joint': 0,
@@ -104,7 +103,8 @@ class LowLevelControlNode(Node):
             JOINT_INDEX['left_shoulder_pitch_joint'],
             JOINT_INDEX['left_shoulder_roll_joint'],
             JOINT_INDEX['left_shoulder_yaw_joint'],
-            JOINT_INDEX['left_elbow_joint']
+            JOINT_INDEX['left_elbow_joint'],
+            JOINT_INDEX['torso_joint']
         ]
 
         self.target_pos = {
@@ -184,7 +184,9 @@ class LowLevelControlNode(Node):
         self.control_dt = 1 / FREQUENCY
         self.time_for_return_control = 1.0
 
-        self.max_joint_delta = MAX_JOINT_VELOCITY * self.control_dt
+        self.declare_parameter('max_joint_velocity', 0.5)
+        self.max_joint_velocity = self.get_parameter('max_joint_velocity').value
+        self.max_joint_delta = self.max_joint_velocity * self.control_dt
 
         # считает количество итераций цикла timer_callback
         self.timer_call_count = 0
@@ -216,7 +218,10 @@ class LowLevelControlNode(Node):
         self.cmd_msg.level_flag = 255
         self.cmd_msg.gpio = 0
 
-        self.publisher_arm_sdk = self.create_publisher(LowCmd, 'arm_sdk', 10)
+        self.declare_parameter('topic_to_cmds', 'arm_sdk')
+        target_topic = self.get_parameter('topic_to_cmds').value
+        
+        self.publisher_arm_sdk = self.create_publisher(LowCmd, target_topic, 10)
         self.timer_arm_sdk = self.create_timer(
             self.control_dt,
             self.timer_callback_arm_sdk
@@ -248,8 +253,8 @@ class LowLevelControlNode(Node):
 
         try:
             pose = json.loads(data)
-            self.get_logger().info(f'data = {pose}')
-            self.get_logger().info(f'impact = {impact}')
+            self.get_logger().debug(f'data = {pose}')
+            self.get_logger().debug(f'impact = {impact}')
             for i in self.active_joints:
                 if i == JOINT_INDEX['torso_joint']:
                     self.target_pos[i] = 0.0
@@ -275,7 +280,7 @@ class LowLevelControlNode(Node):
 
         if self.timer_call_count <= 5 or self.impact == 0.0:
             self.current_jpos_des = self.current_jpos.copy()
-            self.get_logger().info(
+            self.get_logger().debug(
                 f'Обновление current_jpos_des = {self.current_jpos_des}')
 
         else:
@@ -293,7 +298,7 @@ class LowLevelControlNode(Node):
                 coeff_and_mode = determine_coeff_and_mode(j)  # (Kp, Kd, mode)
                 self.cmd_msg.motor_cmd[j].q = self.current_jpos_des[j]
                 self.cmd_msg.motor_cmd[j].dq = 0.0
-                self.cmd_msg.motor_cmd[j].tau = 0.5
+                self.cmd_msg.motor_cmd[j].tau = 0.0
                 self.cmd_msg.motor_cmd[j].kp = coeff_and_mode[0]
                 self.cmd_msg.motor_cmd[j].kd = coeff_and_mode[1]
                 self.cmd_msg.motor_cmd[j].mode = coeff_and_mode[2]
