@@ -145,3 +145,9 @@ graph LR
   B -->|Результат| C[Пакет 3: Узел Визуализации]
   C -->|Отображение| D[RViz]
 ```
+
+## Credits
+This project uses/modifies code from the [Unitree Robotics SDK](https://github.com/unitreerobotics), which is licensed under the **BSD 3-Clause License**.
+
+## Предложения и корректировки
+Если Вы нашли, ошибку, неточность, у Вас есть предложения по улучшению или вопросы, то напишите в телеграмм [сюда](https://t.me/Alex_19846) (Александр) или [сюда](https://t.me/Kika_01) (Алиса).

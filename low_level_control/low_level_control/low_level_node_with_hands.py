@@ -50,8 +50,10 @@ from unitree_sdk2py.utils.crc import CRC
 # Частота в гц для ноды
 FREQUENCY = 333.33
 # коэффициэнт на который умножается control_dt (сек), который устанавливает максимальную дельту поворота мотора
+START_JOINT_VELOCITY = 0.3
 MAX_JOINT_VELOCITY = 4.0
 MAX_FINGER_VELOCITY = 0.1
+TARGET_TOPIC = 'arm_sdk'
 
 JOINT_INDEX_H1 = {
     'right_hip_roll_joint': 0,
@@ -317,7 +319,6 @@ class LowLevelControlNode(Node):
         self.get_logger().debug(f'cmd_msg_hands = {str(self.cmd_msg_hands)}')
 
         # create control_message for wrists
-
         self.cmd_msg_wrists = MotorCmds()
         for i in self.active_joints_wrists:
             cmd_sub_msg = MotorCmd()
@@ -331,13 +332,20 @@ class LowLevelControlNode(Node):
             self.feedback_msg.states.append(feedback_sub_msg)
         self.get_logger().debug(f'feedback_msg = {str(self.feedback_msg)}')
 
-        # (MAX_JOINT_VELOCITY * self.control_dt)/10
         self.max_joint_delta_hands = MAX_FINGER_VELOCITY
 
         # показывает насколько робот смещается в соторону координат с arm_sdk топика
         self.impact = 0.0
         self.max_temperature = -1.0
 
+        # Объявление параметра максимальной скорости
+        self.velocity_changed = False 
+        self.declare_parameter('max_joint_velocity_param', MAX_JOINT_VELOCITY)
+        self.max_joint_velocity = START_JOINT_VELOCITY
+
+        # Обявление параметра целевого топика
+        self.declare_parameter('target_topic_param', TARGET_TOPIC)
+        self.target_topic = self.get_parameter('target_topic_param').value
 
         # частота обновления
         self.control_dt = 1 / FREQUENCY
@@ -346,8 +354,8 @@ class LowLevelControlNode(Node):
         self.time_for_return_control = 1.0
 
         # максимальный угол на который может измениться целевая поза за один оборот ноды
-        self.max_joint_delta_H1 = MAX_JOINT_VELOCITY * self.control_dt
-        self.max_joint_wrists = MAX_JOINT_VELOCITY * 5 * self.control_dt
+        self.max_joint_delta_H1 = self.max_joint_velocity * self.control_dt
+        self.max_joint_wrists = self.max_joint_velocity * 5 * self.control_dt
 
         # считает количество итераций цикла timer_callback
         self.timer_call_count = 0
@@ -388,7 +396,7 @@ class LowLevelControlNode(Node):
 
         self.subscription_positions_to_unitree = self.create_subscription(
             String,
-            'positions_to_unitree',
+            self.target_topic,
             self.listener_callback_positions_to_unitree,
             10)
 
@@ -432,6 +440,8 @@ class LowLevelControlNode(Node):
         self.subscription_positions_to_unitree
 
         self.get_logger().info('Node started')
+
+        self.start_time = self.get_clock().now()  # возвращает Time объект
 
     def listener_callback_positions_to_unitree(self, msg):
         raw_data = msg.data
@@ -598,6 +608,17 @@ class LowLevelControlNode(Node):
         self.publisher_cmd.publish(self.cmd_msg_hands)
         self.publisher_wrist_cmds.publish(self.cmd_msg_wrists)
         self.timer_call_count += 1
+
+
+        end_time = self.get_clock().now()
+        duration = end_time - self.start_time  # Duration объект
+        if self.velocity_changed == False and duration.nanoseconds / 1e9 > 10.0 :
+            self.max_joint_velocity = self.get_parameter('max_joint_velocity_param').value
+            # максимальный угол на который может измениться целевая поза за один оборот ноды
+            self.max_joint_delta_H1 = self.max_joint_velocity * self.control_dt
+            self.max_joint_wrists = self.max_joint_velocity * 5 * self.control_dt
+            self.velocity_changed = True
+
 
     def return_control(self):
         '''уводит руки в положение для ходьбы'''

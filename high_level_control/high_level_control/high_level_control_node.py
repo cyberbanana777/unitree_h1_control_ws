@@ -1,5 +1,23 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2016-2024 HangZhou YuShu TECHNOLOGY CO.,LTD. ("Unitree Robotics")
+# All rights reserved.
+#
+# This file is part of high_level_control package and is based on the Unitree Robotics SDK.
+# See LICENSE in the project root for license information.
+
+# MODIFICATIONS:
+# 1. Added new commands: "Start" (id=2) and "Stop_move" (id=9)
+# 2. Improved user interface:
+#    - Added automatic listing of available functions at startup
+#    - Added better error handling with try-except blocks
+#    - Added graceful exit on KeyboardInterrupt
+# 3. Added network interface configuration (INTERFACE variable)
+# 4. Restructured code into main() function
+# 5. Enhanced output formatting with f-strings
+# 6. Added detailed script annotation in docstring
+# 7. Removed unused imports (math, ChannelSubscriber, SportModeState_)
+
 '''
 АННОТАЦИЯ
 Данный скрипт запускает high-level клиента, который позволяет управлять робоом Unitree H1 с помощью 
@@ -20,8 +38,8 @@ import sys
 import time
 from dataclasses import dataclass
 
-from unitree_sdk2py.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py.h1.loco.h1_loco_client import LocoClient
+from unitree_sdk2py_custom.core.channel import ChannelFactoryInitialize
+from unitree_sdk2py_custom.h1.loco.h1_loco_client import LocoClient
 
 INTERFACE = 'wlp0s20f3'
 

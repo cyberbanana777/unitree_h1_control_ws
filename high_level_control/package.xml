@@ -8,7 +8,7 @@
     high-level commands (such as damping, readiness, and balancing, etc.) as if it were a remote control.
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD 3-Clause</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

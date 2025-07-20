@@ -86,7 +86,7 @@ class CmdToHighLevelControlNode(Node):
     def timer_callback(self):
         """Handle periodic safety checks and zero-velocity timeouts."""
         now = self.get_clock().now()
-        time_since_last_msg = (now - self.last_msg_time).seconds
+        time_since_last_msg = (now - self.last_msg_time).nanoseconds / 1e9 
 
         if time_since_last_msg > self.dt and self.last_msg != (0.0, 0.0, 0.0):
             # Send zero velocity command if timeout reached
