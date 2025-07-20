@@ -5,7 +5,7 @@
 Запускает исполняемый файл inspire_hand для работы с манипулятором Inspire Hand 
 через UART.
 Автоматически передает sudo-пароль, обрабатывает вывод процесса и корректно
-завершает работу по сигналу Ctrl+C. Используется в ROS 2 пакете hands_init
+завершает работу по сигналу Ctrl+C. Используется в ROS 2 пакете low_level_control
 для управления роботизированными устройствами. Требует Linux и прав sudo
 (пароль указан в коде).
 
@@ -13,7 +13,7 @@ ANNOTATION
 It launches the inspire_hand executable file to work with the Inspire Hand manipulator
 via UART. 
 Automatically passes sudo password, handles process output and implements graceful Ctrl+C
-termination. Designed for ROS 2 hands_init package to control robotic devices.
+termination. Designed for ROS 2 low_level_control package to control robotic devices.
 Requires Linux environment and sudo privileges (password hardcoded).
 """
 
@@ -27,7 +27,7 @@ def main():
     Main function for launching and managing the inspire_hand process.
     Handles sudo launch, password passing, and proper Ctrl+C termination.
     """
-    package_share_dir = get_package_share_directory('hands_init')
+    package_share_dir = get_package_share_directory('low_level_control')
     executable_path = os.path.join(package_share_dir, 'inspire_hand')
     
     # Command to launch with sudo and device specification

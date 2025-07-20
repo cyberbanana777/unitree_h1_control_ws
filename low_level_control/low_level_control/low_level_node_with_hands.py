@@ -143,7 +143,7 @@ LIMITS_OF_JOINTS_UNITREE_WRISTS = {
 class LowLevelControlNode(Node):
 
     def __init__(self):
-        super().__init__('low_level_control_node')
+        super().__init__('low_level_control_with_hands_node')
 
         self.active_joints_H1 = [
             JOINT_INDEX_H1['right_shoulder_roll_joint'],
