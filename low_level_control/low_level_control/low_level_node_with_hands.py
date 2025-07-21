@@ -50,10 +50,11 @@ from unitree_sdk2py.utils.crc import CRC
 # Частота в гц для ноды
 FREQUENCY = 333.33
 # коэффициэнт на который умножается control_dt (сек), который устанавливает максимальную дельту поворота мотора
-START_JOINT_VELOCITY = 0.3
-MAX_JOINT_VELOCITY = 4.0
-MAX_FINGER_VELOCITY = 0.1
+START_JOINT_VELOCITY = 0.5
+MAX_JOINT_VELOCITY = 7.0
+MAX_FINGER_VELOCITY = 0.6
 TARGET_TOPIC = 'arm_sdk'
+TIME_TO_CHANGE_VELOCITY = 5.0 # в секундах
 
 JOINT_INDEX_H1 = {
     'right_hip_roll_joint': 0,
@@ -351,7 +352,7 @@ class LowLevelControlNode(Node):
         self.control_dt = 1 / FREQUENCY
 
         # время за которое мы возвращаем контроль системе при закрытии ноды
-        self.time_for_return_control = 1.0
+        self.time_for_return_control = 2.0
 
         # максимальный угол на который может измениться целевая поза за один оборот ноды
         self.max_joint_delta_H1 = self.max_joint_velocity * self.control_dt
@@ -396,7 +397,7 @@ class LowLevelControlNode(Node):
 
         self.subscription_positions_to_unitree = self.create_subscription(
             String,
-            self.target_topic,
+            'positions_to_unitree',
             self.listener_callback_positions_to_unitree,
             10)
 
@@ -416,7 +417,7 @@ class LowLevelControlNode(Node):
         # publish terget pose for H1 
         self.publisher_arm_sdk = self.create_publisher(
             LowCmd, 
-            'arm_sdk', 
+            self.target_topic, 
             10
             )
         
@@ -612,7 +613,7 @@ class LowLevelControlNode(Node):
 
         end_time = self.get_clock().now()
         duration = end_time - self.start_time  # Duration объект
-        if self.velocity_changed == False and duration.nanoseconds / 1e9 > 10.0 :
+        if self.velocity_changed == False and duration.nanoseconds / 1e9 > TIME_TO_CHANGE_VELOCITY:
             self.max_joint_velocity = self.get_parameter('max_joint_velocity_param').value
             # максимальный угол на который может измениться целевая поза за один оборот ноды
             self.max_joint_delta_H1 = self.max_joint_velocity * self.control_dt
