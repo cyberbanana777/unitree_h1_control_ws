@@ -38,8 +38,8 @@ import sys
 import time
 from dataclasses import dataclass
 
-from unitree_sdk2py_custom.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py_custom.h1.loco.h1_loco_client import LocoClient
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize
+from unitree_sdk2py.h1.loco.h1_loco_client import LocoClient
 
 INTERFACE = 'wlp0s20f3'
 

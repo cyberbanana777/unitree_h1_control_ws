@@ -1,4 +1,7 @@
+import os
 from setuptools import setup
+from glob import glob
+
 
 package_name = 'slider_control'
 
@@ -10,6 +13,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'resource'), glob('resource/*.png')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
