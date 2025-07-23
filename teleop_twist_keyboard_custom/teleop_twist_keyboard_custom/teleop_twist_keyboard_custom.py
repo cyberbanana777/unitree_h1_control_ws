@@ -56,8 +56,8 @@ strafing mode, and dynamic speed adjustment. OS-dependent (Windows/Linux) for in
 
 import sys
 import threading
-import geometry_msgs.msg
 import rclpy
+import geometry_msgs.msg
 
 # Platform-specific imports for keyboard input
 if sys.platform == 'win32':

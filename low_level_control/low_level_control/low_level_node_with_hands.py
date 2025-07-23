@@ -36,8 +36,8 @@ import time
 import numpy as np
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
 
+from std_msgs.msg import String
 from unitree_go.msg import MotorState
 from unitree_go.msg import MotorStates
 from unitree_go.msg import MotorCmd

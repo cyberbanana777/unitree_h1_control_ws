@@ -31,7 +31,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from unitree_go.msg import MotorCmds, MotorState, MotorStates
-from .DM_CAN import Motor, DM_Motor_Type, MotorControl, Control_Type
+from .DM_CAN import Motor, DM_Motor_Type, MotorControl
 
 
 # Constants
