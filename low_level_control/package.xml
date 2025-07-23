@@ -11,6 +11,9 @@
   <depend>unitree_go</depend>
   <depend>string</depend>
 
+  <depend>libboost-all-dev</depend>
+  <depend>libspdlog-dev</depend>
+
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
