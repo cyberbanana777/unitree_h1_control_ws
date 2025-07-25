@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>slider_control</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <name>gui_control</name>
+  <version>1.0.0</version>
+  <description>GUI for controlling Unitree H1 robot joints via ROS2.</description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

@@ -428,7 +428,7 @@ class LowLevelControlNode(Node):
         )
 
         self.publisher_temperature = self.create_publisher(
-            String, 
+            Float32, 
             'max_temperature', 
             10
             )

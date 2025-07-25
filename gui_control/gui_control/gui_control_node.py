@@ -1,10 +1,30 @@
+#!/usr/bin/env python3
+
+'''
+АННОТАЦИЯ
+Графический интерфейс для управления суставами робота Unitree H1 через ROS2. 
+Предоставляет поля для ввода числовых значений и кнопки, позволяющие 
+менять значение для 34 суставов (ноги, руки, кисти, торс, влиение заданных 
+координат на поведение системы - impact) с учетом ограничений диапазона 
+движений. Включает визуализацию схемы нумерации суставов. Зависит от ROS2 
+(rclpy), tkinter и ресурсов пакета gui_control.
+
+ANNOTATION
+A graphical interface (GUI) for controlling the joints of the Unitree H1 robot
+via ROS2. Provides fields for entering numeric values and buttons that allow
+to change the value for 34 joints (legs, arms, hands, torso, impact) taking
+into account range of motion limitations. Includes visualization of the joint
+numbering scheme. Depends on ROS2 (rclpy), tkinter, and gui_control package
+resources.
+'''
+
+import os
+import json
 import tkinter as tk
 from tkinter import ttk
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-import json
-import os
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -86,20 +106,21 @@ LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS = {
     33: [-6.0, -0.23]  # right_wrist
 }
 
+
 class ImageViewer:
     def __init__(self, parent):
         self.top = tk.Toplevel(parent)
         self.top.title("Просмотр изображения")
         self.top.protocol("WM_DELETE_WINDOW", self.close_window)
         
-        package_share_dir = get_package_share_directory('slider_control')
+        package_share_dir = get_package_share_directory('gui_control')
         image_path = os.path.join(package_share_dir, 'resource', 'unitree_h1_joints.png')
         
         try:
             self.photo = tk.PhotoImage(file=image_path)
             
-            # Уменьшаем отображение через subsample
-            self.photo = self.photo.subsample(2, 2)  # Уменьшаем в 2 раза
+            # Reduce display via subsample
+            self.photo = self.photo.subsample(2, 2)  # Reduce by 2 times
             
             self.label = tk.Label(self.top, image=self.photo)
             self.label.pack(padx=10, pady=10)
@@ -110,9 +131,11 @@ class ImageViewer:
         
         close_btn = ttk.Button(self.top, text="Закрыть", command=self.close_window)
         close_btn.pack(pady=5)
-    
+
+
     def close_window(self):
         self.top.destroy()
+
 
 class JointControl:
     def __init__(self, parent, joint_id, node):
@@ -122,48 +145,49 @@ class JointControl:
         self.frame = ttk.Frame(parent)
         self.repeat_id = None
         
-        # Сначала создаем все виджеты
+        # First we create all widgets
         # Joint name label
         label_text = f"{joint_id}: {joint_name}"
         self.label = ttk.Label(self.frame, text=label_text, width=30, anchor='w')
         
-        # Кнопки и поля ввода
+        # Buttons and input fields
         self.dec_btn = ttk.Button(self.frame, text="-", width=3)
         self.value_entry = ttk.Entry(self.frame, width=10)
         self.inc_btn = ttk.Button(self.frame, text="+", width=3)
         self.cur_label = ttk.Label(self.frame, text="0.00", width=10)
         self.limits_label = ttk.Label(self.frame, width=15)
         
-       # Настройка grid - убираем растягивание
-        self.frame.columnconfigure(0, weight=0)  # Метка сустава (фиксированная)
-        self.frame.columnconfigure(1, weight=0)  # Кнопка "-" (фиксированная)
-        self.frame.columnconfigure(2, weight=0)  # Поле ввода (фиксированное)
-        self.frame.columnconfigure(3, weight=0)  # Кнопка "+" (фиксированная)
-        self.frame.columnconfigure(4, weight=0)  # Текущее значение (фиксированное)
+       # Setting up grid - removing stretching
+        self.frame.columnconfigure(0, weight=0)  # Joint Mark (fixed)
+        self.frame.columnconfigure(1, weight=0)  # Button "-" (fixed)
+        self.frame.columnconfigure(2, weight=0)  # Input field (fixed)
+        self.frame.columnconfigure(3, weight=0)  # Button "+" (fixed)
+        self.frame.columnconfigure(4, weight=0)  # Current value (fixed)
         
-        # Создаем виджеты с фиксированными размерами
-        self.label = ttk.Label(self.frame, text=label_text, width=25, anchor='w')  # Фиксированная ширина
+        # Create widgets with fixed sizes
+        self.label = ttk.Label(self.frame, text=label_text, width=25, anchor='w') # Fixed width
         self.dec_btn = ttk.Button(self.frame, text="-", width=3)
-        self.value_entry = ttk.Entry(self.frame, width=10)  # width в символах
+        self.value_entry = ttk.Entry(self.frame, width=10)  # width in characters
         self.inc_btn = ttk.Button(self.frame, text="+", width=3)
         self.cur_label = ttk.Label(self.frame, text="0.00", width=10)
         
-        # Размещаем без растягивания
+        # Place without stretching
         self.label.grid(row=0, column=0, padx=2, sticky='w')
         self.dec_btn.grid(row=0, column=1, padx=2)
         self.value_entry.grid(row=0, column=2, padx=2)
         self.inc_btn.grid(row=0, column=3, padx=2)
         self.cur_label.grid(row=0, column=4, padx=2)
         
-        # Подсказка с пределами
+        # Hint with limits
         self.limits_label = ttk.Label(self.frame, width=20)
         self.limits_label.grid(row=1, column=2, columnspan=3, pady=(0,5), sticky='w')
         self.limits_label.grid_remove()
         
-        # Остальная инициализация
+        # Rest of the initialization
         self.value_entry.insert(0, "0.0")
         self.setup_bindings()
-    
+
+
     def setup_bindings(self):
         self.dec_btn.bind('<ButtonPress-1>', self.start_decrement)
         self.dec_btn.bind('<ButtonRelease-1>', self.stop_repeat)
@@ -172,62 +196,73 @@ class JointControl:
         self.value_entry.bind('<FocusIn>', self.on_entry_focus)
         self.value_entry.bind('<FocusOut>', self.on_entry_focus_out)
         self.value_entry.bind('<Return>', self.update_value)
-    
-    def on_entry_focus(self, event):
+
+
+    def on_entry_focus(self):
         # Highlight active entry and show limits
         self.value_entry.configure(style='Active.TEntry')
         limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS.get(self.joint_id, [0, 0])
         self.limits_label.config(text=f"[{limits[0]:.2f}, {limits[1]:.2f}]",
                             foreground="blue")
         
-        # Смещаем подсказку вправо на 10 пикселей
-        self.limits_label.grid(row=1, column=2, pady=(0, 5), padx=(3, 0))  # Добавлен padx=(10, 0)
-    
-    def on_entry_focus_out(self, event):
+        # Move the tooltip to the right by 10 pixels
+        self.limits_label.grid(row=1, column=2, pady=(0, 5), padx=(3, 0))  # Added padx=(10, 0)
+
+
+    def on_entry_focus_out(self):
         # Remove highlight and hide limits
         self.value_entry.configure(style='TEntry')
         self.limits_label.grid_remove()
-        
+
+
     def clamp_value(self, value):
         limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS.get(self.joint_id, [-float('inf'), float('inf')])
         return max(limits[0], min(value, limits[1]))
-        
-    def start_increment(self, event):
+
+
+    def start_increment(self):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
-        
-    def start_decrement(self, event):
+
+
+    def start_decrement(self):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
-        
+
+
     def repeat_increment(self):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
-        
+
+
     def repeat_decrement(self):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
-        
-    def stop_repeat(self, event):
+
+
+    def stop_repeat(self):
         if self.repeat_id:
             self.frame.after_cancel(self.repeat_id)
             self.repeat_id = None
-        
+
+
     def increment(self):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current + STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
         self.value_entry.insert(0, f"{new_value:.2f}")
         self.update_joint_value(new_value)
-        
+
+
     def decrement(self):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current - STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
         self.value_entry.insert(0, f"{new_value:.2f}")
         self.update_joint_value(new_value)
-        
-    def update_value(self, event=None):
+
+
+    def update_value(self):
         try:
             new_value = float(self.value_entry.get())
             clamped_value = self.clamp_value(new_value)
@@ -239,12 +274,13 @@ class JointControl:
             self.value_entry.delete(0, tk.END)
             self.value_entry.insert(0, "0.0")
             self.update_joint_value(0.0)
-                
+
+
     def update_joint_value(self, value):
         self.cur_label.config(text=f"{value:.2f}")
         msg = String()
         
-        # Получаем текущее значение IMPACT
+        # Get the current value of IMPACT
         impact_value = 0.0
         if hasattr(self.node, 'impact_control') and hasattr(self.node.impact_control, 'cur_label'):
             try:
@@ -252,10 +288,11 @@ class JointControl:
             except (ValueError, AttributeError):
                 impact_value = 0.0
         
-        # Формируем JSON с joint_id и значением, затем добавляем IMPACT через $
+        # Generate JSON with joint_id and value, then add IMPACT via $
         joint_data = {str(self.joint_id): float(f"{value:.2f}")}  # {"6": 1.50}
         msg.data = f"{json.dumps(joint_data)}${impact_value:.2f}"  # {"6":1.50}$0.75
         self.node.publisher.publish(msg)
+
 
 class ImpactControl:
     def __init__(self, parent, node):
@@ -300,45 +337,54 @@ class ImpactControl:
         
         self.value_entry.insert(0, "0.0")
         
-    def start_increment(self, event):
+
+    def start_increment(self):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
         
-    def start_decrement(self, event):
+
+    def start_decrement(self):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
         
+
     def repeat_increment(self):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
         
+
     def repeat_decrement(self):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
         
-    def stop_repeat(self, event):
+
+    def stop_repeat(self):
         if self.repeat_id:
             self.frame.after_cancel(self.repeat_id)
             self.repeat_id = None
         
+
     def clamp_value(self, value):
         return max(0.0, min(value, 1.0))
         
+
     def increment(self):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current + STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
         self.value_entry.insert(0, f"{new_value:.2f}")
         self.update_impact_value(new_value)
-        
+
+
     def decrement(self):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current - STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
         self.value_entry.insert(0, f"{new_value:.2f}")
         self.update_impact_value(new_value)
-        
-    def update_value(self, event=None):
+
+
+    def update_value(self):
         try:
             new_value = float(self.value_entry.get())
             clamped_value = self.clamp_value(new_value)
@@ -350,14 +396,16 @@ class ImpactControl:
             self.value_entry.delete(0, tk.END)
             self.value_entry.insert(0, "0.0")
             self.update_impact_value(0.0)
-            
+
+
     def update_impact_value(self, value):
         self.cur_label.config(text=f"{value:.2f}")
         msg = String()
         msg.data = f"{json.dumps({})}${value:.2f}"  # {}$0.75
         self.node.publisher.publish(msg)
 
-class SliderControlNode(Node):
+
+class GUIControlNode(Node):
     def __init__(self):
         super().__init__('slider_control_node')
         self.publisher = self.create_publisher(String, 'positions_to_unitree', 10)
@@ -371,8 +419,9 @@ class SliderControlNode(Node):
         
         self.setup_gui()
 
+
     def add_image_viewer_button(self):
-        # Создаем кнопку в нижней части интерфейса
+        # Create a button at the bottom of the interface
         img_btn_frame = ttk.Frame(self.root)
         img_btn_frame.pack(fill=tk.X, padx=5, pady=5)
         
@@ -383,10 +432,12 @@ class SliderControlNode(Node):
         )
         img_btn.pack(pady=5)
     
+
     def open_image_viewer(self):
-        # Создаем окно с изображением
+        # Create a window with an image
         self.image_viewer = ImageViewer(self.root)
-        
+
+
     def setup_gui(self):
         # Joint controls notebook
         notebook = ttk.Notebook(self.root)
@@ -466,22 +517,22 @@ class SliderControlNode(Node):
         control_frame = ttk.Frame(self.root)
         control_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        # Создаем фрейм для IMPACT и кнопки
+        # Create a frame for IMPACT and buttons
         impact_row_frame = ttk.Frame(control_frame)
         impact_row_frame.pack(fill=tk.X, pady=5)
 
-        # Impact control слева
+        # Impact control left
         impact_frame = ttk.LabelFrame(impact_row_frame, text="IMPACT")
         impact_frame.pack(side=tk.LEFT)
 
-        # Compact impact control внутри impact_frame
+        # Compact impact control inside impact_frame
         self.setup_compact_impact(impact_frame)
 
-        # Пустой фрейм для заполнения пространства между IMPACT и кнопкой
+        # Empty frame to fill the space between IMPACT and the button
         spacer = ttk.Frame(impact_row_frame)
         spacer.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
-        # Кнопка показа изображения справа (прижата к правому краю)
+        # Show image button on the right (pressed to the right edge)
         self.img_btn = ttk.Button(
             impact_row_frame, 
             text="Показать схему", 
@@ -490,8 +541,10 @@ class SliderControlNode(Node):
         )
         self.img_btn.pack(side=tk.RIGHT, padx=(0, 5))
 
+
     def open_image_viewer(self):
         ImageViewer(self.root)
+
 
     def setup_compact_impact(self, parent):
         frame = ttk.Frame(parent)
@@ -539,12 +592,14 @@ class SliderControlNode(Node):
             self.root.update()
             rclpy.spin_once(self, timeout_sec=0.01)
 
+
 def main(args=None):
     rclpy.init(args=args)
-    node = SliderControlNode()
+    node = GUIControlNode()
     node.run()
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
