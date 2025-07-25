@@ -132,7 +132,7 @@ class ImageViewer:
         close_btn = ttk.Button(self.top, text="Закрыть", command=self.close_window)
         close_btn.pack(pady=5)
 
-
+    
     def close_window(self):
         self.top.destroy()
 
