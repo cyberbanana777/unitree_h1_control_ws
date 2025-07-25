@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teleop_twist_keyboard_custom = teleop_twist_keyboard_custom.teleop_twist_keyboard_custom:main'
+            'teleop_twist_keyboard_custom_node = teleop_twist_keyboard_custom.teleop_twist_keyboard_custom:main'
         ],
     },
 )

@@ -28,8 +28,8 @@ if __name__ == '__main__':
 
     custom = Custom()
     selectMode = "ai" 
-    # selectMode = "normal"
-    # selectMode = "advanced" 
+    selectMode = "normal"
+    selectMode = "advanced" 
     # selectMode = "ai-w"  # for wheeled robot
     ret = custom.selectMode(selectMode) 
     print("ret: ",ret)

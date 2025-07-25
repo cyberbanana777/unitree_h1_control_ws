@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'high_level_control = high_level_control.high_level_control_node:main',
+            'high_level_control_node = high_level_control.high_level_control_node:main',
         ],
     },
 )

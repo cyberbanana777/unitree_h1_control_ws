@@ -146,7 +146,7 @@ install_unitree_sdk() {
     
     if [ -d "./unitree_sdk2_python" ]; then
         log "Устанавливаю unitree_sdk2_python..."
-        if sudo -u "$user" pip install --user ./unitree_sdk2_python; then
+        if sudo -u "$user" pip install --user -e ./unitree_sdk2_python; then
             log "Unitree SDK успешно установлен"
             installed_pip_pkgs+=("unitree_sdk2_python")
         else

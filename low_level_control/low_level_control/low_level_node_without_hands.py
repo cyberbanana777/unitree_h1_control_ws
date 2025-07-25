@@ -184,8 +184,8 @@ class LowLevelControlNode(Node):
         self.control_dt = 1 / FREQUENCY
         self.time_for_return_control = 1.0
 
-        self.declare_parameter('max_joint_velocity', 0.5)
-        self.max_joint_velocity = self.get_parameter('max_joint_velocity').value
+        self.declare_parameter('max_joint_velocity_param', 0.5)
+        self.max_joint_velocity = self.get_parameter('max_joint_velocity_param').value
         self.max_joint_delta = self.max_joint_velocity * self.control_dt
 
         # считает количество итераций цикла timer_callback
@@ -218,8 +218,8 @@ class LowLevelControlNode(Node):
         self.cmd_msg.level_flag = 255
         self.cmd_msg.gpio = 0
 
-        self.declare_parameter('topic_to_cmds', 'arm_sdk')
-        target_topic = self.get_parameter('topic_to_cmds').value
+        self.declare_parameter('target_topic_param', 'arm_sdk')
+        target_topic = self.get_parameter('target_topic_param').value
         
         self.publisher_arm_sdk = self.create_publisher(LowCmd, target_topic, 10)
         self.timer_arm_sdk = self.create_timer(
@@ -255,15 +255,17 @@ class LowLevelControlNode(Node):
             pose = json.loads(data)
             self.get_logger().debug(f'data = {pose}')
             self.get_logger().debug(f'impact = {impact}')
-            for i in self.active_joints:
-                if i == JOINT_INDEX['torso_joint']:
-                    self.target_pos[i] = 0.0
-                else:
-                    self.target_pos[i] = np.clip(
-                        pose[str(i)],
-                        LIMITS_OF_JOINTS_UNITREE_H1[i][0],
-                        LIMITS_OF_JOINTS_UNITREE_H1[i][1]
-                    )
+
+            if len(data) != 0:
+                for i in self.active_joints:
+                    if i == JOINT_INDEX['torso_joint']:
+                        self.target_pos[i] = 0.0
+                    else:
+                        self.target_pos[i] = np.clip(
+                            pose[str(i)],
+                            LIMITS_OF_JOINTS_UNITREE_H1[i][0],
+                            LIMITS_OF_JOINTS_UNITREE_H1[i][1]
+                        )
         except Exception as e:
             self.get_logger().error(e)
 

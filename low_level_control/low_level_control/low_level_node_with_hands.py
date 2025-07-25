@@ -38,6 +38,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
+from std_msgs.msg import Float32
 from unitree_go.msg import MotorState
 from unitree_go.msg import MotorStates
 from unitree_go.msg import MotorCmd
@@ -446,13 +447,25 @@ class LowLevelControlNode(Node):
 
     def listener_callback_positions_to_unitree(self, msg):
         raw_data = msg.data
-        data, impact = raw_data.split('$')
-        self.impact = float(impact)
+        
+        # Разделяем данные по символу '$'
+        parts = raw_data.split('$')
+        if len(parts) != 2:
+            self.get_logger().error(f"Invalid message format: {raw_data}")
+            return
+        
+        data_part, impact_part = parts
+        self.impact = float(impact_part) if impact_part else 0.0  # Устанавливаем impact в 0.0, если нет значения
+        
+        # Если часть данных пустая или содержит только '{}', пропускаем обработку позы
+        if not data_part or data_part == '{}':
+            self.get_logger().debug('Empty pose data received, skipping processing')
+            return
 
         try:
-            pose = json.loads(data)
+            pose = json.loads(data_part)
             self.get_logger().debug(f'data = {pose}')
-            self.get_logger().debug(f'impact = {impact}')
+            self.get_logger().debug(f'impact = {self.impact}')
 
             H1_pose = {}
             hands_pose = {}
@@ -473,7 +486,7 @@ class LowLevelControlNode(Node):
                     self.target_pos_H1[i] = 0.0
                 else:
                     self.target_pos_H1[i] = np.clip(
-                        H1_pose[i],
+                        H1_pose.get(i, 0.0),  # Используем get с значением по умолчанию
                         LIMITS_OF_JOINTS_UNITREE_H1[i][0],
                         LIMITS_OF_JOINTS_UNITREE_H1[i][1]
                     )
@@ -481,7 +494,7 @@ class LowLevelControlNode(Node):
             for i in self.active_joints_hands:
                 self.get_logger().debug(f'hands_pose = {hands_pose}')
                 self.target_pos_hands[i] = np.clip(
-                    hands_pose[i],  
+                    hands_pose.get(i, 0.0),  # Используем get с значением по умолчанию
                     LIMITS_OF_JOINTS_UNITREE_HANDS[i][0],
                     LIMITS_OF_JOINTS_UNITREE_HANDS[i][1]
                 )
@@ -489,13 +502,15 @@ class LowLevelControlNode(Node):
             for i in self.active_joints_wrists:
                 self.get_logger().debug(f'wrists_pose = {wrists_pose}')
                 self.target_pos_wrists[i] = np.clip(
-                    wrists_pose[i],  
+                    wrists_pose.get(i, 0.0),  # Используем get с значением по умолчанию
                     LIMITS_OF_JOINTS_UNITREE_WRISTS[i][0],
                     LIMITS_OF_JOINTS_UNITREE_WRISTS[i][1]
                 )
 
+        except json.JSONDecodeError as e:
+            self.get_logger().error(f"JSON decode error: {e}")
         except Exception as e:
-            self.get_logger().error(e)
+            self.get_logger().error(f"Unexpected error: {e}")
 
 
     def listener_callback_LowCmd(self, msg):
@@ -519,8 +534,8 @@ class LowLevelControlNode(Node):
 
 
     def timer_callback_temperature(self):
-        msg = String()
-        msg.data = str(self.max_temperature)
+        msg = Float32()
+        msg.data = float(self.max_temperature)
         self.publisher_temperature.publish(msg)
 
 

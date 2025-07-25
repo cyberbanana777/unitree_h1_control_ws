@@ -1,19 +1,18 @@
+import tkinter as tk
+from tkinter import ttk
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-import tkinter as tk
-from tkinter import ttk
 import json
-import threading
-from ament_index_python.packages import get_package_share_directory
 import os
-import queue
+from ament_index_python.packages import get_package_share_directory
+
 
 STEP_BUTTON = 0.05
-ASK_CONFIGURATION = False
-DEFOLT_CONFIGURATION = 2
+REPEAT_DELAY = 300  # milliseconds before repeat starts
+REPEAT_INTERVAL = 100  # milliseconds between repeats
 
-JOINT_INDEX_H1_WITH_HANDS = {
+JOINT_NAMES = {
     'right_hip_roll_joint': 0,
     'right_hip_pitch_joint': 1,
     'right_knee_joint': 2,
@@ -48,7 +47,7 @@ JOINT_INDEX_H1_WITH_HANDS = {
     'left_thumb_rotation': 31,
     'left_wrist': 32,
     'right_wrist': 33
-    }
+}
 
 LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS = {
     0: [-0.43, 0.43],  # right_hip_roll_joint
@@ -87,500 +86,465 @@ LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS = {
     33: [-6.0, -0.23]  # right_wrist
 }
 
+class ImageViewer:
+    def __init__(self, parent):
+        self.top = tk.Toplevel(parent)
+        self.top.title("Просмотр изображения")
+        self.top.protocol("WM_DELETE_WINDOW", self.close_window)
+        
+        package_share_dir = get_package_share_directory('slider_control')
+        image_path = os.path.join(package_share_dir, 'resource', 'unitree_h1_joints.png')
+        
+        try:
+            self.photo = tk.PhotoImage(file=image_path)
+            
+            # Уменьшаем отображение через subsample
+            self.photo = self.photo.subsample(2, 2)  # Уменьшаем в 2 раза
+            
+            self.label = tk.Label(self.top, image=self.photo)
+            self.label.pack(padx=10, pady=10)
+            
+        except Exception as e:
+            error_msg = f"Не удалось загрузить изображение\nПоддерживаются только GIF, PGM/PPM\n{str(e)}"
+            tk.Label(self.top, text=error_msg, wraplength=300).pack(padx=10, pady=10)
+        
+        close_btn = ttk.Button(self.top, text="Закрыть", command=self.close_window)
+        close_btn.pack(pady=5)
+    
+    def close_window(self):
+        self.top.destroy()
+
+class JointControl:
+    def __init__(self, parent, joint_id, node):
+        self.joint_id = joint_id
+        self.node = node
+        joint_name = [name for name, id in JOINT_NAMES.items() if id == joint_id][0]
+        self.frame = ttk.Frame(parent)
+        self.repeat_id = None
+        
+        # Сначала создаем все виджеты
+        # Joint name label
+        label_text = f"{joint_id}: {joint_name}"
+        self.label = ttk.Label(self.frame, text=label_text, width=30, anchor='w')
+        
+        # Кнопки и поля ввода
+        self.dec_btn = ttk.Button(self.frame, text="-", width=3)
+        self.value_entry = ttk.Entry(self.frame, width=10)
+        self.inc_btn = ttk.Button(self.frame, text="+", width=3)
+        self.cur_label = ttk.Label(self.frame, text="0.00", width=10)
+        self.limits_label = ttk.Label(self.frame, width=15)
+        
+       # Настройка grid - убираем растягивание
+        self.frame.columnconfigure(0, weight=0)  # Метка сустава (фиксированная)
+        self.frame.columnconfigure(1, weight=0)  # Кнопка "-" (фиксированная)
+        self.frame.columnconfigure(2, weight=0)  # Поле ввода (фиксированное)
+        self.frame.columnconfigure(3, weight=0)  # Кнопка "+" (фиксированная)
+        self.frame.columnconfigure(4, weight=0)  # Текущее значение (фиксированное)
+        
+        # Создаем виджеты с фиксированными размерами
+        self.label = ttk.Label(self.frame, text=label_text, width=25, anchor='w')  # Фиксированная ширина
+        self.dec_btn = ttk.Button(self.frame, text="-", width=3)
+        self.value_entry = ttk.Entry(self.frame, width=10)  # width в символах
+        self.inc_btn = ttk.Button(self.frame, text="+", width=3)
+        self.cur_label = ttk.Label(self.frame, text="0.00", width=10)
+        
+        # Размещаем без растягивания
+        self.label.grid(row=0, column=0, padx=2, sticky='w')
+        self.dec_btn.grid(row=0, column=1, padx=2)
+        self.value_entry.grid(row=0, column=2, padx=2)
+        self.inc_btn.grid(row=0, column=3, padx=2)
+        self.cur_label.grid(row=0, column=4, padx=2)
+        
+        # Подсказка с пределами
+        self.limits_label = ttk.Label(self.frame, width=20)
+        self.limits_label.grid(row=1, column=2, columnspan=3, pady=(0,5), sticky='w')
+        self.limits_label.grid_remove()
+        
+        # Остальная инициализация
+        self.value_entry.insert(0, "0.0")
+        self.setup_bindings()
+    
+    def setup_bindings(self):
+        self.dec_btn.bind('<ButtonPress-1>', self.start_decrement)
+        self.dec_btn.bind('<ButtonRelease-1>', self.stop_repeat)
+        self.inc_btn.bind('<ButtonPress-1>', self.start_increment)
+        self.inc_btn.bind('<ButtonRelease-1>', self.stop_repeat)
+        self.value_entry.bind('<FocusIn>', self.on_entry_focus)
+        self.value_entry.bind('<FocusOut>', self.on_entry_focus_out)
+        self.value_entry.bind('<Return>', self.update_value)
+    
+    def on_entry_focus(self, event):
+        # Highlight active entry and show limits
+        self.value_entry.configure(style='Active.TEntry')
+        limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS.get(self.joint_id, [0, 0])
+        self.limits_label.config(text=f"[{limits[0]:.2f}, {limits[1]:.2f}]",
+                            foreground="blue")
+        
+        # Смещаем подсказку вправо на 10 пикселей
+        self.limits_label.grid(row=1, column=2, pady=(0, 5), padx=(3, 0))  # Добавлен padx=(10, 0)
+    
+    def on_entry_focus_out(self, event):
+        # Remove highlight and hide limits
+        self.value_entry.configure(style='TEntry')
+        self.limits_label.grid_remove()
+        
+    def clamp_value(self, value):
+        limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS.get(self.joint_id, [-float('inf'), float('inf')])
+        return max(limits[0], min(value, limits[1]))
+        
+    def start_increment(self, event):
+        self.increment()
+        self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
+        
+    def start_decrement(self, event):
+        self.decrement()
+        self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
+        
+    def repeat_increment(self):
+        self.increment()
+        self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
+        
+    def repeat_decrement(self):
+        self.decrement()
+        self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
+        
+    def stop_repeat(self, event):
+        if self.repeat_id:
+            self.frame.after_cancel(self.repeat_id)
+            self.repeat_id = None
+        
+    def increment(self):
+        current = float(self.value_entry.get())
+        new_value = self.clamp_value(current + STEP_BUTTON)
+        self.value_entry.delete(0, tk.END)
+        self.value_entry.insert(0, f"{new_value:.2f}")
+        self.update_joint_value(new_value)
+        
+    def decrement(self):
+        current = float(self.value_entry.get())
+        new_value = self.clamp_value(current - STEP_BUTTON)
+        self.value_entry.delete(0, tk.END)
+        self.value_entry.insert(0, f"{new_value:.2f}")
+        self.update_joint_value(new_value)
+        
+    def update_value(self, event=None):
+        try:
+            new_value = float(self.value_entry.get())
+            clamped_value = self.clamp_value(new_value)
+            if clamped_value != new_value:
+                self.value_entry.delete(0, tk.END)
+                self.value_entry.insert(0, f"{clamped_value:.2f}")
+            self.update_joint_value(clamped_value)
+        except ValueError:
+            self.value_entry.delete(0, tk.END)
+            self.value_entry.insert(0, "0.0")
+            self.update_joint_value(0.0)
+                
+    def update_joint_value(self, value):
+        self.cur_label.config(text=f"{value:.2f}")
+        msg = String()
+        
+        # Получаем текущее значение IMPACT
+        impact_value = 0.0
+        if hasattr(self.node, 'impact_control') and hasattr(self.node.impact_control, 'cur_label'):
+            try:
+                impact_value = float(self.node.impact_control.cur_label.cget("text"))
+            except (ValueError, AttributeError):
+                impact_value = 0.0
+        
+        # Формируем JSON с joint_id и значением, затем добавляем IMPACT через $
+        joint_data = {str(self.joint_id): float(f"{value:.2f}")}  # {"6": 1.50}
+        msg.data = f"{json.dumps(joint_data)}${impact_value:.2f}"  # {"6":1.50}$0.75
+        self.node.publisher.publish(msg)
+
+class ImpactControl:
+    def __init__(self, parent, node):
+        self.node = node
+        # Wrap in a LabelFrame like other controls
+        self.outer_frame = ttk.LabelFrame(parent, text="IMPACT Control")
+        self.frame = ttk.Frame(self.outer_frame)
+        self.frame.pack(fill=tk.X, padx=5, pady=5)
+        self.repeat_id = None
+        
+        # Configure grid with less spacing
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=1)
+        self.frame.columnconfigure(2, weight=1)
+        self.frame.columnconfigure(3, weight=1)
+        self.frame.columnconfigure(4, weight=1)
+        
+        # Label moved closer to entry
+        self.label = ttk.Label(self.frame, text="9: IMPACT", width=15, anchor='w')
+        self.label.grid(row=0, column=0, sticky='w', padx=(0, 5))
+        
+        # Decrease button with press-and-hold
+        self.dec_btn = ttk.Button(self.frame, text="-", width=3)
+        self.dec_btn.grid(row=0, column=1, padx=2)
+        self.dec_btn.bind('<ButtonPress-1>', self.start_decrement)
+        self.dec_btn.bind('<ButtonRelease-1>', self.stop_repeat)
+        
+        # Value entry
+        self.value_entry = ttk.Entry(self.frame, width=8)
+        self.value_entry.bind('<Return>', self.update_value)
+        self.value_entry.grid(row=0, column=2, padx=2)
+        
+        # Increase button with press-and-hold
+        self.inc_btn = ttk.Button(self.frame, text="+", width=3)
+        self.inc_btn.grid(row=0, column=3, padx=2)
+        self.inc_btn.bind('<ButtonPress-1>', self.start_increment)
+        self.inc_btn.bind('<ButtonRelease-1>', self.stop_repeat)
+        
+        # Current value label
+        self.cur_label = ttk.Label(self.frame, text="0.00", width=8)
+        self.cur_label.grid(row=0, column=4, padx=2)
+        
+        self.value_entry.insert(0, "0.0")
+        
+    def start_increment(self, event):
+        self.increment()
+        self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
+        
+    def start_decrement(self, event):
+        self.decrement()
+        self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
+        
+    def repeat_increment(self):
+        self.increment()
+        self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
+        
+    def repeat_decrement(self):
+        self.decrement()
+        self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
+        
+    def stop_repeat(self, event):
+        if self.repeat_id:
+            self.frame.after_cancel(self.repeat_id)
+            self.repeat_id = None
+        
+    def clamp_value(self, value):
+        return max(0.0, min(value, 1.0))
+        
+    def increment(self):
+        current = float(self.value_entry.get())
+        new_value = self.clamp_value(current + STEP_BUTTON)
+        self.value_entry.delete(0, tk.END)
+        self.value_entry.insert(0, f"{new_value:.2f}")
+        self.update_impact_value(new_value)
+        
+    def decrement(self):
+        current = float(self.value_entry.get())
+        new_value = self.clamp_value(current - STEP_BUTTON)
+        self.value_entry.delete(0, tk.END)
+        self.value_entry.insert(0, f"{new_value:.2f}")
+        self.update_impact_value(new_value)
+        
+    def update_value(self, event=None):
+        try:
+            new_value = float(self.value_entry.get())
+            clamped_value = self.clamp_value(new_value)
+            if clamped_value != new_value:
+                self.value_entry.delete(0, tk.END)
+                self.value_entry.insert(0, f"{clamped_value:.2f}")
+            self.update_impact_value(clamped_value)
+        except ValueError:
+            self.value_entry.delete(0, tk.END)
+            self.value_entry.insert(0, "0.0")
+            self.update_impact_value(0.0)
+            
+    def update_impact_value(self, value):
+        self.cur_label.config(text=f"{value:.2f}")
+        msg = String()
+        msg.data = f"{json.dumps({})}${value:.2f}"  # {}$0.75
+        self.node.publisher.publish(msg)
+
 class SliderControlNode(Node):
     def __init__(self):
         super().__init__('slider_control_node')
-
-        self.declare_parameter('ask_configuration_param', ASK_CONFIGURATION)
-        self.declare_parameter('configuration_param', DEFOLT_CONFIGURATION)
-
-        self.configuration = self.get_parameter('configuration_param').value
-
-        self.get_logger().info('Chose configuration:\n 1 - arms\n 2 - arms + hands\n 3 - legs + arms\n 4 - legs + arms + hands')
-
-        if self.get_parameter('ask_configuration_param').value == True:
-            self.configuration = int(input("Enter the configuration number: "))
+        self.publisher = self.create_publisher(String, 'positions_to_unitree', 10)
         
-        if self.configuration == 1:
-            self.param_joints = [6, 9, 12, 13, 14, 15, 16, 17, 18, 19]
-        elif self.configuration == 2:
-            self.param_joints = [6, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
-        elif self.configuration == 3:
-            self.param_joints = [9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-        elif self.configuration == 4:
-            self.param_joints = [9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33]
+        self.root = tk.Tk()
+        self.root.title("Unitree H1 Control")
         
-        self.publisher_ = self.create_publisher(String, 'positions_to_unitree', 10)
-        self.slider_values = {i: 0.0 for i in self.param_joints}
-        self.value_labels = {}
-        self.min_labels = {}
-        self.max_labels = {}
-        self.entry_widgets = {}
-                
-        # Create a queue for thread-safe communication
-        self.gui_events = queue.Queue()
+        # Create custom style for active entry
+        style = ttk.Style()
+        style.configure('Active.TEntry', fieldbackground='lightblue')
         
-        # Start ROS spinning in a separate thread
-        self.ros_thread = threading.Thread(target=self.ros_spin, daemon=True)
-        self.ros_thread.start()
-        
-        # Run Tkinter in the main thread
         self.setup_gui()
-        self.get_logger().info('slider_control_node started.')
 
-
-    def ros_spin(self):
-        rclpy.spin(self)
-
-    def setup_gui(self):
-        try:
-            self.root = tk.Tk()
-            self.root.title("ROS2 Joint Controller (Humanoid Joints)")
-            self.root.geometry("1400x1000")
-            
-            style = ttk.Style()
-            style.theme_use('clam')
-            
-            # Главный контейнер с 3 колонками (используем только grid)
-            main_frame = ttk.Frame(self.root, padding="10")
-            main_frame.pack(fill=tk.BOTH, expand=True)
-
-                # Создаем интерфейс в зависимости от конфигурации
-            if self.configuration == 1:
-                self._setup_config1_interface(main_frame)
-            elif self.configuration == 2:
-                self._setup_config2_interface(main_frame)
-            elif self.configuration == 3:
-                self._setup_config3_interface(main_frame)
-            elif self.configuration == 4:
-                self._setup_config4_interface(main_frame)
-            
-            
-            self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-            self.root.after(100, self.process_ros_events)
-            self.root.mainloop()
-            
-        except Exception as e:
-            self.get_logger().error(f"GUI error: {str(e)}")
-            raise
+    def add_image_viewer_button(self):
+        # Создаем кнопку в нижней части интерфейса
+        img_btn_frame = ttk.Frame(self.root)
+        img_btn_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        img_btn = ttk.Button(
+            img_btn_frame, 
+            text="Показать изображение", 
+            command=self.open_image_viewer
+        )
+        img_btn.pack(pady=5)
     
-    def _setup_config1_interface(self, main_frame):
-        # Увеличиваем базовые размеры
-        self.root.geometry("1600x1200")  # Было 1400x1000
-        self.root.minsize(1000, 800)  # Перенесли эту строку
+    def open_image_viewer(self):
+        # Создаем окно с изображением
+        self.image_viewer = ImageViewer(self.root)
         
-        # Увеличиваем padding в главном фрейме
-        main_frame = ttk.Frame(self.root, padding="20")  # Было 10
-        main_frame.pack(fill=tk.BOTH, expand=True)
+    def setup_gui(self):
+        # Joint controls notebook
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # Увеличиваем отступы между колонками
-        padx_value = 15  # Было 5
-        pady_value = 15  # Было 5
+        # Arms tab (combined left and right)
+        arms_frame = ttk.Frame(notebook)
         
-        # Левая колонка - правая рука
-        right_arm_frame = ttk.Frame(main_frame, padding="10")  # Добавили padding
-        right_arm_frame.grid(row=0, column=0, sticky="nsew", padx=padx_value, pady=pady_value)
+        # Left Arm controls
+        left_arm_frame = ttk.LabelFrame(arms_frame, text="Left Arm")
+        for joint_id in [16, 17, 18, 19]:  # left arm joints
+            JointControl(left_arm_frame, joint_id, self).frame.pack(fill=tk.X, pady=2)
         
-        # Центральная колонка - картинка и управление
-        center_frame = ttk.Frame(main_frame, padding="10")
-        center_frame.grid(row=0, column=1, sticky="nsew", padx=padx_value, pady=pady_value)
+        # Add separator and torso joint
+        ttk.Separator(left_arm_frame, orient='horizontal').pack(fill=tk.X, pady=5)
+        JointControl(left_arm_frame, 6, self).frame.pack(fill=tk.X, pady=2)  # torso_joint
         
-        # Правая колонка - левая рука
-        left_arm_frame = ttk.Frame(main_frame, padding="10")
-        left_arm_frame.grid(row=0, column=2, sticky="nsew", padx=padx_value, pady=pady_value)
+        left_arm_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Right Arm controls
+        right_arm_frame = ttk.LabelFrame(arms_frame, text="Right Arm")
+        for joint_id in [12, 13, 14, 15]:  # right arm joints
+            JointControl(right_arm_frame, joint_id, self).frame.pack(fill=tk.X, pady=2)
+        right_arm_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        notebook.add(arms_frame, text="Arms")
+        
+        # Hands tab
+        hands_frame = ttk.Frame(notebook)
 
-        # Установка минимальных размеров и фиксированных ширины колонок
-        # main_frame.minsize(1000, 800)  # Минимальные размеры окна
-        right_arm_frame.config(width=300)  # Фиксированная ширина правой колонки
-        center_frame.config(width=400)    # Фиксированная ширина центральной колонки
-        left_arm_frame.config(width=300)  # Фиксированная ширина левой колонки
-        
-        # Настройка весов колонок (после установки размеров)
-        main_frame.columnconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.columnconfigure(2, weight=1)
-        main_frame.rowconfigure(0, weight=1)
-        
-        # Загрузка изображения
-        try:
-            package_share_dir = get_package_share_directory('slider_control')
-            image_path = os.path.join(package_share_dir, 'resource', 'unitree_h1_joints.png')
-            original_image = tk.PhotoImage(file=image_path)
-            self.image = original_image.subsample(2, 2)  # Было subsample(2, 2) - теперь оригинальный размер
-            image_label = ttk.Label(center_frame, image=self.image)
-            image_label.grid(row=0, column=0, columnspan=2, pady=20)
-        except Exception as e:
-            self.get_logger().warn(f"Could not load image: {str(e)}")
-            ttk.Label(center_frame, text="Robot Image", font=('Arial', 14)).grid(row=0, column=0, columnspan=2, pady=20)
-            
-        # Создаем контейнер для управления torso и IMPACT в одной строке
-        control_frame = ttk.Frame(center_frame)
-        control_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=10)
-        
-        # Настройка колонок в control_frame
-        control_frame.columnconfigure(0, weight=1)  # Для torso_joint
-        control_frame.columnconfigure(1, weight=1)  # Для IMPACT
-        
-        # Счетчики строк для каждой колонки
-        right_row = 0
-        left_row = 0
-        
-        # Создаем элементы управления для суставов
-        for joint_id in self.param_joints:
-            joint_name = [k for k, v in JOINT_INDEX_H1_WITH_HANDS.items() if v == joint_id][0]
-            
-            # Определяем родительский фрейм и позицию
-            if joint_id == 6:  # torso_joint
-                parent = control_frame
-                row, col = 0, 0
-            elif joint_id == 9:  # IMPACT
-                parent = control_frame
-                row, col = 0, 1
-            elif 'right' in joint_name.lower():
-                parent = right_arm_frame
-                row, col = right_row, 0
-                right_row += 1
-            elif 'left' in joint_name.lower():
-                parent = left_arm_frame
-                row, col = left_row, 0
-                left_row += 1
-            else:
-                continue
-            
-            # Увеличиваем padding фрейма сустава
-            slider_frame = ttk.Frame(parent, padding="10", relief="ridge")  # Было 5
-            slider_frame.grid(row=row, column=col, sticky="ew", padx=10, pady=10)  # Было 5, 2
-            
-            # Увеличиваем шрифты и размеры элементов
-            ttk.Label(slider_frame, 
-                    text=f'{joint_id} {joint_name}', 
-                    font=('Arial', 12, 'bold')).grid(row=0, column=0, columnspan=3)  # Было 9
-            
-            limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS[joint_id]
-            ttk.Label(slider_frame, 
-                    text=f"Min: {limits[0]:.2f}, Max: {limits[1]:.2f}",
-                    font=('Arial', 11)).grid(row=1, column=0, columnspan=3)  # Было 8
-            
-            # Увеличиваем кнопки и поле ввода
-            ttk.Button(slider_frame, text="-", width=5,  # Было width=3
-                    command=lambda idx=joint_id: self.adjust_value(idx, -STEP_BUTTON)
-                    ).grid(row=2, column=0, sticky="w")
-            
-            self.entry_widgets[joint_id] = ttk.Entry(slider_frame, width=12,  # Было width=8
-                                                font=('Arial', 12, 'bold'),  # Было 10
-                                                justify='center')
-            self.entry_widgets[joint_id].insert(0, "0.0")
-            self.entry_widgets[joint_id].grid(row=2, column=1)
-            
-            ttk.Button(slider_frame, text="+", width=5,  # Было width=3
-                    command=lambda idx=joint_id: self.adjust_value(idx, STEP_BUTTON)
-                    ).grid(row=2, column=2, sticky="e")
-            
-            self.value_labels[joint_id] = ttk.Label(slider_frame, 
-                                                text="0.0", 
-                                                font=('Arial', 12, 'bold'))  # Было 10
-            self.value_labels[joint_id].grid(row=3, column=0, columnspan=3)
-        
-    def _setup_config2_interface(self, main_frame):
-        # Настройки основного окна
-        self.root.geometry("1800x1400")
-        self.root.minsize(1200, 900)
-        
-        # Главный фрейм с увеличенными отступами
-        main_frame = ttk.Frame(self.root, padding="20")
-        main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Колонки (левая рука | центр | правая рука)
-        left_arm_frame = ttk.Frame(main_frame, padding="10")
-        center_frame = ttk.Frame(main_frame, padding="10")
-        right_arm_frame = ttk.Frame(main_frame, padding="10")
-        
-        left_arm_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=15)
-        center_frame.grid(row=0, column=1, sticky="nsew", padx=15, pady=15)
-        right_arm_frame.grid(row=0, column=2, sticky="nsew", padx=15, pady=15)
-        
-        # Фиксированные ширины колонок
-        left_arm_frame.config(width=350)
-        center_frame.config(width=450)
-        right_arm_frame.config(width=350)
-        
-        # Настройка весов
-        main_frame.columnconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.columnconfigure(2, weight=1)
-        main_frame.rowconfigure(0, weight=1)
-        
-        # Загрузка уменьшенного изображения
-        try:
-            package_share_dir = get_package_share_directory('slider_control')
-            image_path = os.path.join(package_share_dir, 'resource', 'unitree_h1_joints.png')
-            original_image = tk.PhotoImage(file=image_path)
-            self.image = original_image.subsample(3, 3)  # Уменьшаем сильнее
-            image_label = ttk.Label(center_frame, image=self.image)
-            image_label.grid(row=0, column=0, columnspan=2, pady=10)
-        except Exception as e:
-            self.get_logger().warn(f"Could not load image: {str(e)}")
-            ttk.Label(center_frame, text="Robot Image", font=('Arial', 14)).grid(row=0, column=0, columnspan=2, pady=10)
-        
-        impact_middle_frame = ttk.Frame(center_frame)
-        impact_middle_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=5)
+        # Left Hand section
+        left_hand_frame = ttk.LabelFrame(hands_frame, text="Left Hand")
+        left_wrist_frame = ttk.LabelFrame(left_hand_frame, text="Left Wrist")
+        JointControl(left_wrist_frame, 32, self).frame.pack(fill=tk.X, pady=2)
+        left_wrist_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        torso_thumb_frame = ttk.Frame(center_frame)
-        torso_thumb_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=5)
+        left_fingers_frame = ttk.LabelFrame(left_hand_frame, text="Left Fingers")
+        for joint_id in range(26, 32):  # left hand finger joints
+            JointControl(left_fingers_frame, joint_id, self).frame.pack(fill=tk.X, pady=1)
+        left_fingers_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        # Настройка колонок с отступами
-        impact_middle_frame.columnconfigure(0, weight=1, pad=20)  # IMPACT
-        impact_middle_frame.columnconfigure(1, weight=0)          # Пробел
-        impact_middle_frame.columnconfigure(2, weight=1)          # right_middle
+        left_hand_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
 
-        torso_thumb_frame.columnconfigure(0, weight=1, pad=20)    # torso_joint
-        torso_thumb_frame.columnconfigure(1, weight=0)            # Пробел
-        torso_thumb_frame.columnconfigure(2, weight=1)            # right_thumb_rotation
-        
-        # Фрейм для пальцев (в центре, под верхними контролами)
-        fingers_frame = ttk.Frame(center_frame)
-        fingers_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=20)
-        
-        # Левая рука (пальцы)
-        left_fingers_frame = ttk.Frame(fingers_frame)
-        left_fingers_frame.grid(row=0, column=0, sticky="nsew", padx=10)
-        
-        # Правая рука (пальцы)
-        right_fingers_frame = ttk.Frame(fingers_frame)
-        right_fingers_frame.grid(row=0, column=1, sticky="nsew", padx=10)
-        
-        # Настройка весов для пальцев
-        fingers_frame.columnconfigure(0, weight=1)
-        fingers_frame.columnconfigure(1, weight=1)
-        
-        # Счетчики строк для рук
-        left_row = 0
-        right_row = 0
-        
-        # Создаем элементы управления для всех суставов
-        for joint_id in self.param_joints:
-            joint_name = [k for k, v in JOINT_INDEX_H1_WITH_HANDS.items() if v == joint_id][0]
-            
-            if joint_id == 9:  # IMPACT
-                parent = impact_middle_frame
-                row, col = 0, 0
-            elif joint_id == 6:  # torso_joint
-                parent = torso_thumb_frame
-                row, col = 0, 0
-            elif joint_id == 22:  # right_middle
-                parent = impact_middle_frame
-                row, col = 0, 2
-            elif joint_id == 25:  # right_thumb_rotation
-                parent = torso_thumb_frame
-                row, col = 0, 2
-            elif 'right' in joint_name.lower():
-                if joint_id in [20, 21, 22, 23, 24, 25]:  # Пальцы правой руки
-                    parent = right_fingers_frame
-                    row, col = (joint_id - 20) // 3, (joint_id - 20) % 3
-                else:  # Остальные суставы правой руки
-                    parent = right_arm_frame
-                    row, col = right_row, 0
-                    right_row += 1
-            elif 'left' in joint_name.lower():
-                if joint_id in [26, 27, 28, 29, 30, 31]:  # Пальцы левой руки
-                    parent = left_fingers_frame
-                    row, col = (joint_id - 26) // 3, (joint_id - 26) % 3
-                else:  # Остальные суставы левой руки
-                    parent = left_arm_frame
-                    row, col = left_row, 0
-                    left_row += 1
-            else:
-                continue
-            
-            # Создаем фрейм для сустава
-            slider_frame = ttk.Frame(parent, padding="8", relief="ridge")
-            slider_frame.grid(row=row, column=col, sticky="ew", padx=5, pady=3)
-            
-            # Элементы управления (аналогично config1, но с адаптированными размерами)
-            ttk.Label(slider_frame, 
-                    text=f'{joint_name}\n(ID: {joint_id})', 
-                    font=('Arial', 11, 'bold')).grid(row=0, column=0, columnspan=3)
-            
-            limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS[joint_id]
-            ttk.Label(slider_frame, 
-                    text=f"Min: {limits[0]:.2f}, Max: {limits[1]:.2f}",
-                    font=('Arial', 10)).grid(row=1, column=0, columnspan=3)
-            
-            # Кнопки и поле ввода (немного компактнее для пальцев)
-            btn_width = 4 if joint_id in range(20, 32) else 5
-            entry_width = 10 if joint_id in range(20, 32) else 12
-            
-            ttk.Button(slider_frame, text="-", width=btn_width,
-                    command=lambda idx=joint_id: self.adjust_value(idx, -STEP_BUTTON)
-                    ).grid(row=2, column=0, sticky="w")
-            
-            self.entry_widgets[joint_id] = ttk.Entry(slider_frame, width=entry_width, 
-                                                font=('Arial', 11, 'bold'),
-                                                justify='center')
-            self.entry_widgets[joint_id].insert(0, "0.0")
-            self.entry_widgets[joint_id].grid(row=2, column=1)
-            
-            ttk.Button(slider_frame, text="+", width=btn_width,
-                    command=lambda idx=joint_id: self.adjust_value(idx, STEP_BUTTON)
-                    ).grid(row=2, column=2, sticky="e")
-            
-            self.value_labels[joint_id] = ttk.Label(slider_frame, 
-                                                text="0.0", 
-                                                font=('Arial', 11, 'bold'))
-            self.value_labels[joint_id].grid(row=3, column=0, columnspan=3)
-        
-        # Добавляем отступ между основными суставами и кистями
-        ttk.Separator(right_arm_frame, orient='horizontal').grid(row=right_row, column=0, sticky="ew", pady=10)
-        ttk.Separator(left_arm_frame, orient='horizontal').grid(row=left_row, column=0, sticky="ew", pady=10)
-        
-        # Добавляем кисти в конец соответствующих колонок
-        self._add_wrist_control(right_arm_frame, 33, right_row + 1)  # Правая кисть
-        self._add_wrist_control(left_arm_frame, 32, left_row + 1)    # Левая кисть
+        # Right Hand section
+        right_hand_frame = ttk.LabelFrame(hands_frame, text="Right Hand")
+        right_wrist_frame = ttk.LabelFrame(right_hand_frame, text="Right Wrist")
+        JointControl(right_wrist_frame, 33, self).frame.pack(fill=tk.X, pady=2)
+        right_wrist_frame.pack(fill=tk.X, padx=5, pady=5)
 
-    def _add_wrist_control(self, parent_frame, joint_id, row):
-        """Добавляет контроль кисти в указанный фрейм"""
-        joint_name = [k for k, v in JOINT_INDEX_H1_WITH_HANDS.items() if v == joint_id][0]
-        
-        wrist_frame = ttk.Frame(parent_frame, padding="10", relief="solid")
-        wrist_frame.grid(row=row, column=0, sticky="ew", padx=5, pady=10)
-        
-        ttk.Label(wrist_frame, 
-                text=f'{joint_name}\n(ID: {joint_id})', 
-                font=('Arial', 12, 'bold')).grid(row=0, column=0, columnspan=3)
-        
-        limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS[joint_id]
-        ttk.Label(wrist_frame, 
-                text=f"Min: {limits[0]:.2f}, Max: {limits[1]:.2f}",
-                font=('Arial', 11)).grid(row=1, column=0, columnspan=3)
-        
-        ttk.Button(wrist_frame, text="-", width=5,
-                command=lambda idx=joint_id: self.adjust_value(idx, -STEP_BUTTON)
-                ).grid(row=2, column=0, sticky="w")
-        
-        self.entry_widgets[joint_id] = ttk.Entry(wrist_frame, width=12, 
-                                            font=('Arial', 12, 'bold'),
-                                            justify='center')
-        self.entry_widgets[joint_id].insert(0, "0.0")
-        self.entry_widgets[joint_id].grid(row=2, column=1)
-        
-        ttk.Button(wrist_frame, text="+", width=5,
-                command=lambda idx=joint_id: self.adjust_value(idx, STEP_BUTTON)
-                ).grid(row=2, column=2, sticky="e")
-        
-        self.value_labels[joint_id] = ttk.Label(wrist_frame, 
-                                            text="0.0", 
-                                            font=('Arial', 12, 'bold'))
-        self.value_labels[joint_id].grid(row=3, column=0, columnspan=3)
-    def _setup_config3_interface(self, main_frame):
-        pass
-    def _setup_config4_interface(self, main_frame):
-        pass
+        right_fingers_frame = ttk.LabelFrame(right_hand_frame, text="Right Fingers")
+        for joint_id in range(20, 26):  # right hand finger joints
+            JointControl(right_fingers_frame, joint_id, self).frame.pack(fill=tk.X, pady=1)
+        right_fingers_frame.pack(fill=tk.X, padx=5, pady=5)
 
-    def process_ros_events(self):
-        """Process any pending ROS events in the GUI thread"""
-        try:
-            while True:
-                try:
-                    # Get any pending GUI events from ROS thread
-                    callback, args = self.gui_events.get_nowait()
-                    callback(*args)
-                except queue.Empty:
-                    break
-        except Exception as e:
-            self.get_logger().error(f"Error processing ROS events: {str(e)}")
+        right_hand_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+
+        notebook.add(hands_frame, text="Hands")
         
-        # Schedule next check
-        self.root.after(100, self.process_ros_events)
+        # Legs tab
+        legs_frame = ttk.Frame(notebook)
+        
+        # Left Leg controls
+        left_leg_frame = ttk.LabelFrame(legs_frame, text="Left Leg")
+        for joint_id in [3, 4, 5, 7, 10]:  # left leg joints
+            JointControl(left_leg_frame, joint_id, self).frame.pack(fill=tk.X, pady=2)
+        left_leg_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # Right Leg controls
+        right_leg_frame = ttk.LabelFrame(legs_frame, text="Right Leg")
+        for joint_id in [0, 1, 2, 8, 11]:  # right leg joints
+            JointControl(right_leg_frame, joint_id, self).frame.pack(fill=tk.X, pady=2)
+        right_leg_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
+        
+        notebook.add(legs_frame, text="Legs")
+        
+        # Control frame at bottom
+        control_frame = ttk.Frame(self.root)
+        control_frame.pack(fill=tk.X, padx=5, pady=5)
 
-    def on_close(self):
-        """Handle window close event"""
-        self.get_logger().info("Closing GUI window")
-        self.root.destroy()
-        # Signal ROS to shutdown
-        rclpy.shutdown()
+        # Создаем фрейм для IMPACT и кнопки
+        impact_row_frame = ttk.Frame(control_frame)
+        impact_row_frame.pack(fill=tk.X, pady=5)
 
-    def check_gui(self):
-        if not hasattr(self, 'root') or not self.root.winfo_exists():
-            self.get_logger().warn("GUI window not available")
+        # Impact control слева
+        impact_frame = ttk.LabelFrame(impact_row_frame, text="IMPACT")
+        impact_frame.pack(side=tk.LEFT)
 
-    def on_close(self):
-        """Handle window close event"""
-        self.get_logger().info("Closing GUI window")
-        self.root.quit()  # Use quit() instead of destroy() for cleaner shutdown
-    def adjust_value(self, index, delta):
-        try:
-            current_value = float(self.entry_widgets[index].get())
-            limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS[index]
-            new_value = current_value + delta
-            
-            # Проверка границ
-            if new_value < limits[0]:
-                new_value = limits[0]
-            elif new_value > limits[1]:
-                new_value = limits[1]
-                
-            self.entry_widgets[index].delete(0, tk.END)
-            self.entry_widgets[index].insert(0, f"{new_value:.2f}")
-            self.entry_changed(index)
-        except ValueError:
-            self.get_logger().warn(f"Invalid value for joint {index}")
+        # Compact impact control внутри impact_frame
+        self.setup_compact_impact(impact_frame)
 
-    def entry_changed(self, index):
-        try:
-            value = float(self.entry_widgets[index].get())
-            limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS[index]
-            
-            # Проверка границ
-            if value < limits[0]:
-                value = limits[0]
-                self.entry_widgets[index].delete(0, tk.END)
-                self.entry_widgets[index].insert(0, f"{limits[0]:.2f}")
-            elif value > limits[1]:
-                value = limits[1]
-                self.entry_widgets[index].delete(0, tk.END)
-                self.entry_widgets[index].insert(0, f"{limits[1]:.2f}")
-            
-            self.slider_values[index] = value
-            self.value_labels[index].config(text=f"{value:.2f}")
-            self.publish_values()
-        except ValueError:
-            self.get_logger().warn(f"Invalid value entered for joint {index}")
+        # Пустой фрейм для заполнения пространства между IMPACT и кнопкой
+        spacer = ttk.Frame(impact_row_frame)
+        spacer.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
-    def publish_values(self):
-        data_dict = {}
-        for k, v in self.slider_values.items():
-            if k != 9:
-                data_dict[str(k)] = v
-        impact = self.slider_values[9]
-        msg = String()
-        msg.data = json.dumps(data_dict) + f'${impact}'
-        self.publisher_.publish(msg)
-        self.get_logger().debug(f"Published: {msg.data[:100]}...")
+        # Кнопка показа изображения справа (прижата к правому краю)
+        self.img_btn = ttk.Button(
+            impact_row_frame, 
+            text="Показать схему", 
+            command=self.open_image_viewer,
+            width=17
+        )
+        self.img_btn.pack(side=tk.RIGHT, padx=(0, 5))
 
+    def open_image_viewer(self):
+        ImageViewer(self.root)
+
+    def setup_compact_impact(self, parent):
+        frame = ttk.Frame(parent)
+        frame.pack()
+        
+        # Compact layout
+        ttk.Label(frame, text="Value:").grid(row=0, column=0, padx=2)
+        
+        dec_btn = ttk.Button(frame, text="-", width=3)
+        dec_btn.grid(row=0, column=1, padx=2)
+        
+        value_entry = ttk.Entry(frame, width=6)
+        value_entry.grid(row=0, column=2, padx=2)
+        value_entry.insert(0, "0.0")
+        
+        inc_btn = ttk.Button(frame, text="+", width=3)
+        inc_btn.grid(row=0, column=3, padx=2)
+        
+        cur_label = ttk.Label(frame, text="0.00", width=6)
+        cur_label.grid(row=0, column=4, padx=2)
+        
+        # Connect to existing ImpactControl logic
+        self.impact_control = ImpactControl(parent, self)
+        self.impact_control.label.destroy()  # Remove default label
+        self.impact_control.dec_btn.destroy()
+        self.impact_control.value_entry.destroy()
+        self.impact_control.inc_btn.destroy()
+        self.impact_control.cur_label.destroy()
+        
+        # Connect new compact UI
+        dec_btn.bind('<ButtonPress-1>', self.impact_control.start_decrement)
+        dec_btn.bind('<ButtonRelease-1>', self.impact_control.stop_repeat)
+        inc_btn.bind('<ButtonPress-1>', self.impact_control.start_increment)
+        inc_btn.bind('<ButtonRelease-1>', self.impact_control.stop_repeat)
+        value_entry.bind('<Return>', self.impact_control.update_value)
+        
+        # Keep references
+        self.impact_control.value_entry = value_entry
+        self.impact_control.cur_label = cur_label
+        self.impact_control.dec_btn = dec_btn
+        self.impact_control.inc_btn = inc_btn
+        
+    def run(self):
+        while rclpy.ok():
+            self.root.update()
+            rclpy.spin_once(self, timeout_sec=0.01)
 
 def main(args=None):
     rclpy.init(args=args)
-    
-    if 'DISPLAY' not in os.environ:
-        os.environ['DISPLAY'] = ':0'
-        os.environ['XAUTHORITY'] = '/home/user/.Xauthority'
-    
     node = SliderControlNode()
-    
-    # Start ROS in a separate thread
-    ros_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
-    ros_thread.start()
-    
-    try:
-        # Run Tkinter mainloop in main thread
-        node.root.mainloop()
-    except KeyboardInterrupt:
-        node.get_logger().info("Shutting down...")
-    finally:
-        node.root.quit()
-        rclpy.shutdown()
-        ros_thread.join()
-        node.destroy_node()
+    node.run()
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

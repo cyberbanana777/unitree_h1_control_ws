@@ -38,7 +38,7 @@ class CmdToHighLevelControlNode(Node):
         # Subscribers
         self.subscription = self.create_subscription(
             Twist,
-            '/cmd_vel',
+            'cmd_vel',
             self.listener_callback,
             10
         )
@@ -58,6 +58,7 @@ class CmdToHighLevelControlNode(Node):
 
         self.subscription  # Prevent unused variable warning
         self.get_logger().info('cmd_to_high_level_control_node has been started')
+
 
     def listener_callback(self, msg):
         """Handle incoming velocity commands."""
@@ -98,17 +99,17 @@ class CmdToHighLevelControlNode(Node):
 def main(args=None):
     """Main entry point for the node."""
     rclpy.init(args=args)
-    cmd_to_high_level_control_node = CmdToHighLevelControlNode()
+    node = CmdToHighLevelControlNode()
     
     try:
-        rclpy.spin(cmd_to_high_level_control_node)
+        rclpy.spin(node)
     except KeyboardInterrupt:
-        cmd_to_high_level_control_node.get_logger().info("\nExiting...")
+        node.get_logger().info("\nExiting...")
     except Exception as e:
-        cmd_to_high_level_control_node.get_logger().error(f"Error: {e}")
+        node.get_logger().error(f"Error: {e}")
     finally:
         # Cleanup
-        cmd_to_high_level_control_node.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 
