@@ -34,10 +34,11 @@
 * **`completed_scripts_control/`**: Содержит python launch-файлы, которые запускают конфигурации нод из данного репозитория для задач соответствующих названиям launch-файлов.
 *   **`high_level_control/`**: содержит high-level клиент, который позволяет управлять движением робота и изменять состояние робота, так же как с пульта.
 *   **`low_level_control/`**: Модули, которые отправляют `low_level` команды для изменения положения моторов и робота Unitree H1 и обеспечивают безопасность движений робота.
-*   **`slider_conrtol/`**: Позволяет задать положение робота  с помощью графического интерфейса.
+*   **`gui_conrtol/`**: Позволяет задать положение робота  с помощью графического интерфейса.
+*   **`h1_info_library/`**: Библиотека, разработанная нами. В ней содержится справочная информация для работы с Unitree H1 и кастомная структура информации (класс ООП), которые облегчает взаимодействие с роботом.
 *   **`teleop_twist_keyboard/`**: Программа телеуправления, адаптированная под Unitree H1.
 *   **`unitree_sdk2_python/`**: Немного переделанная библиотека от производителя робота, предназначенная для взаимодействия с роботом.
-*   ==**`docs/`**: Дополнительная документация (если есть)==.
+*   **`docs/`**: Дополнительная документация (если есть).
 *   **`install_dependensies.bash`** - Bash-скрипт, который автоматизирует установку python-зависимостей через pip.
 *   **`README.md`**: Этот файл.
 *   **`save.bash`**: Скрипт для быстрой выгрузки на Github
@@ -98,19 +99,24 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 *   **Поддерживаемые версии ROS2:** Foxy
 *   **Поддерживаемые платформы:** Ubuntu 22.04
 *   **Ключевые ROS2 пакеты:** `rclpy`, `std_msgs`, `geometry_msgs`, `unitree_go`
-*   **Сторонние зависимости:** numpy(pip), serial(pip), tkinter(pip), libboost-all-dev(apt), libspdlog-dev(apt)
+*   **Сторонние зависимости:** numpy(pip), serial(pip), tkinter(pip) rich(pip), libboost-all-dev(apt), libspdlog-dev(apt)
 
 ## 🧪 Использование
 ### **Запуск узлов:**
-#### cmd_to_high_level_control_package
+#### **cmd_to_high_level_control_package**
 ```bash 
 ros2 run cmd_to_high_level_control_package cmd_to_high_level_control_node
 ```
-#### high_level_control
+#### **high_level_control**
+Минималистичный вывод в консоль:
 ```bash
-ros2 run high_level_control high_level_control_node
+ros2 run high_level_control high_level_control_simple_node
 ```
-#### low_level_control
+Красивый вывод в консоль:
+```bash
+ros2 run high_level_control high_level_control_beautiful_node
+```
+#### **low_level_control**
 ##### Без параметра
 ```bash
 ros2 run low_level_control low_level_control_with_hands_node
@@ -134,11 +140,11 @@ ros2 run low_level_control hands_init_node
 ```bash
 ros2 run low_level_control low_level_control_with_hands_node --ros-args -p target_topic_param:="lowcmd" -p max_joint_velocity_param:=1.5 
 ```
-#### slider_control
+#### **gui_control**
 ```bash
-ros2 run slider_control slider_control_node
+ros2 run gui_control gui_control_node
 ```
-#### teleop_twist_keyboard_custom
+#### **teleop_twist_keyboard_custom**
 ```bash
 ros2 run teleop_twist_keyboard_custom teleop_twist_keyboard_custom_node
 ```
@@ -193,7 +199,14 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 | `time_step` | `float (0.5)`        | Длительность движения при однократном нажатии |
 
 ### **Пакет 2: `high_level_control`**
-#### **Узел: `high_level_control_node`**
+#### **Узел: `high_level_control_simple_node`**
+- **Рабочие топики:**
+
+| Тип услуги | Топик                | Тип сообщения              | Описание                                      |
+| :--------- | :------------------- | :------------------------- | :-------------------------------------------- |
+| Публикация | `/api/loco/request`  | `unitree_api/msg/Request`  | Запрос на выполнение high-level-команды       |
+| Подписка   | `/api/loco/response` | `unitree_api/msg/Response` | Ответ на запрос выполнения high-level-команды |
+#### **Узел: `high_level_control_beautiful_node`**
 - **Рабочие топики:**
 
 | Тип услуги | Топик                | Тип сообщения              | Описание                                      |
@@ -251,8 +264,8 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 #### **Узел: `hands_init_node`**
 - **Рабочие топики:** -
 
-### **Пакет 4: `slider_control`**
-#### **Узел: `slider_control_node`**
+### **Пакет 4: `gui_control`**
+#### **Узел: `gui_control_node`**
 - **Рабочие топики:**
 
 | Тип услуги | Топик                   | Тип сообщения         | Описание                                                    |
