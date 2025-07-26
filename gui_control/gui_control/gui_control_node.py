@@ -198,7 +198,7 @@ class JointControl:
         self.value_entry.bind('<Return>', self.update_value)
 
 
-    def on_entry_focus(self):
+    def on_entry_focus(self, event=None):
         # Highlight active entry and show limits
         self.value_entry.configure(style='Active.TEntry')
         limits = LIMITS_OF_JOINTS_UNITREE_H1_WITH_HANDS.get(self.joint_id, [0, 0])
@@ -209,7 +209,7 @@ class JointControl:
         self.limits_label.grid(row=1, column=2, pady=(0, 5), padx=(3, 0))  # Added padx=(10, 0)
 
 
-    def on_entry_focus_out(self):
+    def on_entry_focus_out(self, event=None):
         # Remove highlight and hide limits
         self.value_entry.configure(style='TEntry')
         self.limits_label.grid_remove()
@@ -220,27 +220,27 @@ class JointControl:
         return max(limits[0], min(value, limits[1]))
 
 
-    def start_increment(self):
+    def start_increment(self, event=None):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
 
 
-    def start_decrement(self):
+    def start_decrement(self, event=None):  # Добавлен event=None
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
 
 
-    def repeat_increment(self):
+    def repeat_increment(self, event=None):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
 
 
-    def repeat_decrement(self):
+    def repeat_decrement(self, event=None):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
 
 
-    def stop_repeat(self):
+    def stop_repeat(self, event=None):  # Добавлен event=None
         if self.repeat_id:
             self.frame.after_cancel(self.repeat_id)
             self.repeat_id = None
@@ -262,7 +262,7 @@ class JointControl:
         self.update_joint_value(new_value)
 
 
-    def update_value(self):
+    def update_value(self, event=None):
         try:
             new_value = float(self.value_entry.get())
             clamped_value = self.clamp_value(new_value)
@@ -338,27 +338,28 @@ class ImpactControl:
         self.value_entry.insert(0, "0.0")
         
 
-    def start_increment(self):
+    def start_increment(self, event=None):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_increment)
         
 
-    def start_decrement(self):
+
+    def start_decrement(self, event=None):  # Добавлен event=None
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_DELAY, self.repeat_decrement)
         
 
-    def repeat_increment(self):
+    def repeat_increment(self, event=None):
         self.increment()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_increment)
         
 
-    def repeat_decrement(self):
+    def repeat_decrement(self, event=None):
         self.decrement()
         self.repeat_id = self.frame.after(REPEAT_INTERVAL, self.repeat_decrement)
         
 
-    def stop_repeat(self):
+    def stop_repeat(self, event=None):  # Добавлен event=None
         if self.repeat_id:
             self.frame.after_cancel(self.repeat_id)
             self.repeat_id = None
@@ -368,7 +369,7 @@ class ImpactControl:
         return max(0.0, min(value, 1.0))
         
 
-    def increment(self):
+    def increment(self, event=None):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current + STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
@@ -376,7 +377,7 @@ class ImpactControl:
         self.update_impact_value(new_value)
 
 
-    def decrement(self):
+    def decrement(self, event=None):
         current = float(self.value_entry.get())
         new_value = self.clamp_value(current - STEP_BUTTON)
         self.value_entry.delete(0, tk.END)
@@ -384,7 +385,7 @@ class ImpactControl:
         self.update_impact_value(new_value)
 
 
-    def update_value(self):
+    def update_value(self, event=None):
         try:
             new_value = float(self.value_entry.get())
             clamped_value = self.clamp_value(new_value)
@@ -407,7 +408,7 @@ class ImpactControl:
 
 class GUIControlNode(Node):
     def __init__(self):
-        super().__init__('slider_control_node')
+        super().__init__('gui_control_node')
         self.publisher = self.create_publisher(String, 'positions_to_unitree', 10)
         
         self.root = tk.Tk()

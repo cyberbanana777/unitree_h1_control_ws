@@ -481,31 +481,36 @@ class LowLevelControlNode(Node):
                     else:
                         hands_pose[num - 20] = value
 
-            for i in self.active_joints_H1:
-                if i == JOINT_INDEX_H1['torso_joint']:
-                    self.target_pos_H1[i] = 0.0
-                else:
-                    self.target_pos_H1[i] = np.clip(
-                        H1_pose.get(i, 0.0),  # Используем get с значением по умолчанию
-                        LIMITS_OF_JOINTS_UNITREE_H1[i][0],
-                        LIMITS_OF_JOINTS_UNITREE_H1[i][1]
+            for i in H1_pose:
+                if i in self.active_joints_H1:
+                    if i == JOINT_INDEX_H1['torso_joint']:
+                        self.target_pos_H1[i] = 0.0
+                    else:
+                        self.get_logger().info(f'h1_pose = {H1_pose[i]}')
+                        self.target_pos_H1[i] = np.clip(
+                            H1_pose.get(i),  # Используем get с значением по умолчанию
+                            LIMITS_OF_JOINTS_UNITREE_H1[i][0],
+                            LIMITS_OF_JOINTS_UNITREE_H1[i][1]
+                        )
+                        self.get_logger().info(f'h1_pose = {self.target_pos_H1}')
+
+            for i in hands_pose:
+                if i in self.active_joints_hands:
+                    self.get_logger().debug(f'hands_pose = {hands_pose[i]}')
+                    self.target_pos_hands[i] = np.clip(
+                        hands_pose.get(i),  # Используем get с значением по умолчанию
+                        LIMITS_OF_JOINTS_UNITREE_HANDS[i][0],
+                        LIMITS_OF_JOINTS_UNITREE_HANDS[i][1]
                     )
 
-            for i in self.active_joints_hands:
-                self.get_logger().debug(f'hands_pose = {hands_pose}')
-                self.target_pos_hands[i] = np.clip(
-                    hands_pose.get(i, 0.0),  # Используем get с значением по умолчанию
-                    LIMITS_OF_JOINTS_UNITREE_HANDS[i][0],
-                    LIMITS_OF_JOINTS_UNITREE_HANDS[i][1]
-                )
-
-            for i in self.active_joints_wrists:
-                self.get_logger().debug(f'wrists_pose = {wrists_pose}')
-                self.target_pos_wrists[i] = np.clip(
-                    wrists_pose.get(i, 0.0),  # Используем get с значением по умолчанию
-                    LIMITS_OF_JOINTS_UNITREE_WRISTS[i][0],
-                    LIMITS_OF_JOINTS_UNITREE_WRISTS[i][1]
-                )
+            for i in wrists_pose:
+                if i in self.active_joints_wrists:
+                    self.get_logger().debug(f'wrists_pose = {wrists_pose[i]}')
+                    self.target_pos_wrists[i] = np.clip(
+                        wrists_pose.get(i),  # Используем get с значением по умолчанию
+                        LIMITS_OF_JOINTS_UNITREE_WRISTS[i][0],
+                        LIMITS_OF_JOINTS_UNITREE_WRISTS[i][1]
+                    )
 
         except json.JSONDecodeError as e:
             self.get_logger().error(f"JSON decode error: {e}")
