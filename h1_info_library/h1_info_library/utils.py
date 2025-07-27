@@ -5,8 +5,8 @@ def determine_coeff_and_mode(index_of_joint_of_unitree_h1: int) -> tuple:
     '''
     size_S = [10, 11]
     size_L = [2, 5]
-    fingers = [x for x in range (20, 32)]
-    size_XS = [x for x in range (32, 34)]
+    fingers = [x for x in range(20, 32)]
+    size_XS = [x for x in range(32, 34)]
 
     # determine Kp and Kd
     if index_of_joint_of_unitree_h1 in size_S:

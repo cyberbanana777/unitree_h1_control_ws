@@ -9,16 +9,16 @@ LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR = {
     7: (-0.43, 0.43),  # left_hip_yaw_joint
     8: (-0.43, 0.43),  # right_hip_yaw_joint
     9: (0.0, 1.0),     # IMPACT
-    10: (-0.87, 0.52), # left_ankle_joint
-    11: (-0.87, 0.52), # right_ankle_joint
-    12: (-2.87, 2.87), # right_shoulder_pitch_joint
-    13: (-3.11, 0.34), # right_shoulder_roll_joint
+    10: (-0.87, 0.52),  # left_ankle_joint
+    11: (-0.87, 0.52),  # right_ankle_joint
+    12: (-2.87, 2.87),  # right_shoulder_pitch_joint
+    13: (-3.11, 0.34),  # right_shoulder_roll_joint
     14: (-4.45, 1.3),  # right_shoulder_yaw_joint
-    15: (-1.25, 2.61), # right_elbow_joint
-    16: (-2.87, 2.87), # left_shoulder_pitch_joint
-    17: (-0.34, 3.11), # left_shoulder_roll_joint
+    15: (-1.25, 2.61),  # right_elbow_joint
+    16: (-2.87, 2.87),  # left_shoulder_pitch_joint
+    17: (-0.34, 3.11),  # left_shoulder_roll_joint
     18: (-1.3, 4.45),  # left_shoulder_yaw_joint
-    19: (-1.25, 2.61), # left_elbow_joint
+    19: (-1.25, 2.61),  # left_elbow_joint
     20: (0.0, 1.0),    # right_pinky
     21: (0.0, 1.0),    # right_ring
     22: (0.0, 1.0),    # right_middle
@@ -35,6 +35,7 @@ LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR = {
     33: (-6.0, -0.23)  # right_wrist
 }
 
+
 LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION = {
     0: (-0.43, 0.43),  # right_hip_roll_joint M
     1: (-3.14, 2.53),  # right_hip_pitch_joint M
@@ -46,8 +47,8 @@ LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION = {
     7: (-0.43, 0.43),  # left_hip_yaw_joint M
     8: (-0.43, 0.43),  # right_hip_yaw_joint M
     9: (0.0, 1.0),     # IMPACT
-    10: (-0.87, 0.52), # left_ankle_joint S
-    11: (-0.87, 0.52), # right_ankle_joint S
+    10: (-0.87, 0.52),  # left_ankle_joint S
+    11: (-0.87, 0.52),  # right_ankle_joint S
     12: (-1.9, 0.5),   # right_shoulder_pitch_joint M
     13: (-2.2, 0.0),   # right_shoulder_roll_joint M
     14: (-1.5, 1.3),   # right_shoulder_yaw_joint M
