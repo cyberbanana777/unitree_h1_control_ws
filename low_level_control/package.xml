@@ -10,6 +10,7 @@
   <depend>rclpy</depend>
   <depend>unitree_go</depend>
   <depend>std_msgs</depend>
+  <depend>inspire_hand_lib</depend>
 
   <depend>libboost-all-dev</depend>
   <depend>libspdlog-dev</depend>

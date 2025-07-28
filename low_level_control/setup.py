@@ -28,6 +28,7 @@ setup(
             "low_level_control_without_hands_node = low_level_control.low_level_node_without_hands:main",
             "wrist_control_node = low_level_control.wrist_control_node:main",
             "hands_init_node = low_level_control.hands_init:main",
+            'hands_node_with_lib = low_level_control.hands_node_with_lib:main',
         ],
     },
 )
