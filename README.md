@@ -1,11 +1,4 @@
 @ - отложено до того момента как программа не будет полностью дописана
-# @cmd_to_high_level_control_package
-## Осталось
-- Сделать аннотацию в python-коде
-- Сделать описание в setup.py
-- Сделать описание в package.xml
-## Данное состояние
-- Нода работает, но не описана
 
 # @low_level_control
 ## Осталось
@@ -16,14 +9,11 @@
 ## Данное состояние
 - Нода работает, но не описана
 
-# @slider_control
+# @gui_control
 ## Осталось
-- Проверить код по pep8
-- Сделать аннотацию в python-коде
-- Сделать описание в setup.py
-- Сделать описание в package.xml
+- Сделать так, чтобы отправляла за 1 раз и хранила значения всех суставов
 ## Данное состояние
-- Нода работает, но не описана
+- Нода работает, но не совсем корректно (возможны улучшения)
 
 
 # unitree_h1_control_ws
@@ -110,11 +100,11 @@ ros2 run cmd_to_high_level_control_package cmd_to_high_level_control_node
 #### **high_level_control**
 Минималистичный вывод в консоль:
 ```bash
-ros2 run high_level_control high_level_control_simple_node
+ros2 run high_level_control simple_node
 ```
 Красивый вывод в консоль:
 ```bash
-ros2 run high_level_control high_level_control_beautiful_node
+ros2 run high_level_control beautiful_node
 ```
 #### **low_level_control**
 ##### Без параметра

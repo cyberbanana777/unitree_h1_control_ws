@@ -17,14 +17,16 @@ setup(
     zip_safe=True,
     maintainer="cyberbanana777",
     maintainer_email="sashagrachev2005@gmail.com",
-    description="This script launches a high-level client that allows you to control the Unitree H1 robot using\
-                igh-level commands (such as damping, readiness, and balancing, etc.) as if it were a remote control.",
+    description="This script launches a high-level client that allows you to\
+        control the Unitree H1 robot using high-level commands (such as \
+        damping, readiness, and balancing, etc.) as if it were a remote\
+        control.",
     license="BSD 3-Clause",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "high_level_control_simple_node = high_level_control.high_level_control_simple_node:main",
-            "high_level_control_beautiful_node = high_level_control.high_level_control_beautiful_node:main",
+            f"simple_node = {package_name}.high_level_control_simple_node:main",
+            f"beautiful_node = {package_name}.high_level_control_beautiful_node:main",
         ],
     },
 )

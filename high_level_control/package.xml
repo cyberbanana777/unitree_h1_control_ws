@@ -4,11 +4,14 @@
   <name>high_level_control</name>
   <version>1.0.0</version>
   <description>
-    This script launches a high-level client that allows you to control the Unitree H1 robot using
-    high-level commands (such as damping, readiness, and balancing, etc.) as if it were a remote control.
+    This script launches a high-level client that allows you to control the
+    Unitree H1 robot using high-level commands (such as damping, readiness,
+    and balancing, etc.) as if it were a remote control.
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>BSD 3-Clause</license>
+
+  <depend>unitree_sdk2</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
