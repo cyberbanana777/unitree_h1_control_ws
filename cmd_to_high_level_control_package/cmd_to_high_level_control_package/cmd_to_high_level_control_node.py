@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+"""
+АННОТАЦИЯ
+Скрипт конвертирует команды скорости (Twist) в управляющие сигналы для робота
+Unitree H1 через ROS 2. Обеспечивает безопасный останов при отсутствии новых
+команд. Требует Unitree SDK 2.0 и ROS 2 Foxy.
+
+ANNOTATION
+Programm Converts velocity commands (Twist) to control signals for Unitree H1
+robot via ROS 2. Implements safety stop on command timeout. Requires Unitree
+SDK 2.0 and ROS 2 Foxy.
+"""
+
 import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
@@ -28,7 +40,7 @@ class CmdToHighLevelControlNode(Node):
         # Parameters
         self.declare_parameter("time_step", TIME_STEP)
         self.get_logger().info(
-            f"time_step = {self.get_parameter('time_step').value} Hz"
+            f"time_step = {self.get_parameter('time_step').value} sec"
         )
 
         # State variables
