@@ -1,7 +1,32 @@
 def determine_coeff_and_mode(index_of_joint_of_unitree_h1: int) -> tuple:
-    """
-    Function for determining the coefficients Kp, Kd and mode for motors
-    by absolute index
+    """Determine motor coefficients and mode by joint index.
+
+    This function determines the proportional (Kp) and derivative (Kd)
+    coefficients and operation mode for motors based on the absolute
+    joint index of the Unitree H1 robot.
+
+    Args:
+        index_of_joint_of_unitree_h1 (int): Absolute index of the joint
+            in the Unitree H1 robot.
+
+    Returns:
+        tuple: A tuple containing (Kp, Kd, mode) where:
+            - Kp (float): Proportional coefficient
+            - Kd (float): Derivative coefficient
+            - mode (int): Operation mode for motor enable/disable control
+
+    Note:
+        Different joint sizes use different coefficient values:
+        - Size S joints (indices 10, 11): Kp=80.0, Kd=2.0
+        - Size L joints (indices 2, 5): Kp=200.0, Kd=5.0
+        - Size XS joints (indices 32, 33): Kp=10.0, Kd=2.0
+        - Finger joints (indices 20-31): Kp=0.0, Kd=0.0
+        - All other joints: Kp=100.0, Kd=3.0
+
+        Mode values:
+        - Indices < 9: mode = 0x0A
+        - Indices > 9: mode = 0x01
+        - Index == 9: mode = 0x00
     """
     size_S = [10, 11]
     size_L = [2, 5]

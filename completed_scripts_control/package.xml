@@ -2,14 +2,17 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>completed_scripts_control</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>
-    in this package, you will find python launch files
+    In this package, you will find python launch files
     that launch specific node configurations,
     as indicated in the name of the launch files
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
+
+  <depend>low_level_control</depend>
+  <depend>cmd_to_high_level_control_package</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

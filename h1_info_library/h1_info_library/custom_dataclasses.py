@@ -1,116 +1,182 @@
+"""
+Module for managing robot motor data and displaying joint information.
+
+This module defines data structures for motor information and pose,
+and provides a class to manage and display robot joint data based on
+configuration (e.g., teleoperation mode or vendor defaults).
+"""
+
 from dataclasses import dataclass
 
 from rich.console import Console
 from rich.style import Style
 from rich.table import Table
 
-from .limits import *
-from .names_and_indexes import *
+from .limits import (
+    LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION,
+    LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR,
+)
+from .names_and_indexes import FROM_INDEXES_TO_NAMES, FROM_NAMES_TO_INDEXES
 
 
 @dataclass
 class MotorInfo:
+    """
+    Dataclass representing static information about a motor/joint.
+
+    Attributes:
+        abs_index (int): Absolute index of the motor in the system.
+        type (str): Type/category of the motor (e.g., body, finger, wrist).
+        name_joint (str): Human-readable name of the joint.
+        limits (tuple[float, float]): Min and max allowed pose values (in radians).
+        index_in_msg (int): Index of the motor in the communication message.
+    """
+
     abs_index: int
     type: str
     name_joint: str
-    limits: tuple
+    limits: tuple[float, float]
     index_in_msg: int
 
 
 @dataclass
 class MotorPose:
+    """
+    Dataclass representing the current and target pose state of a motor.
+
+    Attributes:
+        abs_index (int): Absolute index of the motor.
+        target_pose (float): Desired pose (radians).
+        current_pose (float): Current measured pose (radians).
+        temporary_pose (float): Temporary value used during intermediate calculations.
+    """
+
     abs_index: int
     target_pose: float
     current_pose: float
     temporary_pose: float
 
 
-TYPES_OF_MOTOR = {0: "default_body_joint", 1: "finger_joint", 2: "wrist_joint"}
+# Mapping from integer codes to motor type names.
+TYPES_OF_MOTOR = {
+    0: "default_body_joint",
+    1: "finger_joint",
+    2: "wrist_joint",
+}
 
 
 class RobotData:
-    def __init__(self, target_action: str, include_hands_with_fingers: bool):
-        self._var_runner = 0
-        self.joints_info = []
-        self.joints_pose_status = []
+    """
+    A class to manage and display information about robot motors.
 
+    This class initializes motor data based on the target action mode
+    (e.g., teleoperation or vendor defaults) and whether hands and fingers
+    are included. It supports displaying joint information in a formatted table.
+
+    Attributes:
+        joints_info (list[MotorInfo]): List of motor metadata.
+        joints_pose_status (list[MotorPose]): List of current motor states.
+    """
+
+    def __init__(self, target_action: str, include_hands_with_fingers: bool) -> None:
+        """
+        Initialize the RobotData instance.
+
+        Args:
+            target_action (str): The action mode. Must be 'teleoperation'
+                to use teleoperation-specific limits, otherwise uses vendor defaults.
+            include_hands_with_fingers (bool): Whether to include finger and wrist joints.
+
+        Raises:
+            ValueError: If an invalid joint name is encountered during initialization.
+        """
+        self.joints_info: list[MotorInfo] = []
+        self.joints_pose_status: list[MotorPose] = []
+
+        # Select the appropriate set of joint limits
         if target_action == "teleoperation":
             limits_set = LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION
         else:
             limits_set = LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR
 
-        # Initialize default joints
+        # Initialize default body joints (0–19)
+        base_index = 0
         for i in range(20):
+            abs_index = base_index + i
             self.joints_info.append(
                 MotorInfo(
-                    abs_index=(self._var_runner + i),
+                    abs_index=abs_index,
                     type=TYPES_OF_MOTOR[0],
-                    name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
-                    limits=limits_set[self._var_runner + i],
+                    name_joint=FROM_INDEXES_TO_NAMES[abs_index],
+                    limits=limits_set[abs_index],
                     index_in_msg=i,
                 )
             )
-
             self.joints_pose_status.append(
                 MotorPose(
-                    abs_index=(self._var_runner + i),
+                    abs_index=abs_index,
                     target_pose=0.0,
                     current_pose=0.0,
                     temporary_pose=0.0,
                 )
             )
 
-        # Additional parts (hands and fingers)
+        # Optionally include fingers and wrists
         if include_hands_with_fingers:
-            # Initialize fingers
-            self._var_runner = 20
+            # Initialize finger joints (20–31)
+            base_index = 20
             for i in range(12):
+                abs_index = base_index + i
                 self.joints_info.append(
                     MotorInfo(
-                        abs_index=(self._var_runner + i),
+                        abs_index=abs_index,
                         type=TYPES_OF_MOTOR[1],
-                        name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
-                        limits=limits_set[self._var_runner + i],
+                        name_joint=FROM_INDEXES_TO_NAMES[abs_index],
+                        limits=limits_set[abs_index],
                         index_in_msg=i,
                     )
                 )
-
                 self.joints_pose_status.append(
                     MotorPose(
-                        abs_index=(self._var_runner + i),
+                        abs_index=abs_index,
                         target_pose=0.0,
                         current_pose=0.0,
                         temporary_pose=0.0,
                     )
                 )
 
-            # Initialize wrists
-            self._var_runner = 32
+            # Initialize wrist joints (32–33)
+            base_index = 32
             for i in range(2):
+                abs_index = base_index + i
                 self.joints_info.append(
                     MotorInfo(
-                        abs_index=(self._var_runner + i),
+                        abs_index=abs_index,
                         type=TYPES_OF_MOTOR[2],
-                        name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
-                        limits=limits_set[self._var_runner + i],
+                        name_joint=FROM_INDEXES_TO_NAMES[abs_index],
+                        limits=limits_set[abs_index],
                         index_in_msg=i,
                     )
                 )
-
                 self.joints_pose_status.append(
                     MotorPose(
-                        abs_index=(self._var_runner + i),
+                        abs_index=abs_index,
                         target_pose=0.0,
                         current_pose=0.0,
                         temporary_pose=0.0,
                     )
                 )
-        del self._var_runner
 
-    def show_info(self):
+    def show_info(self) -> None:
+        """
+        Display robot motor information in a formatted table.
+
+        The table includes columns for ID, type, joint name, limits, and message index.
+        Color coding is applied based on motor type. Summary statistics are also printed.
+        """
         console = Console()
 
-        # Create table with style settings
+        # Create styled table
         table = Table(
             title="[bold]Robot Motors Reference[/]",
             title_style="bold white on blue",
@@ -120,45 +186,41 @@ class RobotData:
             expand=True,
         )
 
-        # Add columns
+        # Define columns
         table.add_column("ID", justify="center", style="cyan")
         table.add_column("Type", style="magenta")
         table.add_column("Joint Name", style="green")
         table.add_column("Limits", justify="center")
         table.add_column("Message Index", justify="center")
 
-        # Fill table with data
+        # Add rows
         for motor in self.joints_info:
-            # Determine color based on motor type
-            type_style = Style(
-                color={
-                    "default_body_joint": "bright_cyan",
-                    "finger_joint": "bright_magenta",
-                    "wrist_joint": "#ffa000",
-                }.get(motor.type, "white")
-            )
-
-            # Format limits
+            type_color = {
+                "default_body_joint": "bright_cyan",
+                "finger_joint": "bright_magenta",
+                "wrist_joint": "#ffa000",
+            }.get(motor.type, "white")
+            type_style = Style(color=type_color)
             limits_str = f"[{motor.limits[0]:.2f}, {motor.limits[1]:.2f}]"
 
             table.add_row(
-                f"[color(220)]{str(motor.abs_index)}[/]",
+                f"[color(220)]{motor.abs_index}[/]",
                 f"[{type_style}]{motor.type}[/]",
                 motor.name_joint,
                 limits_str,
                 str(motor.index_in_msg),
             )
 
-        # Print the table
+        # Print table
         console.print(table)
 
-        # Additional statistics
+        # Print summary
         console.print(
             f"\n[bold]Total motors:[/] {len(self.joints_info)}",
             style="bold green",
         )
 
-        # Group by motor types
+        # Count motors by type
         type_counts = {}
         for motor in self.joints_info:
             type_counts[motor.type] = type_counts.get(motor.type, 0) + 1
@@ -168,19 +230,36 @@ class RobotData:
             console.print(f"  {motor_type}: {count}", style="bright_blue")
 
     def get_joint_by_name(self, name_joint: str) -> MotorInfo:
-        """Get info about joint by name"""
+        """
+        Retrieve motor information by joint name.
+
+        Args:
+            name_joint (str): The name of the joint to look up.
+
+        Returns:
+            MotorInfo: The motor information associated with the given name.
+
+        Raises:
+            ValueError: If no joint with the given name exists.
+        """
         try:
             index = FROM_NAMES_TO_INDEXES[name_joint]
-            return index
-        except Exception:
-            raise ValueError(f"Joint with name '{name_joint}' not found")
+            # Find the MotorInfo object with the matching absolute index
+            for motor in self.joints_info:
+                if motor.abs_index == index:
+                    return motor
+            raise ValueError(f"Joint with name '{name_joint}' not found in motor list.")
+        except KeyError:
+            raise ValueError(f"Joint with name '{name_joint}' not found.")
 
 
 if __name__ == "__main__":
     robot = RobotData(
-        target_action="teleoperation", include_hands_with_fingers=True
+        target_action="teleoperation",
+        include_hands_with_fingers=True,
     )
     robot.show_info()
     print(robot.joints_info[0].type)
     print(robot.get_joint_by_name("left_ankle_joint"))
-    print(robot.get_joint_by_name("left_ankle_joint__"))
+    # This will raise ValueError:
+    # print(robot.get_joint_by_name("left_ankle_joint__"))
