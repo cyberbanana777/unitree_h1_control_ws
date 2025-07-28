@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,12 +21,9 @@ import cyclonedds.idl.types as types
 #     import builtin_interfaces.msg.dds_
 
 
-
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
 class Header_(idl.IdlStruct, typename="std_msgs.msg.dds_.Header_"):
-    stamp: 'unitree_sdk2py.idl.builtin_interfaces.msg.dds_.Time_'
+    stamp: "unitree_sdk2py.idl.builtin_interfaces.msg.dds_.Time_"
     frame_id: str
-
-

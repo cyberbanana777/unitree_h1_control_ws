@@ -12,8 +12,19 @@ SPORT_PATH_POINT_SIZE = 30
 """
 " class PathPoint
 """
+
+
 class PathPoint:
-    def __init__(self, timeFromStart: float, x: float, y: float, yaw: float, vx: float, vy: float, vyaw: float):
+    def __init__(
+        self,
+        timeFromStart: float,
+        x: float,
+        y: float,
+        yaw: float,
+        vx: float,
+        vy: float,
+        vyaw: float,
+    ):
         self.timeFromStart = timeFromStart
         self.x = x
         self.y = y
@@ -26,10 +37,11 @@ class PathPoint:
 """
 " class SportClient
 """
+
+
 class SportClient(Client):
     def __init__(self, enableLease: bool = False):
         super().__init__(SPORT_SERVICE_NAME, enableLease)
-
 
     def Init(self):
         # set api version
@@ -143,7 +155,9 @@ class SportClient(Client):
             path_p.append(p)
 
         parameter = json.dumps(path_p)
-        code = self._CallNoReply(ROBOT_SPORT_API_ID_TRAJECTORYFOLLOW, parameter)
+        code = self._CallNoReply(
+            ROBOT_SPORT_API_ID_TRAJECTORYFOLLOW, parameter
+        )
         return code
 
     def ContinuousGait(self, flag: int):
@@ -168,49 +182,49 @@ class SportClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_SWITCHMOVEMODE, parameter)
         return code
-    
+
     def VisionWalk(self, flag: bool):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_VISIONWALK, parameter)
         return code
-    
+
     def HandStand(self, flag: int):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_HANDSTAND, parameter)
         return code
-    
+
     def AutoRecoverySet(self, flag: int):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_AUTORECOVERY_SET, parameter)
         return code
-    
+
     def FreeWalk(self):
         p = {}
-        p["data"] = True ## default
+        p["data"] = True  ## default
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_FREEWALK, parameter)
         return code
-    
+
     def ClassicWalk(self, flag: bool):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_CLASSICWALK, parameter)
         return code
-    
+
     def FastWalk(self, flag: bool):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_FASTWALK, parameter)
         return code
-    
+
     def FreeEuler(self, flag: bool):
         p = {}
         p["data"] = flag

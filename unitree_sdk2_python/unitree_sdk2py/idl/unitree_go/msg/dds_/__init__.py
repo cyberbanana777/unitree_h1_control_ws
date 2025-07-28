@@ -20,12 +20,37 @@ from ._MotorCmd_ import MotorCmd_
 from ._MotorCmds_ import MotorCmds_
 from ._MotorState_ import MotorState_
 from ._MotorStates_ import MotorStates_
+from ._PathPoint_ import PathPoint_
 from ._Req_ import Req_
 from ._Res_ import Res_
 from ._SportModeState_ import SportModeState_
 from ._TimeSpec_ import TimeSpec_
-from ._PathPoint_ import PathPoint_ 
 from ._UwbState_ import UwbState_
 from ._UwbSwitch_ import UwbSwitch_
 from ._WirelessController_ import WirelessController_
-__all__ = ["AudioData_", "BmsCmd_", "BmsState_", "Error_", "Go2FrontVideoData_", "HeightMap_", "IMUState_", "InterfaceConfig_", "LidarState_", "LowCmd_", "LowState_", "MotorCmd_", "MotorCmds_", "MotorState_", "MotorStates_", "Req_", "Res_", "SportModeState_", "TimeSpec_", "PathPoint_",  "UwbState_", "UwbSwitch_", "WirelessController_", ]
+
+__all__ = [
+    "AudioData_",
+    "BmsCmd_",
+    "BmsState_",
+    "Error_",
+    "Go2FrontVideoData_",
+    "HeightMap_",
+    "IMUState_",
+    "InterfaceConfig_",
+    "LidarState_",
+    "LowCmd_",
+    "LowState_",
+    "MotorCmd_",
+    "MotorCmds_",
+    "MotorState_",
+    "MotorStates_",
+    "Req_",
+    "Res_",
+    "SportModeState_",
+    "TimeSpec_",
+    "PathPoint_",
+    "UwbState_",
+    "UwbSwitch_",
+    "WirelessController_",
+]

@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,9 +21,9 @@ import cyclonedds.idl.types as types
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class InterfaceConfig_(idl.IdlStruct, typename="unitree_go.msg.dds_.InterfaceConfig_"):
+class InterfaceConfig_(
+    idl.IdlStruct, typename="unitree_go.msg.dds_.InterfaceConfig_"
+):
     mode: types.uint8
     value: types.uint8
     reserve: types.array[types.uint8, 2]
-
-

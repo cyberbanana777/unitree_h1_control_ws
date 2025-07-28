@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -32,5 +32,3 @@ class MotorState_(idl.IdlStruct, typename="unitree_hg.msg.dds_.MotorState_"):
     sensor: types.array[types.uint32, 2]
     motorstate: types.uint32
     reserve: types.array[types.uint32, 4]
-
-

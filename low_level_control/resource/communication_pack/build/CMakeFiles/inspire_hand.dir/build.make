@@ -110,4 +110,3 @@ CMakeFiles/inspire_hand.dir/clean:
 CMakeFiles/inspire_hand.dir/depend:
 	cd /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build /home/banana-killer/extentions_for_h1_ws/src/wrist_init/resource/communication_pack/build/CMakeFiles/inspire_hand.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/inspire_hand.dir/depend
-

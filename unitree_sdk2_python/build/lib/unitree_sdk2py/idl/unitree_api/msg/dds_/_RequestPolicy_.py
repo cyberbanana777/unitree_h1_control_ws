@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,8 +21,8 @@ import cyclonedds.idl.types as types
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class RequestPolicy_(idl.IdlStruct, typename="unitree_api.msg.dds_.RequestPolicy_"):
+class RequestPolicy_(
+    idl.IdlStruct, typename="unitree_api.msg.dds_.RequestPolicy_"
+):
     priority: types.int32
     noreply: bool
-
-

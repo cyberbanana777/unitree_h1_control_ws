@@ -73,7 +73,7 @@ public:
 
   /**
    * @brief Get the finger position
-   * 
+   *
    * ID: pinky, ring, middle, index, thumb_bend, thumb_rotate
    */
   int16_t GetPosition(Eigen::Matrix<double, 6, 1> & q)
@@ -134,7 +134,7 @@ public:
 
   /**
    * @brief Get the force control threshold
-   * 
+   *
    * [0, 1000] Unit: g
    */
   void SetForce(uint16_t f0, uint16_t f1, uint16_t f2, uint16_t f3, uint16_t f4, uint16_t f5)
@@ -170,7 +170,7 @@ public:
 
   /**
    * @brief Get the force of each finger
-   * 
+   *
    * The force is in the unit of g, [0 - 1000], convert to N
    */
   int16_t GetForce(Eigen::Matrix<double, 6, 1> & f)
@@ -197,8 +197,8 @@ public:
 
   /**
    * @brief Clear error
-   * 
-   * When the Inspire Hand has a fault such as a stall, overcurrent, or abnormality, 
+   *
+   * When the Inspire Hand has a fault such as a stall, overcurrent, or abnormality,
    * the fault can be cleared by the clear fault command.
    */
   void ClearError()
@@ -213,7 +213,7 @@ public:
     cmd[6] = 0x03;
     cmd[7] = 0x01;
     cmd[8] = CheckSum(cmd, 9);
-    
+
     serial_->send(cmd, 9);
     usleep(5000);
     serial_->recv(recvBuff, 9);
@@ -221,7 +221,7 @@ public:
 
   /**
    * @brief Force sensor calibration
-   * 
+   *
    * @attention The Inspire Hand must be in an unloaded state during calibration
    */
   void Calibration()

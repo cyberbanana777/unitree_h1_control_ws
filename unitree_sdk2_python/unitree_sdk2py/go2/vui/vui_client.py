@@ -3,10 +3,11 @@ import json
 from ...rpc.client import Client
 from .vui_api import *
 
-
 """
 " class VideoClient
 """
+
+
 class VuiClient(Client):
     def __init__(self):
         super().__init__(VUI_SERVICE_NAME, False)

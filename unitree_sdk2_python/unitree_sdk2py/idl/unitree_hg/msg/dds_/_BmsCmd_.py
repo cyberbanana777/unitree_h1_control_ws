@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -24,5 +24,3 @@ import cyclonedds.idl.types as types
 class BmsCmd_(idl.IdlStruct, typename="unitree_hg.msg.dds_.BmsCmd_"):
     cmd: types.uint8
     reserve: types.array[types.uint8, 40]
-
-

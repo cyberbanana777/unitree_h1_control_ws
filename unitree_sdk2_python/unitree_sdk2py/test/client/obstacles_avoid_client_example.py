@@ -1,8 +1,10 @@
-import time
 import os
+import time
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py.go2.obstacles_avoid.obstacles_avoid_client import ObstaclesAvoidClient
+from unitree_sdk2py.go2.obstacles_avoid.obstacles_avoid_client import (
+    ObstaclesAvoidClient,
+)
 
 if __name__ == "__main__":
     ChannelFactoryInitialize(0, "enp3s0")
@@ -30,16 +32,16 @@ if __name__ == "__main__":
             print("switch get error. code:", code)
         else:
             print("switch get success. enable:", enable)
-            
+
         time.sleep(3)
-        
+
         print("##################SwitchSet (on)###################")
         code = client.SwitchSet(True)
         if code != 0:
             print("switch set error. code:", code)
         else:
             print("switch set success.")
-            
+
         time.sleep(3)
 
         print("##################SwitchGet###################")
@@ -48,7 +50,7 @@ if __name__ == "__main__":
             print("switch get error. code:", code)
         else:
             print("switch get success. enable:", enable1)
-            
+
         time.sleep(3)
 
         print("##################SwitchSet (off)###################")
@@ -57,7 +59,7 @@ if __name__ == "__main__":
             print("switch set error. code:", code)
         else:
             print("switch set success.")
-            
+
         time.sleep(3)
 
         print("##################SwitchGet###################")
@@ -66,9 +68,8 @@ if __name__ == "__main__":
             print("switch get error. code:", code)
         else:
             print("switch get success. enable:", enable1)
-            
-        time.sleep(3)
 
+        time.sleep(3)
 
         print("##################SwitchSet (enable)###################")
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
             print("switch set error. code:", code)
         else:
             print("switch set success. enable:", enable)
-            
+
         time.sleep(3)
 
         print("##################SwitchGet###################")
@@ -86,6 +87,5 @@ if __name__ == "__main__":
             print("switch get error. code:", code)
         else:
             print("switch get success. enable:", enable)
-            
+
         time.sleep(3)
-        

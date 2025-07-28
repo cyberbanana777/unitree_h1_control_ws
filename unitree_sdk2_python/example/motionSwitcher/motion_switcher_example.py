@@ -1,8 +1,10 @@
-import time
 import sys
+import time
 
+from unitree_sdk2py.comm.motion_switcher.motion_switcher_client import (
+    MotionSwitcherClient,
+)
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py.comm.motion_switcher.motion_switcher_client import MotionSwitcherClient
 
 
 class Custom:
@@ -11,26 +13,26 @@ class Custom:
         self.msc.SetTimeout(5.0)
         self.msc.Init()
 
-    def selectMode(self,name):
+    def selectMode(self, name):
         ret = self.msc.SelectMode(name)
         return ret
 
 
-if __name__ == '__main__':
-
-    print("WARNING: Please ensure there are no obstacles around the robot while running this example.")
+if __name__ == "__main__":
+    print(
+        "WARNING: Please ensure there are no obstacles around the robot while running this example."
+    )
     input("Press Enter to continue...")
 
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         ChannelFactoryInitialize(0, sys.argv[1])
     else:
         ChannelFactoryInitialize(0)
 
     custom = Custom()
-    selectMode = "ai" 
+    selectMode = "ai"
     selectMode = "normal"
-    selectMode = "advanced" 
+    selectMode = "advanced"
     # selectMode = "ai-w"  # for wheeled robot
-    ret = custom.selectMode(selectMode) 
-    print("ret: ",ret)
-
+    ret = custom.selectMode(selectMode)
+    print("ret: ", ret)

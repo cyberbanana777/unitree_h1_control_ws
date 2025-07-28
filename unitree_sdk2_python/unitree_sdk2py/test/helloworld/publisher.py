@@ -1,7 +1,7 @@
 import time
 
-from unitree_sdk2py.core.channel import ChannelPublisher, ChannelFactoryInitialize
 from helloworld import HelloWorld
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize, ChannelPublisher
 
 ChannelFactoryInitialize()
 

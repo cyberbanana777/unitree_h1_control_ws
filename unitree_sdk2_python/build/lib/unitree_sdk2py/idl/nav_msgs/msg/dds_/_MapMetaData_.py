@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -22,14 +22,12 @@ import cyclonedds.idl.types as types
 #     import geometry_msgs.msg.dds_
 
 
-
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
 class MapMetaData_(idl.IdlStruct, typename="nav_msgs.msg.dds_.MapMetaData_"):
-    map_load_time: 'unitree_sdk2py.idl.builtin_interfaces.msg.dds_.Time_'
+    map_load_time: "unitree_sdk2py.idl.builtin_interfaces.msg.dds_.Time_"
     resolution: types.float32
     width: types.uint32
     height: types.uint32
-    origin: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.Pose_'
-
+    origin: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.Pose_"

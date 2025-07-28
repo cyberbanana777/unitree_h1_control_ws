@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -39,5 +39,3 @@ class LidarState_(idl.IdlStruct, typename="unitree_go.msg.dds_.LidarState_"):
     serial_recv_stamp: types.float64
     serial_buffer_size: types.uint32
     serial_buffer_read: types.uint32
-
-

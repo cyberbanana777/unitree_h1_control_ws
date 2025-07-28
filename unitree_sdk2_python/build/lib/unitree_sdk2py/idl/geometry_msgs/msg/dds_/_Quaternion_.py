@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,10 +21,10 @@ import cyclonedds.idl.types as types
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class Quaternion_(idl.IdlStruct, typename="geometry_msgs.msg.dds_.Quaternion_"):
+class Quaternion_(
+    idl.IdlStruct, typename="geometry_msgs.msg.dds_.Quaternion_"
+):
     x: types.float64
     y: types.float64
     z: types.float64
     w: types.float64
-
-

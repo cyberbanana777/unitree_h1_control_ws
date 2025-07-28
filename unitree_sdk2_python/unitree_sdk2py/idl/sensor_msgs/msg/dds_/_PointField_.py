@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -26,5 +26,3 @@ class PointField_(idl.IdlStruct, typename="sensor_msgs.msg.dds_.PointField_"):
     offset: types.uint32
     datatype: types.uint8
     count: types.uint32
-
-

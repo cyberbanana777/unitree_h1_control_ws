@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,12 +21,11 @@ import cyclonedds.idl.types as types
 #     import std_msgs.msg.dds_
 
 
-
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class PoseWithCovarianceStamped_(idl.IdlStruct, typename="geometry_msgs.msg.dds_.PoseWithCovarianceStamped_"):
-    header: 'unitree_sdk2py.idl.std_msgs.msg.dds_.Header_'
-    pose: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.PoseWithCovariance_'
-
-
+class PoseWithCovarianceStamped_(
+    idl.IdlStruct, typename="geometry_msgs.msg.dds_.PoseWithCovarianceStamped_"
+):
+    header: "unitree_sdk2py.idl.std_msgs.msg.dds_.Header_"
+    pose: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.PoseWithCovariance_"

@@ -1,13 +1,14 @@
-from threading import Condition, Lock
 from enum import Enum
+from threading import Condition, Lock
 
 from ..idl.unitree_api.msg.dds_ import Response_ as Response
 from ..utils.future import Future, FutureResult
 
-
 """
 " class RequestFuture
 """
+
+
 class RequestFuture(Future):
     def __init__(self):
         self.__requestId = None
@@ -24,7 +25,7 @@ class RequestFutureQueue:
     def __init__(self):
         self.__data = {}
         self.__lock = Lock()
-        
+
     def Set(self, requestId: int, future: RequestFuture):
         if future is None:
             return False

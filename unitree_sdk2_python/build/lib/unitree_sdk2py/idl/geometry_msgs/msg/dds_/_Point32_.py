@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -25,5 +25,3 @@ class Point32_(idl.IdlStruct, typename="geometry_msgs.msg.dds_.Point32_"):
     x: types.float32
     y: types.float32
     z: types.float32
-
-

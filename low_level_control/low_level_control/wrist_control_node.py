@@ -26,17 +26,17 @@ Connection is initialized via UART-CAN adapter (/dev/ttyACM0). Uses ROS2 message
 Node gracefully terminates by disabling motors and closing connection.
 """
 
-import serial
 import numpy as np
 import rclpy
+import serial
 from rclpy.node import Node
 from unitree_go.msg import MotorCmds, MotorState, MotorStates
-from .DM_CAN import Motor, DM_Motor_Type, MotorControl
 
+from .DM_CAN import DM_Motor_Type, Motor, MotorControl
 
 # Constants
-TOPIC_CMD = 'wrist/cmds'
-TOPIC_STATES = 'wrist/states'
+TOPIC_CMD = "wrist/cmds"
+TOPIC_STATES = "wrist/states"
 FREQUENCY = 333  # Hz
 
 # Motor aliases
@@ -54,7 +54,7 @@ MOTOR_LIMITS = {
 
 class PubSubNode(Node):
     def __init__(self):
-        super().__init__('wrist_control_node')
+        super().__init__("wrist_control_node")
 
         # Motor initialization
         self.motor_left = Motor(DM_Motor_Type.DM4310, 0x01, 0x11)
@@ -62,7 +62,9 @@ class PubSubNode(Node):
 
         # CAN connection setup
         try:
-            self.serial_device = serial.Serial('/dev/ttyACM0', 921600, timeout=0.5)
+            self.serial_device = serial.Serial(
+                "/dev/ttyACM0", 921600, timeout=0.5
+            )
             self.motor_controler = MotorControl(self.serial_device)
             self.motor_controler.addMotor(self.motor_left)
             self.motor_controler.addMotor(self.motor_right)
@@ -78,22 +80,14 @@ class PubSubNode(Node):
 
         # ROS2 communication setup
         self.subscription = self.create_subscription(
-            MotorCmds,
-            TOPIC_CMD,
-            self.listener_callback,
-            10
+            MotorCmds, TOPIC_CMD, self.listener_callback, 10
         )
 
-        self.publisher = self.create_publisher(
-            MotorStates,
-            TOPIC_STATES,
-            10
-        )
+        self.publisher = self.create_publisher(MotorStates, TOPIC_STATES, 10)
 
         # Timer for periodic state publishing
         self.timer = self.create_timer(
-            1 / FREQUENCY,  # Period in seconds
-            self.timer_callback
+            1 / FREQUENCY, self.timer_callback  # Period in seconds
         )
 
         self.get_logger().info(
@@ -104,25 +98,25 @@ class PubSubNode(Node):
         self.motor_controler.controlMIT(
             self.motor_left,
             10.0,  # kp
-            2.0,   # kd
-            0.0,   # target position
-            0.0,   # target velocity
-            0.0    # torque
+            2.0,  # kd
+            0.0,  # target position
+            0.0,  # target velocity
+            0.0,  # torque
         )
 
         self.motor_controler.controlMIT(
             self.motor_right,
             10.0,  # kp
-            2.0,   # kd
+            2.0,  # kd
             -2.0,  # target position
-            0.0,   # target velocity
-            0.0    # torque
+            0.0,  # target velocity
+            0.0,  # torque
         )
 
     def listener_callback(self, msg):
         """Handle incoming motor commands."""
-        self.get_logger().debug(f'Received command: {msg}')
-        
+        self.get_logger().debug(f"Received command: {msg}")
+
         left_motor_cmd = msg.cmds[LEFT_ALIAS]
         right_motor_cmd = msg.cmds[RIGHT_ALIAS]
 
@@ -130,12 +124,12 @@ class PubSubNode(Node):
         target_position_left = np.clip(
             float(left_motor_cmd.q),
             MOTOR_LIMITS[LEFT_ALIAS][0],
-            MOTOR_LIMITS[LEFT_ALIAS][1]
+            MOTOR_LIMITS[LEFT_ALIAS][1],
         )
         target_position_right = np.clip(
             float(right_motor_cmd.q),
             MOTOR_LIMITS[RIGHT_ALIAS][0],
-            MOTOR_LIMITS[RIGHT_ALIAS][1]
+            MOTOR_LIMITS[RIGHT_ALIAS][1],
         )
 
         # Send commands to motors
@@ -145,7 +139,7 @@ class PubSubNode(Node):
             float(left_motor_cmd.kd),
             target_position_left,
             float(left_motor_cmd.dq),
-            float(left_motor_cmd.tau)
+            float(left_motor_cmd.tau),
         )
 
         self.motor_controler.controlMIT(
@@ -154,7 +148,7 @@ class PubSubNode(Node):
             float(right_motor_cmd.kd),
             target_position_right,
             float(right_motor_cmd.dq),
-            float(right_motor_cmd.tau)
+            float(right_motor_cmd.tau),
         )
 
     def timer_callback(self):
@@ -180,7 +174,7 @@ class PubSubNode(Node):
         motor_states_msg.states.append(motor_right_state_msg)
         self.publisher.publish(motor_states_msg)
 
-        self.get_logger().debug(f'Published states: {motor_states_msg}')
+        self.get_logger().debug(f"Published states: {motor_states_msg}")
 
     def shutdown(self):
         """Gracefully shutdown node by disabling motors and closing connection."""
@@ -197,14 +191,14 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        node.get_logger().info('Node stopped by user')
+        node.get_logger().info("Node stopped by user")
     except Exception as e:
-        node.get_logger().error(f'Exception: {str(e)}')
+        node.get_logger().error(f"Exception: {str(e)}")
     finally:
         node.shutdown()
         node.destroy_node()
         rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

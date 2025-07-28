@@ -1,15 +1,15 @@
-import time
 import json
-
-from unitree_sdk2py.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py.rpc.server import Server
+import time
 
 from test_api import *
-
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize
+from unitree_sdk2py.rpc.server import Server
 
 """
 " class TestServer
 """
+
+
 class TestServer(Server):
     def __init__(self):
         super().__init__("test")
@@ -31,7 +31,8 @@ class TestServer(Server):
         print("Stop Called.")
         return 0, ""
 
-if __name__ ==  "__main__":
+
+if __name__ == "__main__":
     # initialize channel factory.
     ChannelFactoryInitialize(0)
 

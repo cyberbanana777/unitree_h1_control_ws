@@ -6,4 +6,7 @@
 """
 
 from ._Time_ import Time_
-__all__ = ["Time_", ]
+
+__all__ = [
+    "Time_",
+]

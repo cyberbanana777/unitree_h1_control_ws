@@ -4,8 +4,8 @@
   <name>completed_scripts_control</name>
   <version>0.0.0</version>
   <description>
-    in this package, you will find python launch files 
-    that launch specific node configurations, 
+    in this package, you will find python launch files
+    that launch specific node configurations,
     as indicated in the name of the launch files
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>

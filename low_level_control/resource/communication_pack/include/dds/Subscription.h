@@ -15,7 +15,7 @@ class SubscriptionBase
 public:
   using MsgType = MessageType;
   using SharedPtr = std::shared_ptr<SubscriptionBase<MsgType>>;
-  
+
   SubscriptionBase(const std::string& topic)
   {
     last_update_time_ = std::chrono::steady_clock::now() - std::chrono::milliseconds(timeout_ms_);

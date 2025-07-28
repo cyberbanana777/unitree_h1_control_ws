@@ -3,14 +3,14 @@ import json
 from ...rpc.client import Client
 from .back_video_api import *
 
-
 """
 " class FrontVideoClient
 """
+
+
 class BackVideoClient(Client):
     def __init__(self):
         super().__init__(ROBOT_BACK_VIDEO_SERVICE_NAME, False)
-
 
     def Init(self):
         # set api version

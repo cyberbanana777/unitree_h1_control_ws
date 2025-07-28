@@ -1,23 +1,24 @@
-import time
-import sys
 import struct
+import sys
+import time
 
-from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
-
-# Uncomment the following two lines when using Go2、Go2-W、B2、B2-W、H1 robot
-# from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_
-# from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize, ChannelSubscriber
 
 # Uncomment the following two lines when using G1、H1-2 robot
 from unitree_sdk2py.idl.default import unitree_hg_msg_dds__LowState_
 from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowState_
 
+# Uncomment the following two lines when using Go2、Go2-W、B2、B2-W、H1 robot
+# from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_
+# from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
+
+
 class unitreeRemoteController:
     def __init__(self):
         # key
-        self.Lx = 0           
-        self.Rx = 0            
-        self.Ry = 0            
+        self.Lx = 0
+        self.Rx = 0
+        self.Ry = 0
         self.Ly = 0
 
         # button
@@ -37,8 +38,8 @@ class unitreeRemoteController:
         self.F1 = 0
         self.F3 = 0
         self.Start = 0
-       
-    def parse_botton(self,data1,data2):
+
+    def parse_botton(self, data1, data2):
         self.R1 = (data1 >> 0) & 1
         self.L1 = (data1 >> 1) & 1
         self.Start = (data1 >> 2) & 1
@@ -56,22 +57,23 @@ class unitreeRemoteController:
         self.Down = (data2 >> 6) & 1
         self.Left = (data2 >> 7) & 1
 
-    def parse_key(self,data):
+    def parse_key(self, data):
         lx_offset = 4
-        self.Lx = struct.unpack('<f', data[lx_offset:lx_offset + 4])[0]
+        self.Lx = struct.unpack("<f", data[lx_offset : lx_offset + 4])[0]
         rx_offset = 8
-        self.Rx = struct.unpack('<f', data[rx_offset:rx_offset + 4])[0]
+        self.Rx = struct.unpack("<f", data[rx_offset : rx_offset + 4])[0]
         ry_offset = 12
-        self.Ry = struct.unpack('<f', data[ry_offset:ry_offset + 4])[0]
+        self.Ry = struct.unpack("<f", data[ry_offset : ry_offset + 4])[0]
         L2_offset = 16
-        L2 = struct.unpack('<f', data[L2_offset:L2_offset + 4])[0] # Placeholder，unused
+        L2 = struct.unpack("<f", data[L2_offset : L2_offset + 4])[
+            0
+        ]  # Placeholder，unused
         ly_offset = 20
-        self.Ly = struct.unpack('<f', data[ly_offset:ly_offset + 4])[0]
+        self.Ly = struct.unpack("<f", data[ly_offset : ly_offset + 4])[0]
 
-
-    def parse(self,remoteData):
+    def parse(self, remoteData):
         self.parse_key(remoteData)
-        self.parse_botton(remoteData[2],remoteData[3])
+        self.parse_botton(remoteData[2], remoteData[3])
 
         print("debug unitreeRemoteController: ")
         print("Lx:", self.Lx)
@@ -97,29 +99,31 @@ class unitreeRemoteController:
         print("Start:", self.Start)
         print("\n")
 
-        
+
 class Custom:
     def __init__(self):
-        self.low_state = None 
+        self.low_state = None
         self.remoteController = unitreeRemoteController()
 
     def Init(self):
-        self.lowstate_subscriber = ChannelSubscriber("rt/lf/lowstate", LowState_)
+        self.lowstate_subscriber = ChannelSubscriber(
+            "rt/lf/lowstate", LowState_
+        )
         self.lowstate_subscriber.Init(self.LowStateMessageHandler, 10)
 
-    
     def LowStateMessageHandler(self, msg: LowState_):
         self.low_state = msg
         wireless_remote_data = self.low_state.wireless_remote
         self.remoteController.parse(wireless_remote_data)
 
 
-if __name__ == '__main__':
-
-    print("WARNING: Please ensure there are no obstacles around the robot while running this example.")
+if __name__ == "__main__":
+    print(
+        "WARNING: Please ensure there are no obstacles around the robot while running this example."
+    )
     input("Press Enter to continue...")
 
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         ChannelFactoryInitialize(0, sys.argv[1])
     else:
         ChannelFactoryInitialize(0)
@@ -127,5 +131,5 @@ if __name__ == '__main__':
     custom = Custom()
     custom.Init()
 
-    while True:   
+    while True:
         time.sleep(1)

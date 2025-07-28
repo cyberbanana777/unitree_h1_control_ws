@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -31,5 +31,3 @@ class BmsState_(idl.IdlStruct, typename="unitree_go.msg.dds_.BmsState_"):
     bq_ntc: types.array[types.uint8, 2]
     mcu_ntc: types.array[types.uint8, 2]
     cell_vol: types.array[types.uint16, 15]
-
-

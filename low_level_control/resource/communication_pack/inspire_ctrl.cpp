@@ -100,7 +100,7 @@ int main(int argc, char ** argv)
   std::cout << "  Inspire Hand Controller  " << std::endl;
 
   InspireRunner runner;
- 
+
   while (true)
   {
     sleep(1);

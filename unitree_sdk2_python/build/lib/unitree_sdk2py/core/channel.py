@@ -1,25 +1,24 @@
-import time
-from typing import Any, Callable
 import threading
-from threading import Thread, Event
+import time
+from threading import Event, Thread
+from typing import Any, Callable
 
+from cyclonedds.core import DDSException, Listener
 from cyclonedds.domain import Domain, DomainParticipant
-from cyclonedds.internal import dds_c_t
+from cyclonedds.internal import InvalidSample, dds_c_t
 from cyclonedds.pub import DataWriter
+from cyclonedds.qos import Qos
 from cyclonedds.sub import DataReader
 from cyclonedds.topic import Topic
-from cyclonedds.qos import Qos
-from cyclonedds.core import DDSException, Listener
 from cyclonedds.util import duration
-from cyclonedds.internal import dds_c_t, InvalidSample
 
-# for channel config
-from .channel_config import ChannelConfigAutoDetermine, ChannelConfigHasInterface
+from ..utils.bqueue import BQueue
 
 # for singleton
 from ..utils.singleton import Singleton
-from ..utils.bqueue import BQueue
 
+# for channel config
+from .channel_config import ChannelConfigAutoDetermine, ChannelConfigHasInterface
 
 """
 " class ChannelReader
@@ -28,11 +27,14 @@ from ..utils.bqueue import BQueue
 """
 " class Channel
 """
+
+
 class Channel:
-    
+
     """
     " internal class __Reader
     """
+
     class __Reader:
         def __init__(self):
             self.__reader = None
@@ -41,8 +43,15 @@ class Channel:
             self.__queueEnable = False
             self.__threadEvent = None
             self.__threadReader = None
-        
-        def Init(self, participant: DomainParticipant, topic: Topic, qos: Qos = None, handler: Callable = None, queueLen: int = 0):
+
+        def Init(
+            self,
+            participant: DomainParticipant,
+            topic: Topic,
+            qos: Qos = None,
+            handler: Callable = None,
+            queueLen: int = 0,
+        ):
             if handler is None:
                 self.__reader = DataReader(participant, topic, qos)
             else:
@@ -51,9 +60,18 @@ class Channel:
                     self.__queueEnable = True
                     self.__queue = BQueue(queueLen)
                     self.__threadEvent = Event()
-                    self.__threadReader = Thread(target=self.__ChannelReaderThreadFunc, name="ch_reader", daemon=True)
+                    self.__threadReader = Thread(
+                        target=self.__ChannelReaderThreadFunc,
+                        name="ch_reader",
+                        daemon=True,
+                    )
                     self.__threadReader.start()
-                self.__reader = DataReader(participant, topic, qos, Listener(on_data_available=self.__OnDataAvailable))
+                self.__reader = DataReader(
+                    participant,
+                    topic,
+                    qos,
+                    Listener(on_data_available=self.__OnDataAvailable),
+                )
 
         def Read(self, timeout: float = None):
             sample = None
@@ -61,7 +79,9 @@ class Channel:
                 if timeout is None:
                     sample = self.__reader.take_one()
                 else:
-                    sample = self.__reader.take_one(timeout=duration(seconds=timeout))
+                    sample = self.__reader.take_one(
+                        timeout=duration(seconds=timeout)
+                    )
             except DDSException as e:
                 print("[Reader] catch DDSException msg:", e.msg)
             except TimeoutError as e:
@@ -98,7 +118,7 @@ class Channel:
             if samples is None:
                 return
 
-            # check invalid sample        
+            # check invalid sample
             sample = samples[0]
             if isinstance(sample, InvalidSample):
                 return
@@ -118,13 +138,21 @@ class Channel:
     """
     " internal class __Writer
     """
+
     class __Writer:
         def __init__(self):
             self.__writer = None
             self.__publication_matched_count = 0
-        
-        def Init(self, participant: DomainParticipant, topic: Topic, qos: Qos = None):
-            self.__writer = DataWriter(participant, topic, qos, Listener(on_publication_matched=self.__OnPublicationMatched))
+
+        def Init(
+            self, participant: DomainParticipant, topic: Topic, qos: Qos = None
+        ):
+            self.__writer = DataWriter(
+                participant,
+                topic,
+                qos,
+                Listener(on_publication_matched=self.__OnPublicationMatched),
+            )
             time.sleep(0.2)
 
         def Write(self, sample: Any, timeout: float = None):
@@ -150,17 +178,26 @@ class Channel:
                 return False
 
             return True
-        
+
         def Close(self):
             if self.__writer is not None:
                 del self.__writer
-        
-        def __OnPublicationMatched(self, writer: DataWriter, status: dds_c_t.publication_matched_status):
+
+        def __OnPublicationMatched(
+            self,
+            writer: DataWriter,
+            status: dds_c_t.publication_matched_status,
+        ):
             self.__publication_matched_count = status.current_count
 
-
     # channel __init__
-    def __init__(self, participant: DomainParticipant, name: str, type: Any, qos: Qos = None):
+    def __init__(
+        self,
+        participant: DomainParticipant,
+        name: str,
+        type: Any,
+        qos: Qos = None,
+    ):
         self.__reader = self.__Reader()
         self.__writer = self.__Writer()
         self.__participant = participant
@@ -169,9 +206,13 @@ class Channel:
     def SetWriter(self, qos: Qos = None):
         self.__writer.Init(self.__participant, self.__topic, qos)
 
-    def SetReader(self, qos: Qos = None, handler: Callable = None, queueLen: int = 0):
-        self.__reader.Init(self.__participant, self.__topic, qos, handler, queueLen)
-        
+    def SetReader(
+        self, qos: Qos = None, handler: Callable = None, queueLen: int = 0
+    ):
+        self.__reader.Init(
+            self.__participant, self.__topic, qos, handler, queueLen
+        )
+
     def Write(self, sample: Any, timeout: float = None):
         return self.__writer.Write(sample, timeout)
 
@@ -188,6 +229,8 @@ class Channel:
 """
 " class ChannelFactory
 """
+
+
 class ChannelFactory(Singleton):
     __domain = None
     __participant = None
@@ -202,17 +245,19 @@ class ChannelFactory(Singleton):
     def Init(self, id: int, networkInterface: str = None, qos: Qos = None):
         if self.__class__.__initialized:
             return True
-        
+
         with self.__class__.__init_lock:
             if self.__class__.__initialized:
                 return True
-            
+
             config = None
             # choose config
             if networkInterface is None:
                 config = ChannelConfigAutoDetermine
             else:
-                config = ChannelConfigHasInterface.replace('$__IF_NAME__$', networkInterface)
+                config = ChannelConfigHasInterface.replace(
+                    "$__IF_NAME__$", networkInterface
+                )
 
             try:
                 self.__class__.__domain = Domain(id, config)
@@ -226,7 +271,10 @@ class ChannelFactory(Singleton):
             try:
                 self.__class__.__participant = DomainParticipant(id)
             except DDSException as e:
-                print("[ChannelFactory] create domain participant error. msg:", e.msg)
+                print(
+                    "[ChannelFactory] create domain participant error. msg:",
+                    e.msg,
+                )
                 return False
             except:
                 print("[ChannelFactory] create domain participant error")
@@ -237,14 +285,18 @@ class ChannelFactory(Singleton):
             return True
 
     def CreateChannel(self, name: str, type: Any):
-        return Channel(self.__class__.__participant, name, type, self.__class__.__qos)
+        return Channel(
+            self.__class__.__participant, name, type, self.__class__.__qos
+        )
 
     def CreateSendChannel(self, name: str, type: Any):
         channel = self.CreateChannel(name, type)
         channel.SetWriter(None)
         return channel
 
-    def CreateRecvChannel(self, name: str, type: Any, handler: Callable = None, queueLen: int = 0):
+    def CreateRecvChannel(
+        self, name: str, type: Any, handler: Callable = None, queueLen: int = 0
+    ):
         channel = self.CreateChannel(name, type)
         channel.SetReader(None, handler, queueLen)
         return channel
@@ -253,6 +305,8 @@ class ChannelFactory(Singleton):
 """
 " class ChannelPublisher
 """
+
+
 class ChannelPublisher:
     def __init__(self, name: str, type: Any):
         factory = ChannelFactory()
@@ -271,9 +325,12 @@ class ChannelPublisher:
     def Write(self, sample: Any, timeout: float = None):
         return self.__channel.Write(sample, timeout)
 
+
 """
 " class ChannelSubscriber
 """
+
+
 class ChannelSubscriber:
     def __init__(self, name: str, type: Any):
         factory = ChannelFactory()
@@ -292,9 +349,12 @@ class ChannelSubscriber:
     def Read(self, timeout: int = None):
         return self.__channel.Read(timeout)
 
+
 """
 " function ChannelFactoryInitialize. used to intialize channel everenment.
 """
+
+
 def ChannelFactoryInitialize(id: int = 0, networkInterface: str = None):
     factory = ChannelFactory()
     if not factory.Init(id, networkInterface):

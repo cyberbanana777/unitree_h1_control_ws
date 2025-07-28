@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,10 +21,10 @@ import cyclonedds.idl.types as types
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class Go2FrontVideoData_(idl.IdlStruct, typename="unitree_go.msg.dds_.Go2FrontVideoData_"):
+class Go2FrontVideoData_(
+    idl.IdlStruct, typename="unitree_go.msg.dds_.Go2FrontVideoData_"
+):
     time_frame: types.uint64
     video720p: types.sequence[types.uint8]
     video360p: types.sequence[types.uint8]
     video180p: types.sequence[types.uint8]
-
-

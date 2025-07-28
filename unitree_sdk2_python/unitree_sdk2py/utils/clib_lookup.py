@@ -1,13 +1,15 @@
-import os
 import ctypes
+import os
 
 clib = ctypes.CDLL(None, use_errno=True)
+
 
 def CLIBCheckError(ret, func, args):
     if ret < 0:
         code = ctypes.get_errno()
         raise OSError(code, os.strerror(code))
     return ret
+
 
 def CLIBLookup(name, resType, argTypes):
     func = clib[name]

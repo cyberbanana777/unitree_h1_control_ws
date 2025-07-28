@@ -13,8 +13,8 @@ namespace param
 namespace po = boost::program_options;
 
 inline std::string serial_port;
-inline std::string network; 
-inline std::string ns; 
+inline std::string network;
+inline std::string ns;
 inline float threhold;
 
 po::variables_map helper(int argc, char** argv)

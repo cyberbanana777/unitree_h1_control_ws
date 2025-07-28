@@ -17,19 +17,19 @@
 # - Improved code structure (Command, TestOption, UserInterface classes).
 # - Added localization (Russian/English).
 
-'''
+"""
 АННОТАЦИЯ
-Данный скрипт запускает high-level клиента для управления роботом Unitree H1 с помощью 
-high-level команд (демпфирование, готовность, балансирование и т.д.) как с пульта. 
+Данный скрипт запускает high-level клиента для управления роботом Unitree H1 с помощью
+high-level команд (демпфирование, готовность, балансирование и т.д.) как с пульта.
 Команды вводятся поочерёдно. При вводе "list" выводятся все доступные команды.
 Для работы требуется библиотека "unitree_sdk2py".
 
 ANNOTATION
-This script launches a high-level client for controlling Unitree H1 robot using 
-high-level commands (damping, readiness, balancing, etc.) like a remote control. 
+This script launches a high-level client for controlling Unitree H1 robot using
+high-level commands (damping, readiness, balancing, etc.) like a remote control.
 Commands are entered sequentially. Enter "list" to display all available commands.
 Requires "unitree_sdk2py" python library.
-'''
+"""
 
 import sys
 import time
@@ -38,24 +38,23 @@ from enum import Enum
 from typing import Optional
 
 from rich import print
-from rich.panel import Panel
-from rich.table import Table
 from rich.console import Console
-from rich.style import Style
+from rich.panel import Panel
 from rich.prompt import Prompt
-
+from rich.style import Style
+from rich.table import Table
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.h1.loco.h1_loco_client import LocoClient
 
-
 # Interface settings
-INTERFACE = 'wlp0s20f3'
+INTERFACE = "wlp0s20f3"
 DOMAIN_ID = 0
 console = Console()
 
 
 class Command(Enum):
     """Enumeration of available commands"""
+
     DAMP = (0, "damp", "Switch to damping mode")
     STAND_UP = (1, "stand_up", "Stand in default position")
     START = (2, "start", "Start movement")
@@ -88,22 +87,25 @@ class Command(Enum):
 @dataclass
 class TestOption:
     """Class for storing current command"""
+
     name: Optional[str] = None
     id: Optional[int] = None
 
 
 def print_welcome():
     """Prints welcome message"""
-    print(Panel.fit(
-        "[bold cyan]Unitree H1 High-Level Control Client[/bold cyan]",
-        subtitle="[yellow]Press Ctrl+C to exit[/yellow]"
-    ))
-    
+    print(
+        Panel.fit(
+            "[bold cyan]Unitree H1 High-Level Control Client[/bold cyan]",
+            subtitle="[yellow]Press Ctrl+C to exit[/yellow]",
+        )
+    )
+
     warning_style = Style(color="red", bold=True)
     console.print(
         "⚠ [bold red]WARNING:[/bold red] Please ensure there are no obstacles "
         "around the robot while running this example.",
-        style=warning_style
+        style=warning_style,
     )
 
 
@@ -114,9 +116,9 @@ def print_command_table():
         show_header=True,
         header_style="bold magenta",
         row_styles=["none", "none"],  # Alternating row styles
-        show_lines=True  # Show lines between rows
+        show_lines=True,  # Show lines between rows
     )
-    
+
     table.add_column("ID", style="cyan", justify="center")
     table.add_column("Name", style="green")
     table.add_column("Description", style="white")
@@ -126,9 +128,9 @@ def print_command_table():
             str(cmd.id),
             cmd.name,
             cmd.description,
-            end_section=True  # Add line after row
+            end_section=True,  # Add line after row
         )
-    
+
     console.print(table)
 
 
@@ -153,10 +155,14 @@ class UserInterface:
 
     def handle_input(self) -> bool:
         """Handles user input"""
-        input_str = Prompt.ask(
-            "[bold cyan]Enter command ID/name or 'list'/'exit'[/bold cyan]",
-            default="list"
-        ).lower().strip()
+        input_str = (
+            Prompt.ask(
+                "[bold cyan]Enter command ID/name or 'list'/'exit'[/bold cyan]",
+                default="list",
+            )
+            .lower()
+            .strip()
+        )
 
         if input_str == "exit":
             return False
@@ -167,8 +173,10 @@ class UserInterface:
 
         # Search for command by ID or name
         for cmd in Command:
-            if (input_str == cmd.name or
-                    self.convert_to_int(input_str) == cmd.id):
+            if (
+                input_str == cmd.name
+                or self.convert_to_int(input_str) == cmd.id
+            ):
                 self.test_option.name = cmd.name
                 self.test_option.id = cmd.id
                 console.print(

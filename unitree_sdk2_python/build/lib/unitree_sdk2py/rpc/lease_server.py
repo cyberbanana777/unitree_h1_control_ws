@@ -1,27 +1,26 @@
-import time
 import json
-
+import time
 from threading import Lock
 
 from ..idl.unitree_api.msg.dds_ import Request_ as Request
+from ..idl.unitree_api.msg.dds_ import Response_ as Response
 from ..idl.unitree_api.msg.dds_ import ResponseHeader_ as ResponseHeader
 from ..idl.unitree_api.msg.dds_ import ResponseStatus_ as ResponseStatus
-from ..idl.unitree_api.msg.dds_ import Response_ as Response
-
 from .internal import *
 from .server_base import ServerBase
-
 
 """
 " class LeaseCache
 """
+
+
 class LeaseCache:
     def __init__(self):
         self.lastModified = 0
         self.id = 0
         self.name = None
-    
-    def Set(self, id: int, name: str, lastModified: int) :
+
+    def Set(self, id: int, name: str, lastModified: int):
         self.id = id
         self.name = name
         self.lastModified = lastModified
@@ -38,6 +37,8 @@ class LeaseCache:
 """
 " class LeaseServer
 """
+
+
 class LeaseServer(ServerBase):
     def __init__(self, name: str, term: float):
         self.__term = int(term * 1000000)
@@ -62,7 +63,7 @@ class LeaseServer(ServerBase):
                 self.__cache.Clear()
                 return False
             else:
-                return self.__cache.id  != leaseId
+                return self.__cache.id != leaseId
 
     def __Apply(self, parameter: str):
         name = ""
@@ -73,7 +74,9 @@ class LeaseServer(ServerBase):
             name = p.get("name")
 
         except:
-            print("[LeaseServer] apply json loads error. parameter:", parameter)
+            print(
+                "[LeaseServer] apply json loads error. parameter:", parameter
+            )
             return RPC_ERR_SERVER_API_PARAMETER, data
 
         if not name:
@@ -88,11 +91,16 @@ class LeaseServer(ServerBase):
         with self.__lock:
             id = self.__cache.id
             lastModified = self.__cache.lastModified
-    
+
             if id == 0 or now > lastModified + self.__term:
                 if id != 0:
-                    print("[LeaseServer] id expired:", id, ", name:", self.__cache.name)
-        
+                    print(
+                        "[LeaseServer] id expired:",
+                        id,
+                        ", name:",
+                        self.__cache.name,
+                    )
+
                 id = self.__GenerateId()
                 self.__cache.Set(id, name, now)
                 setted = True
@@ -108,14 +116,13 @@ class LeaseServer(ServerBase):
         else:
             return RPC_ERR_SERVER_LEASE_EXIST, data
 
-
     def __Renewal(self, id: int):
         now = self.__Now()
 
         with self.__lock:
             if self.__cache.id != id:
                 return RPC_ERR_SERVER_LEASE_NOT_EXIST
-    
+
             if now > self.__cache.lastModified + self.__term:
                 self.__cache.Clear()
                 return RPC_ERR_SERVER_LEASE_NOT_EXIST
@@ -146,6 +153,6 @@ class LeaseServer(ServerBase):
 
     def __GenerateId(self):
         return self.__Now()
-    
+
     def __Now(self):
-        return int(time.time_ns()/1000)
+        return int(time.time_ns() / 1000)

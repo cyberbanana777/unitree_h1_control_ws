@@ -1,22 +1,24 @@
-import time
 import sys
-from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
-from unitree_sdk2py.g1.arm.g1_arm_action_client import G1ArmActionClient
-from unitree_sdk2py.g1.arm.g1_arm_action_client import action_map
+import time
 from dataclasses import dataclass
+
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize, ChannelSubscriber
+from unitree_sdk2py.g1.arm.g1_arm_action_client import G1ArmActionClient, action_map
+
 
 @dataclass
 class TestOption:
     name: str
     id: int
 
+
 option_list = [
-    TestOption(name="release arm", id=0),     
-    TestOption(name="shake hand", id=1),    
-    TestOption(name="high five", id=2), 
-    TestOption(name="hug", id=3), 
+    TestOption(name="release arm", id=0),
+    TestOption(name="shake hand", id=1),
+    TestOption(name="high five", id=2),
+    TestOption(name="hug", id=3),
     TestOption(name="high wave", id=4),
-    TestOption(name="clap", id=5), 
+    TestOption(name="clap", id=5),
     TestOption(name="face wave", id=6),
     TestOption(name="left kiss", id=7),
     TestOption(name="heart", id=8),
@@ -25,10 +27,10 @@ option_list = [
     TestOption(name="x-ray", id=11),
     TestOption(name="right hand up", id=12),
     TestOption(name="reject", id=13),
-    TestOption(name="right kiss", id=14), 
-    TestOption(name="two-hand kiss", id=15),  
-    
+    TestOption(name="right kiss", id=14),
+    TestOption(name="two-hand kiss", id=15),
 ]
+
 
 class UserInterface:
     def __init__(self):
@@ -51,10 +53,15 @@ class UserInterface:
             return
 
         for option in option_list:
-            if input_str == option.name or self.convert_to_int(input_str) == option.id:
+            if (
+                input_str == option.name
+                or self.convert_to_int(input_str) == option.id
+            ):
                 self.test_option_.name = option.name
                 self.test_option_.id = option.id
-                print(f"Test: {self.test_option_.name}, test_id: {self.test_option_.id}")
+                print(
+                    f"Test: {self.test_option_.name}, test_id: {self.test_option_.id}"
+                )
                 return
 
         print("No matching test option found.")
@@ -65,27 +72,31 @@ if __name__ == "__main__":
         print(f"Usage: python3 {sys.argv[0]} networkInterface")
         sys.exit(-1)
 
-    print("WARNING: Please ensure there are no obstacles around the robot while running this example.")
+    print(
+        "WARNING: Please ensure there are no obstacles around the robot while running this example."
+    )
     input("Press Enter to continue...")
 
     ChannelFactoryInitialize(0, sys.argv[1])
 
-    test_option = TestOption(name=None, id=None) 
+    test_option = TestOption(name=None, id=None)
     user_interface = UserInterface()
     user_interface.test_option_ = test_option
 
-    armAction_client = G1ArmActionClient()  
+    armAction_client = G1ArmActionClient()
     armAction_client.SetTimeout(10.0)
     armAction_client.Init()
 
     # actionList = armAction_client.GetActionList()
     # print("actionList\n",actionList)
 
-    print("Input \"list\" to list all test option ...")
+    print('Input "list" to list all test option ...')
     while True:
         user_interface.terminal_handle()
 
-        print(f"Updated Test Option: Name = {test_option.name}, ID = {test_option.id}")
+        print(
+            f"Updated Test Option: Name = {test_option.name}, ID = {test_option.id}"
+        )
 
         if test_option.id == 0:
             armAction_client.ExecuteAction(action_map.get("release arm"))

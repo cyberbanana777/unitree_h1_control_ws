@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from cyclonedds.idl import IdlStruct
 
 

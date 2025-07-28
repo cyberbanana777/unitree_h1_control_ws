@@ -1,27 +1,30 @@
-import sys
-import os
-import errno
 import ctypes
+import errno
+import os
 import struct
+import sys
 import threading
 
 from .future import Future
 from .timerfd import *
 
+
 class Thread(Future):
-    def __init__(self, target = None, name = None, args = (), kwargs = None):
+    def __init__(self, target=None, name=None, args=(), kwargs=None):
         super().__init__()
         self.__target = target
         self.__args = args
         self.__kwargs = {} if kwargs is None else kwargs
-        self.__thread = threading.Thread(target=self.__ThreadFunc, name=name, daemon=True)
+        self.__thread = threading.Thread(
+            target=self.__ThreadFunc, name=name, daemon=True
+        )
 
     def Start(self):
         return self.__thread.start()
-    
+
     def GetId(self):
         return self.__thread.ident
-    
+
     def GetNativeId(self):
         return self.__thread.native_id
 
@@ -31,11 +34,21 @@ class Thread(Future):
             value = self.__target(*self.__args, **self.__kwargs)
             self.Ready(value)
         except:
-            info = sys.exc_info() 
-            self.Fail(f"[Thread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}")
+            info = sys.exc_info()
+            self.Fail(
+                f"[Thread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}"
+            )
+
 
 class RecurrentThread(Thread):
-    def __init__(self, interval: float = 1.0, target = None, name = None, args = (), kwargs = None):
+    def __init__(
+        self,
+        interval: float = 1.0,
+        target=None,
+        name=None,
+        args=(),
+        kwargs=None,
+    ):
         self.__quit = False
         self.__inter = interval
         self.__loopTarget = target
@@ -62,7 +75,9 @@ class RecurrentThread(Thread):
                 self.__loopTarget(*self.__loopArgs, **self.__loopKwargs)
             except:
                 info = sys.exc_info()
-                print(f"[RecurrentThread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}")
+                print(
+                    f"[RecurrentThread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}"
+                )
 
             try:
                 buf = os.read(tfd, 8)
@@ -72,12 +87,13 @@ class RecurrentThread(Thread):
                     raise e
 
         os.close(tfd)
-    
+
     def __LoopFunc_0(self):
         while not self.__quit:
             try:
                 self.__loopTarget(*self.__args, **self.__kwargs)
             except:
-                info = sys.exc_info() 
-                print(f"[RecurrentThread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}")
-
+                info = sys.exc_info()
+                print(
+                    f"[RecurrentThread] target func raise exception: name={info[0].__name__}, args={str(info[1].args)}"
+                )

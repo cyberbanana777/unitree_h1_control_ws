@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -22,14 +22,11 @@ import cyclonedds.idl.types as types
 #     import std_msgs.msg.dds_
 
 
-
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
 class Odometry_(idl.IdlStruct, typename="nav_msgs.msg.dds_.Odometry_"):
-    header: 'unitree_sdk2py.idl.std_msgs.msg.dds_.Header_'
+    header: "unitree_sdk2py.idl.std_msgs.msg.dds_.Header_"
     child_frame_id: str
-    pose: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.PoseWithCovariance_'
-    twist: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.TwistWithCovariance_'
-
-
+    pose: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.PoseWithCovariance_"
+    twist: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.TwistWithCovariance_"

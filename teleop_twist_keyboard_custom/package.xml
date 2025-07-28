@@ -4,7 +4,7 @@
   <name>teleop_twist_keyboard_custom</name>
   <version>1.0.0</version>
   <description>
-    Implements teleoperation control for robots via keyboard, 
+    Implements teleoperation control for robots via keyboard,
     publishing geometry_msgs/msg/Twist messages in ROS2 topic cmd_vel.
   </description>
   <maintainer email="sashagrachev@gmail.com">cyberbanana777</maintainer>

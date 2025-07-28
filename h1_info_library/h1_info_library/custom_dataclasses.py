@@ -1,9 +1,11 @@
-from rich.console import Console
-from rich.table import Table
-from rich.style import Style
-from .names_and_indexes import *
-from .limits import *
 from dataclasses import dataclass
+
+from rich.console import Console
+from rich.style import Style
+from rich.table import Table
+
+from .limits import *
+from .names_and_indexes import *
 
 
 @dataclass
@@ -23,21 +25,16 @@ class MotorPose:
     temporary_pose: float
 
 
-TYPES_OF_MOTOR = {
-    0: 'default_body_joint',
-    1: 'finger_joint',
-    2: 'wrist_joint'
-}
+TYPES_OF_MOTOR = {0: "default_body_joint", 1: "finger_joint", 2: "wrist_joint"}
 
 
-class RobotData():
+class RobotData:
     def __init__(self, target_action: str, include_hands_with_fingers: bool):
-
         self._var_runner = 0
         self.joints_info = []
         self.joints_pose_status = []
 
-        if target_action == 'teleoperation':
+        if target_action == "teleoperation":
             limits_set = LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION
         else:
             limits_set = LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR
@@ -50,7 +47,7 @@ class RobotData():
                     type=TYPES_OF_MOTOR[0],
                     name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
                     limits=limits_set[self._var_runner + i],
-                    index_in_msg=i
+                    index_in_msg=i,
                 )
             )
 
@@ -59,13 +56,12 @@ class RobotData():
                     abs_index=(self._var_runner + i),
                     target_pose=0.0,
                     current_pose=0.0,
-                    temporary_pose=0.0
+                    temporary_pose=0.0,
                 )
             )
 
         # Additional parts (hands and fingers)
         if include_hands_with_fingers:
-
             # Initialize fingers
             self._var_runner = 20
             for i in range(12):
@@ -75,7 +71,7 @@ class RobotData():
                         type=TYPES_OF_MOTOR[1],
                         name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
                         limits=limits_set[self._var_runner + i],
-                        index_in_msg=i
+                        index_in_msg=i,
                     )
                 )
 
@@ -84,7 +80,7 @@ class RobotData():
                         abs_index=(self._var_runner + i),
                         target_pose=0.0,
                         current_pose=0.0,
-                        temporary_pose=0.0
+                        temporary_pose=0.0,
                     )
                 )
 
@@ -97,7 +93,7 @@ class RobotData():
                         type=TYPES_OF_MOTOR[2],
                         name_joint=FROM_INDEXES_TO_NAMES[self._var_runner + i],
                         limits=limits_set[self._var_runner + i],
-                        index_in_msg=i
+                        index_in_msg=i,
                     )
                 )
 
@@ -106,10 +102,9 @@ class RobotData():
                         abs_index=(self._var_runner + i),
                         target_pose=0.0,
                         current_pose=0.0,
-                        temporary_pose=0.0
+                        temporary_pose=0.0,
                     )
                 )
-
         del self._var_runner
 
     def show_info(self):
@@ -122,7 +117,7 @@ class RobotData():
             header_style="bold cyan",
             border_style="bright_blue",
             show_lines=True,
-            expand=True
+            expand=True,
         )
 
         # Add columns
@@ -137,21 +132,21 @@ class RobotData():
             # Determine color based on motor type
             type_style = Style(
                 color={
-                    'default_body_joint': 'bright_cyan',
-                    'finger_joint': 'bright_magenta',
-                    'wrist_joint': '#ffa000'
-                }.get(motor.type, 'white')
+                    "default_body_joint": "bright_cyan",
+                    "finger_joint": "bright_magenta",
+                    "wrist_joint": "#ffa000",
+                }.get(motor.type, "white")
             )
 
             # Format limits
             limits_str = f"[{motor.limits[0]:.2f}, {motor.limits[1]:.2f}]"
 
             table.add_row(
-                f'[color(220)]{str(motor.abs_index)}[/]',
+                f"[color(220)]{str(motor.abs_index)}[/]",
                 f"[{type_style}]{motor.type}[/]",
                 motor.name_joint,
                 limits_str,
-                str(motor.index_in_msg)
+                str(motor.index_in_msg),
             )
 
         # Print the table
@@ -159,7 +154,9 @@ class RobotData():
 
         # Additional statistics
         console.print(
-            f"\n[bold]Total motors:[/] {len(self.joints_info)}", style="bold green")
+            f"\n[bold]Total motors:[/] {len(self.joints_info)}",
+            style="bold green",
+        )
 
         # Group by motor types
         type_counts = {}
@@ -179,10 +176,11 @@ class RobotData():
             raise ValueError(f"Joint with name '{name_joint}' not found")
 
 
-if __name__ == '__main__':
-    robot = RobotData(target_action='teleoperation',
-                      include_hands_with_fingers=True)
+if __name__ == "__main__":
+    robot = RobotData(
+        target_action="teleoperation", include_hands_with_fingers=True
+    )
     robot.show_info()
     print(robot.joints_info[0].type)
-    print(robot.get_joint_by_name('left_ankle_joint'))
-    print(robot.get_joint_by_name('left_ankle_joint__'))
+    print(robot.get_joint_by_name("left_ankle_joint"))
+    print(robot.get_joint_by_name("left_ankle_joint__"))

@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -25,4 +25,3 @@ INT32_ = 5
 UINT32_ = 6
 FLOAT32_ = 7
 FLOAT64_ = 8
-

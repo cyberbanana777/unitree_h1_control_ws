@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -21,13 +21,12 @@ import cyclonedds.idl.types as types
 #      import std_msgs.msg.dds_
 
 
-
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
-class OccupancyGrid_(idl.IdlStruct, typename="nav_msgs.msg.dds_.OccupancyGrid_"):
-    header: 'unitree_sdk2py.idl.std_msgs.msg.dds_.Header_'
-    info: 'unitree_sdk2py.idl.nav_msgs.msg.dds_.MapMetaData_'
+class OccupancyGrid_(
+    idl.IdlStruct, typename="nav_msgs.msg.dds_.OccupancyGrid_"
+):
+    header: "unitree_sdk2py.idl.std_msgs.msg.dds_.Header_"
+    info: "unitree_sdk2py.idl.nav_msgs.msg.dds_.MapMetaData_"
     data: types.sequence[types.uint8]
-
-

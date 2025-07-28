@@ -6,18 +6,19 @@
 
 """
 
+from dataclasses import dataclass, field
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass, field
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
 import cyclonedds.idl.types as types
 
+
 @dataclass
 @annotate.final
 @annotate.autoid("sequential")
 class MotorCmds_(idl.IdlStruct, typename="unitree_go.msg.dds_.MotorCmds_"):
-    cmds: types.sequence['unitree_sdk2py.idl.unitree_go.msg.dds_.MotorCmd_'] = field(default_factory=lambda: [])
-
-
+    cmds: types.sequence[
+        "unitree_sdk2py.idl.unitree_go.msg.dds_.MotorCmd_"
+    ] = field(default_factory=lambda: [])

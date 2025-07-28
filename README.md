@@ -27,7 +27,7 @@
 
 
 # unitree_h1_control_ws
-В данном репозитории лежат ROS2-пакеты, которые позволяют контролировать движения робота Unitree H1. Пакеты реализовывают как low-level движение, так и high-level движение. 
+В данном репозитории лежат ROS2-пакеты, которые позволяют контролировать движения робота Unitree H1. Пакеты реализовывают как low-level движение, так и high-level движение.
 
 ## 📦 Содержание Репозитория
 *   **`cmd_to_high_level_control_package/`**: Программа, анализирующая команды от **`teleop_twist_keyboard_custom`** и приводящая Unitree H1 в движение с помощью `high_level` команд.
@@ -57,7 +57,7 @@ my_pwd=$(pwd)
 ```bash
 sudo ./install_dependensies.bash
 ```
-3. **Установить проприетарные зависимости** (по ссылкам инструкции по установке от производителя): 
+3. **Установить проприетарные зависимости** (по ссылкам инструкции по установке от производителя):
  - [unitree_ros2](https://github.com/unitreerobotics/unitree_ros2) По ссылке нужно выполнить всё, что написано до `Connect to Unitree robot`. После всех действий нужно выполнить команду:
 ```bash
 echo "source ~/unitree_ros2/cyclonedds_ws/install/setup.bash" >> ~/.bashrc
@@ -78,11 +78,11 @@ source ~/.bashrc
 ```
 6. **Запустить пример / основной функционал:**
 ```bash
-ros2 launch completed_scripts_control control_H1_with_hands_launch.py 
+ros2 launch completed_scripts_control control_H1_with_hands_launch.py
 ```
 Или
 ```bash
-ros2 launch completed_scripts_control control_H1_without_hands_launch.py 
+ros2 launch completed_scripts_control control_H1_without_hands_launch.py
 ```
 Или
 ```bash
@@ -90,7 +90,7 @@ ros2 launch completed_scripts_control control_for_slam_with_hands_launch.py
 ```
 Или
 ```bash
-ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py 
+ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 ```
 ## ⚙️ Предварительные Требования
 
@@ -104,7 +104,7 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 ## 🧪 Использование
 ### **Запуск узлов:**
 #### **cmd_to_high_level_control_package**
-```bash 
+```bash
 ros2 run cmd_to_high_level_control_package cmd_to_high_level_control_node
 ```
 #### **high_level_control**
@@ -138,7 +138,7 @@ ros2 run low_level_control hands_init_node
 - `target_topic_param` - это топик, куда будут отправляться управляющие сообщения для Unitree H1. Значение по умолчанию = `arm_sdk`
 - `max_joint_velocity_param` - это максимальная скорость (рад/сек) для каждого из суставов. Значение по умолчанию = `7.0`
 ```bash
-ros2 run low_level_control low_level_control_with_hands_node --ros-args -p target_topic_param:="lowcmd" -p max_joint_velocity_param:=1.5 
+ros2 run low_level_control low_level_control_with_hands_node --ros-args -p target_topic_param:="lowcmd" -p max_joint_velocity_param:=1.5
 ```
 #### **gui_control**
 ```bash

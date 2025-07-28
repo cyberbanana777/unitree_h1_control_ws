@@ -6,6 +6,8 @@ from .g1_audio_api import *
 """
 " class SportClient
 """
+
+
 class AudioClient(Client):
     def __init__(self):
         super().__init__(AUDIO_SERVICE_NAME, False)
@@ -21,8 +23,8 @@ class AudioClient(Client):
         self._RegistApi(ROBOT_API_ID_AUDIO_START_PLAY, 0)
         self._RegistApi(ROBOT_API_ID_AUDIO_STOP_PLAY, 0)
         self._RegistApi(ROBOT_API_ID_AUDIO_GET_VOLUME, 0)
-        self._RegistApi(ROBOT_API_ID_AUDIO_SET_VOLUME, 0) 
-        self._RegistApi(ROBOT_API_ID_AUDIO_SET_RGB_LED, 0) 
+        self._RegistApi(ROBOT_API_ID_AUDIO_SET_VOLUME, 0)
+        self._RegistApi(ROBOT_API_ID_AUDIO_SET_RGB_LED, 0)
 
     ## API Call ##
     def TtsMaker(self, text: str, speaker_id: int):
@@ -59,12 +61,14 @@ class AudioClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_API_ID_AUDIO_SET_RGB_LED, parameter)
         return code
-    
+
     def PlayStream(self, app_name: str, stream_id: str, pcm_data: bytes):
         param = json.dumps({"app_name": app_name, "stream_id": stream_id})
-        pcm_list = list(pcm_data) 
-        return self._CallRequestWithParamAndBin(ROBOT_API_ID_AUDIO_START_PLAY, param, pcm_list)
-    
+        pcm_list = list(pcm_data)
+        return self._CallRequestWithParamAndBin(
+            ROBOT_API_ID_AUDIO_START_PLAY, param, pcm_list
+        )
+
     def PlayStop(self, app_name: str):
         parameter = json.dumps({"app_name": app_name})
         self._Call(ROBOT_API_ID_AUDIO_STOP_PLAY, parameter)

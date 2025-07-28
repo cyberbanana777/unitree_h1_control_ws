@@ -1,13 +1,12 @@
 import time
-from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
+
+import unitree_go2_const as go2
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize, ChannelSubscriber
 from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_
 from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
 
-import unitree_go2_const as go2
-
 
 def LowStateHandler(msg: LowState_):
-    
     # print front right hip motor states
     print("FR_0 motor state: ", msg.motor_state[go2.LegID["FR_0"]])
     print("IMU state: ", msg.imu_state)

@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -22,7 +22,5 @@ import cyclonedds.idl.types as types
 @annotate.final
 @annotate.autoid("sequential")
 class Twist_(idl.IdlStruct, typename="geometry_msgs.msg.dds_.Twist_"):
-    linear: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.Vector3_'
-    angular: 'unitree_sdk2py.idl.geometry_msgs.msg.dds_.Vector3_'
-
-
+    linear: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.Vector3_"
+    angular: "unitree_sdk2py.idl.geometry_msgs.msg.dds_.Vector3_"

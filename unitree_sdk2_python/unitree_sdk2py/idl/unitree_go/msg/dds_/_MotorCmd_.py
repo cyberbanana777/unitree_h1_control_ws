@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -29,5 +29,3 @@ class MotorCmd_(idl.IdlStruct, typename="unitree_go.msg.dds_.MotorCmd_"):
     kp: types.float32
     kd: types.float32
     reserve: types.array[types.uint32, 3]
-
-

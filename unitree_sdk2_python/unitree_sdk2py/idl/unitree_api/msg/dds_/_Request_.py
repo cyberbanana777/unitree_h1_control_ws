@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -22,7 +22,6 @@ import cyclonedds.idl.types as types
 @annotate.final
 @annotate.autoid("sequential")
 class Request_(idl.IdlStruct, typename="unitree_api.msg.dds_.Request_"):
-    header: 'unitree_sdk2py.idl.unitree_api.msg.dds_.RequestHeader_'
+    header: "unitree_sdk2py.idl.unitree_api.msg.dds_.RequestHeader_"
     parameter: str
     binary: types.sequence[types.uint8]
-

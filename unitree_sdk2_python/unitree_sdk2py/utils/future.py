@@ -1,18 +1,23 @@
+from enum import Enum
 from threading import Condition
 from typing import Any
-from enum import Enum
 
 """
 " Enum RequtestFutureState
 """
+
+
 class FutureState(Enum):
     DEFER = 0
     READY = 1
     FAILED = 2
 
+
 """
 " class FutureException
 """
+
+
 class FutureResult:
     FUTURE_SUCC = 0
     FUTUTE_ERR_TIMEOUT = 1
@@ -27,12 +32,13 @@ class FutureResult:
     def __str__(self):
         return f"FutureResult(code={str(self.code)}, msg='{self.msg}', value={self.value})"
 
+
 class Future:
     def __init__(self):
         self.__state = FutureState.DEFER
         self.__msg = None
         self.__condition = Condition()
-    
+
     def GetResult(self, timeout: float = None):
         with self.__condition:
             return self.__WaitResult(timeout)
@@ -67,14 +73,21 @@ class Future:
 
     def __WaitResult(self, timeout: float = None):
         if not self.__Wait(timeout):
-            return FutureResult(FutureResult.FUTUTE_ERR_TIMEOUT, "future wait timeout")
+            return FutureResult(
+                FutureResult.FUTUTE_ERR_TIMEOUT, "future wait timeout"
+            )
 
         if self.__IsReady():
-            return FutureResult(FutureResult.FUTURE_SUCC, "success", self.__value)
+            return FutureResult(
+                FutureResult.FUTURE_SUCC, "success", self.__value
+            )
         elif self.__IsFailed():
             return FutureResult(FutureResult.FUTURE_ERR_FAILED, self.__msg)
         else:
-            return FutureResult(FutureResult.FUTURE_ERR_UNKNOWN, "future state error:" + str(self.__state))
+            return FutureResult(
+                FutureResult.FUTURE_ERR_UNKNOWN,
+                "future state error:" + str(self.__state),
+            )
 
     def __Ready(self, value):
         if not self.__IsDeferred():
@@ -96,9 +109,9 @@ class Future:
 
     def __IsDeferred(self):
         return self.__state == FutureState.DEFER
-    
+
     def __IsReady(self):
         return self.__state == FutureState.READY
-    
+
     def __IsFailed(self):
         return self.__state == FutureState.FAILED

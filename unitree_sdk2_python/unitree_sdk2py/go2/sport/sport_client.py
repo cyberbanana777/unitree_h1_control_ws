@@ -12,8 +12,19 @@ SPORT_PATH_POINT_SIZE = 30
 """
 " class PathPoint
 """
+
+
 class PathPoint:
-    def __init__(self, timeFromStart: float, x: float, y: float, yaw: float, vx: float, vy: float, vyaw: float):
+    def __init__(
+        self,
+        timeFromStart: float,
+        x: float,
+        y: float,
+        yaw: float,
+        vx: float,
+        vy: float,
+        vyaw: float,
+    ):
         self.timeFromStart = timeFromStart
         self.x = x
         self.y = y
@@ -26,15 +37,16 @@ class PathPoint:
 """
 " class SportClient
 """
+
+
 class SportClient(Client):
     def __init__(self, enableLease: bool = False):
         super().__init__(SPORT_SERVICE_NAME, enableLease)
 
-
     def Init(self):
         # set api version
         self._SetApiVerson(SPORT_API_VERSION)
-        
+
         # regist api
         self._RegistApi(SPORT_API_ID_DAMP, 0)
         self._RegistApi(SPORT_API_ID_BALANCESTAND, 0)
@@ -89,14 +101,14 @@ class SportClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(SPORT_API_ID_DAMP, parameter)
         return code
-    
+
     # 1002
     def BalanceStand(self):
         p = {}
         parameter = json.dumps(p)
         code, data = self._Call(SPORT_API_ID_BALANCESTAND, parameter)
         return code
-    
+
     # 1003
     def StopMove(self):
         p = {}
@@ -152,7 +164,7 @@ class SportClient(Client):
         code, data = self._Call(SPORT_API_ID_SIT, parameter)
         return code
 
-    #1010
+    # 1010
     def RiseSit(self):
         p = {}
         parameter = json.dumps(p)
@@ -230,7 +242,7 @@ class SportClient(Client):
             p["vy"] = point.vy
             p["vyaw"] = point.vyaw
             path_p.append(p)
-            
+
         parameter = json.dumps(path_p)
         code = self._CallNoReply(SPORT_API_ID_TRAJECTORYFOLLOW, parameter)
         return code
@@ -249,7 +261,7 @@ class SportClient(Client):
     #     parameter = json.dumps(p)
     #     code, data = self._Call(SPORT_API_ID_CONTENT, parameter)
     #     return code
-    
+
     # 1021
     def Wallow(self):
         p = {}
@@ -275,23 +287,22 @@ class SportClient(Client):
     def GetFootRaiseHeight(self):
         p = {}
         parameter = json.dumps(p)
-        
+
         code, data = self._Call(SPORT_API_ID_GETFOOTRAISEHEIGHT, parameter)
-        
+
         if code == 0:
             d = json.loads(data)
             return code, d["data"]
         else:
             return code, None
-            
 
     # 1026
     def GetSpeedLevel(self):
         p = {}
         parameter = json.dumps(p)
-        
+
         code, data = self._Call(SPORT_API_ID_GETSPEEDLEVEL, parameter)
-        
+
         if code == 0:
             d = json.loads(data)
             return code, d["data"]
@@ -372,7 +383,7 @@ class SportClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(SPORT_API_ID_HEART, parameter)
         return code
-    
+
     # 1042
     def LeftFlip(self):
         p = {}
@@ -404,7 +415,7 @@ class SportClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_FREEBOUND, parameter)
         return code
-    
+
     # 1047
     def FreeJump(self, flag: bool):
         p = {}
@@ -428,7 +439,7 @@ class SportClient(Client):
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_SPORT_API_ID_WALKSTAIR, parameter)
         return code
-    
+
     # 1050
     def WalkUpright(self, flag: bool):
         p = {}
@@ -438,7 +449,7 @@ class SportClient(Client):
         return code
 
     # 1051
-    def CrossStep(self, flag: bool):  
+    def CrossStep(self, flag: bool):
         p = {}
         p["data"] = flag
         parameter = json.dumps(p)

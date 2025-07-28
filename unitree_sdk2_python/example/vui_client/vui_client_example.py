@@ -1,11 +1,11 @@
-import time
 import sys
+import time
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.go2.vui.vui_client import VuiClient
 
 if __name__ == "__main__":
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         ChannelFactoryInitialize(0, sys.argv[1])
     else:
         ChannelFactoryInitialize(0)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     print("#################SetBrightness 0####################")
 
-    code  = client.SetBrightness(0)
+    code = client.SetBrightness(0)
 
     if code != 0:
         print("set brightness error. code:", code)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     print("#################SetVolume 0####################")
 
-    code  = client.SetVolume(0)
+    code = client.SetVolume(0)
 
     if code != 0:
         print("set volume error. code:", code)

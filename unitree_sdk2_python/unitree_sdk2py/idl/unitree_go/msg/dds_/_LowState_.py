@@ -6,9 +6,9 @@
 
 """
 
+from dataclasses import dataclass
 from enum import auto
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass
 
 import cyclonedds.idl as idl
 import cyclonedds.idl.annotations as annotate
@@ -28,9 +28,11 @@ class LowState_(idl.IdlStruct, typename="unitree_go.msg.dds_.LowState_"):
     sn: types.array[types.uint32, 2]
     version: types.array[types.uint32, 2]
     bandwidth: types.uint16
-    imu_state: 'unitree_sdk2py.idl.unitree_go.msg.dds_.IMUState_'
-    motor_state: types.array['unitree_sdk2py.idl.unitree_go.msg.dds_.MotorState_', 20]
-    bms_state: 'unitree_sdk2py.idl.unitree_go.msg.dds_.BmsState_'
+    imu_state: "unitree_sdk2py.idl.unitree_go.msg.dds_.IMUState_"
+    motor_state: types.array[
+        "unitree_sdk2py.idl.unitree_go.msg.dds_.MotorState_", 20
+    ]
+    bms_state: "unitree_sdk2py.idl.unitree_go.msg.dds_.BmsState_"
     foot_force: types.array[types.int16, 4]
     foot_force_est: types.array[types.int16, 4]
     tick: types.uint32
@@ -44,5 +46,3 @@ class LowState_(idl.IdlStruct, typename="unitree_go.msg.dds_.LowState_"):
     fan_frequency: types.array[types.uint16, 4]
     reserve: types.uint32
     crc: types.uint32
-
-

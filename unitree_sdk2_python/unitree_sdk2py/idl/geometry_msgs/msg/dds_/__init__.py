@@ -20,4 +20,21 @@ from ._TwistStamped_ import TwistStamped_
 from ._TwistWithCovariance_ import TwistWithCovariance_
 from ._TwistWithCovarianceStamped_ import TwistWithCovarianceStamped_
 from ._Vector3_ import Vector3_
-__all__ = ["Point32_", "Point_", "PointStamped_", "Pose2D_", "Pose_", "PoseStamped_", "PoseWithCovariance_", "PoseWithCovarianceStamped_", "Quaternion_", "QuaternionStamped_", "Twist_", "TwistStamped_", "TwistWithCovariance_", "TwistWithCovarianceStamped_", "Vector3_", ]
+
+__all__ = [
+    "Point32_",
+    "Point_",
+    "PointStamped_",
+    "Pose2D_",
+    "Pose_",
+    "PoseStamped_",
+    "PoseWithCovariance_",
+    "PoseWithCovarianceStamped_",
+    "Quaternion_",
+    "QuaternionStamped_",
+    "Twist_",
+    "TwistStamped_",
+    "TwistWithCovariance_",
+    "TwistWithCovarianceStamped_",
+    "Vector3_",
+]

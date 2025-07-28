@@ -11,10 +11,10 @@ LegID = {
     "RL_0": 9,
     "RL_1": 10,
     "RL_2": 11,
-    "FR_w": 12, # Front right wheel
-    "FL_w": 13, # Front left wheel
-    "RR_w": 14, # Rear right wheel
-    "RL_w": 15, # Rear left wheel
+    "FR_w": 12,  # Front right wheel
+    "FL_w": 13,  # Front left wheel
+    "RR_w": 14,  # Rear right wheel
+    "RL_w": 15,  # Rear left wheel
 }
 
 HIGHLEVEL = 0xEE

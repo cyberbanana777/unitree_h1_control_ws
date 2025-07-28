@@ -1,12 +1,12 @@
-import time
 import os
 import sys
+import time
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.go2.video.video_client import VideoClient
 
 if __name__ == "__main__":
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         ChannelFactoryInitialize(0, sys.argv[1])
     else:
         ChannelFactoryInitialize(0)

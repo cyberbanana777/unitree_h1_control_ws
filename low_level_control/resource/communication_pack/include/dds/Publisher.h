@@ -61,7 +61,7 @@ public:
 
   /**
    * @brief Try to get the data lock from realtime
-   * 
+   *
    * To publish data from the realtime loop, you need to run trylock to
    * attenot to get unique access to the msg_ variable. Teylock returns
    * true if the lock was aquired, and false otherwise.
@@ -84,7 +84,7 @@ public:
   /**
    * @brief Unlock the msg_ variable and publish it.
    */
-  void unlockAndPublish() 
+  void unlockAndPublish()
   {
     turn_ = NON_REALTIME;
     mutex_.unlock();
@@ -92,7 +92,7 @@ public:
 
   /**
    * @brief Get the data lock from non-realtime.
-   * 
+   *
    * To publish data from the realtime loop, you need to run trylock to
    * attenot to get unique access to the msg_ variable. Teylock returns
    * true if the lock was aquired, and false otherwise.
@@ -147,8 +147,8 @@ private:
 
       unlock();
 
-      if(keep_running_) { 
-        publisher_->Write(outgoing, 0); 
+      if(keep_running_) {
+        publisher_->Write(outgoing, 0);
       }
     }
     is_running_ = false;

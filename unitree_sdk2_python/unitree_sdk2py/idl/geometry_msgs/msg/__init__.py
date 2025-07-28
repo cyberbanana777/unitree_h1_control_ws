@@ -6,4 +6,7 @@
 """
 
 from . import dds_
-__all__ = ["dds_", ]
+
+__all__ = [
+    "dds_",
+]

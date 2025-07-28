@@ -26,6 +26,8 @@ action_map = {
 """
 " class SportClient
 """
+
+
 class G1ArmActionClient(Client):
     def __init__(self):
         super().__init__(ARM_ACTION_SERVICE_NAME, False)
@@ -43,13 +45,17 @@ class G1ArmActionClient(Client):
         p = {}
         p["data"] = action_id
         parameter = json.dumps(p)
-        code, data = self._Call(ROBOT_API_ID_ARM_ACTION_EXECUTE_ACTION, parameter)
+        code, data = self._Call(
+            ROBOT_API_ID_ARM_ACTION_EXECUTE_ACTION, parameter
+        )
         return code
-    
+
     def GetActionList(self):
         p = {}
         parameter = json.dumps(p)
-        code, data = self._Call(ROBOT_API_ID_ARM_ACTION_GET_ACTION_LIST, parameter)
+        code, data = self._Call(
+            ROBOT_API_ID_ARM_ACTION_GET_ACTION_LIST, parameter
+        )
         if code == 0:
             return code, json.loads(data)
         else:

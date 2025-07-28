@@ -1,4 +1,4 @@
-ChannelConfigHasInterface = '''<?xml version="1.0" encoding="UTF-8" ?>
+ChannelConfigHasInterface = """<?xml version="1.0" encoding="UTF-8" ?>
     <CycloneDDS>
         <Domain Id="any">
             <General>
@@ -11,9 +11,9 @@ ChannelConfigHasInterface = '''<?xml version="1.0" encoding="UTF-8" ?>
             <OutputFile>/tmp/cdds.LOG</OutputFile>
         </Tracing>
         </Domain>
-    </CycloneDDS>'''
+    </CycloneDDS>"""
 
-ChannelConfigAutoDetermine = '''<?xml version="1.0" encoding="UTF-8" ?>
+ChannelConfigAutoDetermine = """<?xml version="1.0" encoding="UTF-8" ?>
     <CycloneDDS>
         <Domain Id="any">
             <General>
@@ -22,4 +22,4 @@ ChannelConfigAutoDetermine = '''<?xml version="1.0" encoding="UTF-8" ?>
                 </Interfaces>
             </General>
         </Domain>
-    </CycloneDDS>'''
+    </CycloneDDS>"""
