@@ -136,7 +136,7 @@ ros2 run gui_control gui_control_node
 ```
 #### **teleop_twist_keyboard_custom**
 ```bash
-ros2 run teleop_twist_keyboard_custom teleop_twist_keyboard_custom_node
+ros2 run teleop_twist_keyboard_custom teleop_node
 ```
 
 ### **Запуск Launch файлов:**
