@@ -1,0 +1,24 @@
+running develop
+running egg_info
+creating high_level_control.egg-info
+writing high_level_control.egg-info/PKG-INFO
+writing dependency_links to high_level_control.egg-info/dependency_links.txt
+writing entry points to high_level_control.egg-info/entry_points.txt
+writing requirements to high_level_control.egg-info/requires.txt
+writing top-level names to high_level_control.egg-info/top_level.txt
+writing manifest file 'high_level_control.egg-info/SOURCES.txt'
+reading manifest file 'high_level_control.egg-info/SOURCES.txt'
+writing manifest file 'high_level_control.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/lib/python3.8/site-packages/site.py
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/lib/python3.8/site-packages/high-level-control.egg-link (link to .)
+Installing beautiful_node script to /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/lib/high_level_control
+Installing simple_node script to /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/lib/high_level_control
+
+Installed /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/high_level_control
+running symlink_data
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/share/ament_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/share/ament_index/resource_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/high_level_control/resource/high_level_control -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/high_level_control/package.xml -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/high_level_control/share/high_level_control

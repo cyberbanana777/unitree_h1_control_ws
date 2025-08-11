@@ -254,34 +254,35 @@ class RobotData:
             raise ValueError(f"Joint with name '{name_joint}' not found.")
         
     def get_joint_info_by_index(self, abs_index: int) -> MotorInfo:
-        """Возвращает информацию о суставе по его абсолютному индексу."""
+        """Returns information about a joint by its absolute index."""
         for joint in self.joints_info:
             if joint.abs_index == abs_index:
                 return joint
         raise ValueError(f"Joint with abs_index {abs_index} not found")
 
     def get_joint_pose_by_index(self, abs_index: int) -> MotorPose:
-        """Возвращает текущий pose (состояние) сустава по его абсолютному индексу."""
+        """Returns the current pose (state) of the joint by its absolute index."""
         for pose in self.joints_pose_status:
             if pose.abs_index == abs_index:
                 return pose
         raise ValueError(f"Pose for joint with abs_index {abs_index} not found")
+    
     def update_current_pose(self, abs_index: int, new_value: float) -> None:
-        """Обновляет current_pose для сустава с заданным abs_index."""
+        """Updates the current_pose for the joint with the specified abs_index."""
         joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
         if joint_pose is None:
             raise ValueError(f"Joint with index {abs_index} not found")
         joint_pose.current_pose = new_value
 
     def update_target_pose(self, abs_index: int, new_value: float) -> None:
-        """Обновляет target_pose для сустава с заданным abs_index."""
+        """Updates the target_pose for the joint with the specified abs_index."""
         joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
         if joint_pose is None:
             raise ValueError(f"Joint with index {abs_index} not found")
         joint_pose.target_pose = new_value
 
     def update_temporary_pose(self, abs_index: int, new_value: float) -> None:
-        """Обновляет temporary_pose для сустава с заданным abs_index."""
+        """Updates the temporary_pose for the joint with the specified abs_index."""
         joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
         if joint_pose is None:
             raise ValueError(f"Joint with index {abs_index} not found")

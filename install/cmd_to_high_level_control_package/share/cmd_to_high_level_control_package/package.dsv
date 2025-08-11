@@ -1,0 +1,9 @@
+source;share/cmd_to_high_level_control_package/hook/pythonpath.ps1
+source;share/cmd_to_high_level_control_package/hook/pythonpath.dsv
+source;share/cmd_to_high_level_control_package/hook/pythonpath.sh
+source;share/cmd_to_high_level_control_package/hook/ament_prefix_path.ps1
+source;share/cmd_to_high_level_control_package/hook/ament_prefix_path.dsv
+source;share/cmd_to_high_level_control_package/hook/ament_prefix_path.sh
+source;../../build/cmd_to_high_level_control_package/share/cmd_to_high_level_control_package/hook/pythonpath_develop.ps1
+source;../../build/cmd_to_high_level_control_package/share/cmd_to_high_level_control_package/hook/pythonpath_develop.dsv
+source;../../build/cmd_to_high_level_control_package/share/cmd_to_high_level_control_package/hook/pythonpath_develop.sh

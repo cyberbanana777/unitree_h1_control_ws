@@ -1,0 +1,10 @@
+Metadata-Version: 1.2
+Name: gui-control
+Version: 1.0.0
+Summary: GUI for controlling Unitree H1 robot joints via ROS2.
+Home-page: UNKNOWN
+Maintainer: cyberbanana777
+Maintainer-email: sashagrachev2005@gmail.com
+License: TODO: License declaration
+Description: UNKNOWN
+Platform: UNKNOWN

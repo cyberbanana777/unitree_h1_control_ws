@@ -1,0 +1,10 @@
+Metadata-Version: 1.2
+Name: high-level-control
+Version: 1.0.0
+Summary: This script launches a high-level client that allows you to        control the Unitree H1 robot using high-level commands (such as         damping, readiness, and balancing, etc.) as if it were a remote        control.
+Home-page: UNKNOWN
+Maintainer: cyberbanana777
+Maintainer-email: sashagrachev2005@gmail.com
+License: BSD 3-Clause
+Description: UNKNOWN
+Platform: UNKNOWN

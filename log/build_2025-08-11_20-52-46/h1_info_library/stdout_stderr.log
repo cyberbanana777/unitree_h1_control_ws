@@ -1,0 +1,22 @@
+running develop
+running egg_info
+creating h1_info_library.egg-info
+writing h1_info_library.egg-info/PKG-INFO
+writing dependency_links to h1_info_library.egg-info/dependency_links.txt
+writing entry points to h1_info_library.egg-info/entry_points.txt
+writing requirements to h1_info_library.egg-info/requires.txt
+writing top-level names to h1_info_library.egg-info/top_level.txt
+writing manifest file 'h1_info_library.egg-info/SOURCES.txt'
+reading manifest file 'h1_info_library.egg-info/SOURCES.txt'
+writing manifest file 'h1_info_library.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages/site.py
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages/h1-info-library.egg-link (link to .)
+
+Installed /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library
+running symlink_data
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/resource/h1_info_library -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/package.xml -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/h1_info_library

@@ -1,0 +1,27 @@
+running develop
+running egg_info
+creating completed_scripts_control.egg-info
+writing completed_scripts_control.egg-info/PKG-INFO
+writing dependency_links to completed_scripts_control.egg-info/dependency_links.txt
+writing entry points to completed_scripts_control.egg-info/entry_points.txt
+writing requirements to completed_scripts_control.egg-info/requires.txt
+writing top-level names to completed_scripts_control.egg-info/top_level.txt
+writing manifest file 'completed_scripts_control.egg-info/SOURCES.txt'
+reading manifest file 'completed_scripts_control.egg-info/SOURCES.txt'
+writing manifest file 'completed_scripts_control.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/lib/python3.8/site-packages/site.py
+Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/lib/python3.8/site-packages/completed-scripts-control.egg-link (link to .)
+
+Installed /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control
+running symlink_data
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/ament_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/ament_index/resource_index
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/resource/completed_scripts_control -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/ament_index/resource_index/packages
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/package.xml -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control
+creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control/launch
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/launch/control_H1_without_hands_launch.py -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control/launch
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/launch/control_for_slam_without_hands_launch.py -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control/launch
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/launch/control_H1_with_hands_launch.py -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control/launch
+symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/completed_scripts_control/launch/control_for_slam_with_hands_launch.py -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/completed_scripts_control/share/completed_scripts_control/launch

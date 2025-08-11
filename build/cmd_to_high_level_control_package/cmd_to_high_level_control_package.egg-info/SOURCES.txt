@@ -1,0 +1,13 @@
+package.xml
+setup.cfg
+setup.py
+cmd_to_high_level_control_package/__init__.py
+cmd_to_high_level_control_package/cmd_to_high_level_control_node.py
+cmd_to_high_level_control_package.egg-info/PKG-INFO
+cmd_to_high_level_control_package.egg-info/SOURCES.txt
+cmd_to_high_level_control_package.egg-info/dependency_links.txt
+cmd_to_high_level_control_package.egg-info/entry_points.txt
+cmd_to_high_level_control_package.egg-info/requires.txt
+cmd_to_high_level_control_package.egg-info/top_level.txt
+cmd_to_high_level_control_package.egg-info/zip-safe
+resource/cmd_to_high_level_control_package

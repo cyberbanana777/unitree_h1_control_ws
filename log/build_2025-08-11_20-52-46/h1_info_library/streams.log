@@ -1,0 +1,24 @@
+[1.642s] Invoking command in '/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library': PYTHONPATH=/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/build --no-deps symlink_data
+[1.896s] running develop
+[2.041s] running egg_info
+[2.041s] creating h1_info_library.egg-info
+[2.041s] writing h1_info_library.egg-info/PKG-INFO
+[2.041s] writing dependency_links to h1_info_library.egg-info/dependency_links.txt
+[2.041s] writing entry points to h1_info_library.egg-info/entry_points.txt
+[2.042s] writing requirements to h1_info_library.egg-info/requires.txt
+[2.042s] writing top-level names to h1_info_library.egg-info/top_level.txt
+[2.043s] writing manifest file 'h1_info_library.egg-info/SOURCES.txt'
+[2.069s] reading manifest file 'h1_info_library.egg-info/SOURCES.txt'
+[2.069s] writing manifest file 'h1_info_library.egg-info/SOURCES.txt'
+[2.100s] running build_ext
+[2.100s] Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages/site.py
+[2.102s] Creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages/h1-info-library.egg-link (link to .)
+[2.102s] 
+[2.103s] Installed /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library
+[2.103s] running symlink_data
+[2.103s] creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index
+[2.103s] creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index
+[2.103s] creating /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index/packages
+[2.103s] symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/resource/h1_info_library -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/ament_index/resource_index/packages
+[2.103s] symbolically linking /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/package.xml -> /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/share/h1_info_library
+[2.341s] Invoked command in '/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library' returned '0': PYTHONPATH=/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/install/h1_info_library/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/build/h1_info_library/build --no-deps symlink_data

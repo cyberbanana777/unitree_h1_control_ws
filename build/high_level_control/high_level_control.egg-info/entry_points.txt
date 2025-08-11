@@ -1,0 +1,4 @@
+[console_scripts]
+beautiful_node = high_level_control.high_level_control_beautiful_node:main
+simple_node = high_level_control.high_level_control_simple_node:main
+
