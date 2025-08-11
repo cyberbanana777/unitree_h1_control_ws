@@ -3,7 +3,10 @@
 <package format="3">
   <name>low_level_control</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>
+    Implements low-level control for Unitree H1 robot via ROS 2, 
+    managing arm joints, fingers and wrists.
+  </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
 

@@ -5,7 +5,7 @@ path_to_bin = "resource/communication_pack/build/inspire_hand"
 
 setup(
     name=package_name,
-    version="0.0.0",
+    version="1.0.0",
     packages=[package_name],
     data_files=[
         (
@@ -19,7 +19,8 @@ setup(
     zip_safe=True,
     maintainer="cyberbanana777",
     maintainer_email="sashagrachev2005@gmail.com",
-    description="TODO: Package description",
+    description="Implements low-level control for Unitree H1 robot via ROS 2,\
+                managing arm joints, fingers and wrists.",
     license="TODO: License declaration",
     tests_require=["pytest"],
     entry_points={

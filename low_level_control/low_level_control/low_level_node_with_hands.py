@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 
-"""
-Low-Level Control Node for Unitree H1 Robot with Inspire Hands
+'''
+АННОТАЦИЯ
+Реализует низкоуровневый ROS 2 узел для управления роботом Unitree H1, 
+включая руки c пальцами и запястьями. Основные функции: обработка целевых поз
+из JSON-сообщений через топик positions_to_unitree, плавное изменение 
+скорости суставов с ограничением максимального угла поворота за цикл, 
+контроль температуры приводов. Ключевые технологии: ROS 2 (rclpy), 
+Unitree SDK, CRC-проверка команд. Важные ограничения: жестко заданные 
+PID-коэффициенты, зависимость от проприетарных библиотек unitree_sdk2py 
+и h1_info_library.
 
-This script creates a ROS2 node "low_level_control_node" that controls the articulations 
-of the Unitree H1 robot and Inspire hands. The node listens to the "positions_to_unitree" topic,
-which publishes String messages containing:
-
-1. A JSON package where keys are Unitree H1 joint indices and values are target joint positions
-2. A float value (0.0-1.0) representing the control influence level (1.0 = full control)
-
-These two parts are separated by a "$" character in the message.
-
-Example message:
-{"16": -0.1, "19": 1.65, "12": -0.1, "13": 0.0, "14": -0.1, "15": 1.65}$1.0
-"""
+ANNOTATION
+Implements a low-level ROS 2 node for controlling Unitree H1 robot's arms with
+fingers and wrists. Core functionality: processing target poses from JSON 
+messages via positions_to_unitree topic, smooth joint velocity ramping with 
+per-cycle angle delta limits, motor temperature monitoring. Key technologies: 
+ROS 2 (rclpy), Unitree SDK, CRC command validation. Critical constraints: 
+hardcoded PID coefficients, dependency on proprietary unitree_sdk2py 
+and h1_info_library.
+'''
 
 import json
 import time
