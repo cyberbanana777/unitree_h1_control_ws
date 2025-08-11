@@ -1,1 +1,0 @@
-/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/gui_control/setup.py

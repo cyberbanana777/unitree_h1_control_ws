@@ -291,26 +291,13 @@ class JointControl:
 
     def update_joint_value(self, value):
         self.cur_label.config(text=f"{value:.2f}")
-        msg = String()
+        self.node.publish_all_joints()
 
-        # Get the current value of IMPACT
-        impact_value = 0.0
-        if hasattr(self.node, "impact_control") and hasattr(
-            self.node.impact_control, "cur_label"
-        ):
-            try:
-                impact_value = float(
-                    self.node.impact_control.cur_label.cget("text")
-                )
-            except (ValueError, AttributeError):
-                impact_value = 0.0
-
-        # Generate JSON with joint_id and value, then add IMPACT via $
-        joint_data = {str(self.joint_id): float(f"{value:.2f}")}  # {"6": 1.50}
-        msg.data = (
-            f"{json.dumps(joint_data)}${impact_value:.2f}"  # {"6":1.50}$0.75
-        )
-        self.node.publisher.publish(msg)
+    def get_current_value(self):
+        try:
+            return float(self.cur_label.cget("text"))
+        except (ValueError, AttributeError):
+            return 0.0
 
 
 class ImpactControl:
@@ -415,9 +402,13 @@ class ImpactControl:
 
     def update_impact_value(self, value):
         self.cur_label.config(text=f"{value:.2f}")
-        msg = String()
-        msg.data = f"{json.dumps({})}${value:.2f}"  # {}$0.75
-        self.node.publisher.publish(msg)
+        self.node.publish_all_joints()
+
+    def get_current_value(self):
+        try:
+            return float(self.cur_label.cget("text"))
+        except (ValueError, AttributeError):
+            return 0.0
 
 
 class GUIControlNode(Node):
@@ -434,7 +425,31 @@ class GUIControlNode(Node):
         style = ttk.Style()
         style.configure("Active.TEntry", fieldbackground="lightblue")
 
+        # Store all joint controls
+        self.joint_controls = {}
         self.setup_gui()
+
+    def add_joint_control(self, joint_id, control):
+        self.joint_controls[joint_id] = control
+
+    def publish_all_joints(self):
+        """Publish all joint values in the required format"""
+        msg = String()
+        
+        # Collect all joint values
+        joint_data = {}
+        for joint_id, control in self.joint_controls.items():
+            if joint_id != 9:  # Skip IMPACT (handled separately)
+                joint_data[str(joint_id)] = control.get_current_value()
+        
+        # Get IMPACT value
+        impact_value = 0.0
+        if hasattr(self, "impact_control") and self.impact_control:
+            impact_value = self.impact_control.get_current_value()
+        
+        # Format message as {"16": -0.1, ..., "19": 1.65}$1.0
+        msg.data = f"{json.dumps(joint_data)}${impact_value:.2f}"
+        self.publisher.publish(msg)
 
     def add_image_viewer_button(self):
         # Create a button at the bottom of the interface
@@ -463,26 +478,26 @@ class GUIControlNode(Node):
         # Left Arm controls
         left_arm_frame = ttk.LabelFrame(arms_frame, text="Left Arm")
         for joint_id in [16, 17, 18, 19]:  # left arm joints
-            JointControl(left_arm_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=2
-            )
+            control = JointControl(left_arm_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=2)
+            self.add_joint_control(joint_id, control)
 
         # Add separator and torso joint
         ttk.Separator(left_arm_frame, orient="horizontal").pack(
             fill=tk.X, pady=5
         )
-        JointControl(left_arm_frame, 6, self).frame.pack(
-            fill=tk.X, pady=2
-        )  # torso_joint
+        control = JointControl(left_arm_frame, 6, self)  # torso_joint
+        control.frame.pack(fill=tk.X, pady=2)
+        self.add_joint_control(6, control)
 
         left_arm_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
 
         # Right Arm controls
         right_arm_frame = ttk.LabelFrame(arms_frame, text="Right Arm")
         for joint_id in [12, 13, 14, 15]:  # right arm joints
-            JointControl(right_arm_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=2
-            )
+            control = JointControl(right_arm_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=2)
+            self.add_joint_control(joint_id, control)
         right_arm_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
 
         notebook.add(arms_frame, text="Arms")
@@ -493,16 +508,18 @@ class GUIControlNode(Node):
         # Left Hand section
         left_hand_frame = ttk.LabelFrame(hands_frame, text="Left Hand")
         left_wrist_frame = ttk.LabelFrame(left_hand_frame, text="Left Wrist")
-        JointControl(left_wrist_frame, 32, self).frame.pack(fill=tk.X, pady=2)
+        control = JointControl(left_wrist_frame, 32, self)
+        control.frame.pack(fill=tk.X, pady=2)
+        self.add_joint_control(32, control)
         left_wrist_frame.pack(fill=tk.X, padx=5, pady=5)
 
         left_fingers_frame = ttk.LabelFrame(
             left_hand_frame, text="Left Fingers"
         )
         for joint_id in range(26, 32):  # left hand finger joints
-            JointControl(left_fingers_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=1
-            )
+            control = JointControl(left_fingers_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=1)
+            self.add_joint_control(joint_id, control)
         left_fingers_frame.pack(fill=tk.X, padx=5, pady=5)
 
         left_hand_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
@@ -512,16 +529,18 @@ class GUIControlNode(Node):
         right_wrist_frame = ttk.LabelFrame(
             right_hand_frame, text="Right Wrist"
         )
-        JointControl(right_wrist_frame, 33, self).frame.pack(fill=tk.X, pady=2)
+        control = JointControl(right_wrist_frame, 33, self)
+        control.frame.pack(fill=tk.X, pady=2)
+        self.add_joint_control(33, control)
         right_wrist_frame.pack(fill=tk.X, padx=5, pady=5)
 
         right_fingers_frame = ttk.LabelFrame(
             right_hand_frame, text="Right Fingers"
         )
         for joint_id in range(20, 26):  # right hand finger joints
-            JointControl(right_fingers_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=1
-            )
+            control = JointControl(right_fingers_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=1)
+            self.add_joint_control(joint_id, control)
         right_fingers_frame.pack(fill=tk.X, padx=5, pady=5)
 
         right_hand_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
@@ -534,17 +553,17 @@ class GUIControlNode(Node):
         # Left Leg controls
         left_leg_frame = ttk.LabelFrame(legs_frame, text="Left Leg")
         for joint_id in [3, 4, 5, 7, 10]:  # left leg joints
-            JointControl(left_leg_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=2
-            )
+            control = JointControl(left_leg_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=2)
+            self.add_joint_control(joint_id, control)
         left_leg_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
 
         # Right Leg controls
         right_leg_frame = ttk.LabelFrame(legs_frame, text="Right Leg")
         for joint_id in [0, 1, 2, 8, 11]:  # right leg joints
-            JointControl(right_leg_frame, joint_id, self).frame.pack(
-                fill=tk.X, pady=2
-            )
+            control = JointControl(right_leg_frame, joint_id, self)
+            control.frame.pack(fill=tk.X, pady=2)
+            self.add_joint_control(joint_id, control)
         right_leg_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
 
         notebook.add(legs_frame, text="Legs")
@@ -602,6 +621,7 @@ class GUIControlNode(Node):
 
         # Connect to existing ImpactControl logic
         self.impact_control = ImpactControl(parent, self)
+        self.add_joint_control(9, self.impact_control)  # IMPACT has ID 9
         self.impact_control.label.destroy()  # Remove default label
         self.impact_control.dec_btn.destroy()
         self.impact_control.value_entry.destroy()

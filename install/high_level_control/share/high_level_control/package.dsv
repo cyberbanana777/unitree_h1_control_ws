@@ -1,9 +1,0 @@
-source;share/high_level_control/hook/pythonpath.ps1
-source;share/high_level_control/hook/pythonpath.dsv
-source;share/high_level_control/hook/pythonpath.sh
-source;share/high_level_control/hook/ament_prefix_path.ps1
-source;share/high_level_control/hook/ament_prefix_path.dsv
-source;share/high_level_control/hook/ament_prefix_path.sh
-source;../../build/high_level_control/share/high_level_control/hook/pythonpath_develop.ps1
-source;../../build/high_level_control/share/high_level_control/hook/pythonpath_develop.dsv
-source;../../build/high_level_control/share/high_level_control/hook/pythonpath_develop.sh

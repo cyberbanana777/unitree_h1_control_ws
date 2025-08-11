@@ -1,3 +1,0 @@
-[console_scripts]
-teleop_node = teleop_twist_keyboard_custom.teleop_twist_keyboard_custom_node:main
-

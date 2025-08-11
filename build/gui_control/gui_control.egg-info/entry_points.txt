@@ -1,3 +1,0 @@
-[console_scripts]
-gui_control_node = gui_control.gui_control_node:main
-

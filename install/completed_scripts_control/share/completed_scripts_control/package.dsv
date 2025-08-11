@@ -1,9 +1,0 @@
-source;share/completed_scripts_control/hook/pythonpath.ps1
-source;share/completed_scripts_control/hook/pythonpath.dsv
-source;share/completed_scripts_control/hook/pythonpath.sh
-source;share/completed_scripts_control/hook/ament_prefix_path.ps1
-source;share/completed_scripts_control/hook/ament_prefix_path.dsv
-source;share/completed_scripts_control/hook/ament_prefix_path.sh
-source;../../build/completed_scripts_control/share/completed_scripts_control/hook/pythonpath_develop.ps1
-source;../../build/completed_scripts_control/share/completed_scripts_control/hook/pythonpath_develop.dsv
-source;../../build/completed_scripts_control/share/completed_scripts_control/hook/pythonpath_develop.sh

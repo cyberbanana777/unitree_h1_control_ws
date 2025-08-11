@@ -1,1 +1,0 @@
-/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/completed_scripts_control/launch/control_for_slam_without_hands_launch.py
