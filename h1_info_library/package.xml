@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>
     This is a python3 library for comfortable programming Unitree H1.
-    It lib include reference info and optimized data structure for programming robot.'
+    It lib include reference info and optimized data structure for programming robot.
   </description>
   <maintainer email="sasha_grachev2005@mail.ru">cyberbanana</maintainer>
   <license>TODO: License declaration</license>

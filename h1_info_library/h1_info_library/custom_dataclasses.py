@@ -7,16 +7,17 @@ configuration (e.g., teleoperation mode or vendor defaults).
 """
 
 from dataclasses import dataclass
+from typing import Tuple
 
 from rich.console import Console
 from rich.style import Style
 from rich.table import Table
 
-from .limits import (
-    LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION,
-    LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR,
-)
-from .names_and_indexes import FROM_INDEXES_TO_NAMES, FROM_NAMES_TO_INDEXES
+
+
+from h1_info_library.limits import (LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION,
+                                    LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR)
+from h1_info_library.names_and_indexes import FROM_INDEXES_TO_NAMES, FROM_NAMES_TO_INDEXES
 
 
 @dataclass
@@ -33,9 +34,9 @@ class MotorInfo:
     """
 
     abs_index: int
-    type: str
+    type_: str
     name_joint: str
-    limits: tuple[float, float]
+    limits: Tuple[float, float]
     index_in_msg: int
 
 
@@ -78,7 +79,7 @@ class RobotData:
         joints_pose_status (list[MotorPose]): List of current motor states.
     """
 
-    def __init__(self, target_action: str, include_hands_with_fingers: bool) -> None:
+    def __init__(self, target_action = "teleoperation", include_hands_with_fingers = True) -> None:
         """
         Initialize the RobotData instance.
 
@@ -106,7 +107,7 @@ class RobotData:
             self.joints_info.append(
                 MotorInfo(
                     abs_index=abs_index,
-                    type=TYPES_OF_MOTOR[0],
+                    type_=TYPES_OF_MOTOR[0],
                     name_joint=FROM_INDEXES_TO_NAMES[abs_index],
                     limits=limits_set[abs_index],
                     index_in_msg=i,
@@ -130,7 +131,7 @@ class RobotData:
                 self.joints_info.append(
                     MotorInfo(
                         abs_index=abs_index,
-                        type=TYPES_OF_MOTOR[1],
+                        type_=TYPES_OF_MOTOR[1],
                         name_joint=FROM_INDEXES_TO_NAMES[abs_index],
                         limits=limits_set[abs_index],
                         index_in_msg=i,
@@ -152,7 +153,7 @@ class RobotData:
                 self.joints_info.append(
                     MotorInfo(
                         abs_index=abs_index,
-                        type=TYPES_OF_MOTOR[2],
+                        type_=TYPES_OF_MOTOR[2],
                         name_joint=FROM_INDEXES_TO_NAMES[abs_index],
                         limits=limits_set[abs_index],
                         index_in_msg=i,
@@ -199,13 +200,13 @@ class RobotData:
                 "default_body_joint": "bright_cyan",
                 "finger_joint": "bright_magenta",
                 "wrist_joint": "#ffa000",
-            }.get(motor.type, "white")
+            }.get(motor.type_, "white")
             type_style = Style(color=type_color)
             limits_str = f"[{motor.limits[0]:.2f}, {motor.limits[1]:.2f}]"
 
             table.add_row(
                 f"[color(220)]{motor.abs_index}[/]",
-                f"[{type_style}]{motor.type}[/]",
+                f"[{type_style}]{motor.type_}[/]",
                 motor.name_joint,
                 limits_str,
                 str(motor.index_in_msg),
@@ -223,7 +224,7 @@ class RobotData:
         # Count motors by type
         type_counts = {}
         for motor in self.joints_info:
-            type_counts[motor.type] = type_counts.get(motor.type, 0) + 1
+            type_counts[motor.type_] = type_counts.get(motor.type_, 0) + 1
 
         console.print("\n[bold]Distribution by types:[/]")
         for motor_type, count in type_counts.items():
@@ -251,6 +252,40 @@ class RobotData:
             raise ValueError(f"Joint with name '{name_joint}' not found in motor list.")
         except KeyError:
             raise ValueError(f"Joint with name '{name_joint}' not found.")
+        
+    def get_joint_info_by_index(self, abs_index: int) -> MotorInfo:
+        """Возвращает информацию о суставе по его абсолютному индексу."""
+        for joint in self.joints_info:
+            if joint.abs_index == abs_index:
+                return joint
+        raise ValueError(f"Joint with abs_index {abs_index} not found")
+
+    def get_joint_pose_by_index(self, abs_index: int) -> MotorPose:
+        """Возвращает текущий pose (состояние) сустава по его абсолютному индексу."""
+        for pose in self.joints_pose_status:
+            if pose.abs_index == abs_index:
+                return pose
+        raise ValueError(f"Pose for joint with abs_index {abs_index} not found")
+    def update_current_pose(self, abs_index: int, new_value: float) -> None:
+        """Обновляет current_pose для сустава с заданным abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        joint_pose.current_pose = new_value
+
+    def update_target_pose(self, abs_index: int, new_value: float) -> None:
+        """Обновляет target_pose для сустава с заданным abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        joint_pose.target_pose = new_value
+
+    def update_temporary_pose(self, abs_index: int, new_value: float) -> None:
+        """Обновляет temporary_pose для сустава с заданным abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        joint_pose.temporary_pose = new_value
 
 
 if __name__ == "__main__":
@@ -259,7 +294,7 @@ if __name__ == "__main__":
         include_hands_with_fingers=True,
     )
     robot.show_info()
-    print(robot.joints_info[0].type)
+    print(robot.joints_info[0].type_)
     print(robot.get_joint_by_name("left_ankle_joint"))
     # This will raise ValueError:
     # print(robot.get_joint_by_name("left_ankle_joint__"))

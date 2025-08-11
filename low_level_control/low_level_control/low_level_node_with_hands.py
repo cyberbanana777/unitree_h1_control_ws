@@ -32,9 +32,11 @@ Example message:
 
 import json
 import time
+import math
 
 import numpy as np
 import rclpy
+import h1_info_library as h1
 from rclpy.node import Node
 from std_msgs.msg import Float32, String
 from unitree_go.msg import (
@@ -47,6 +49,7 @@ from unitree_go.msg import (
 )
 from unitree_sdk2py.utils.crc import CRC
 
+
 # Частота в гц для ноды
 FREQUENCY = 333.33
 # коэффициэнт на который умножается control_dt (сек), который устанавливает максимальную дельту поворота мотора
@@ -55,255 +58,49 @@ MAX_JOINT_VELOCITY = 7.0
 MAX_FINGER_VELOCITY = 0.6
 TARGET_TOPIC = "arm_sdk"
 TIME_TO_CHANGE_VELOCITY = 5.0  # в секундах
-
-JOINT_INDEX_H1 = {
-    "right_hip_roll_joint": 0,
-    "right_hip_pitch_joint": 1,
-    "right_knee_joint": 2,
-    "left_hip_roll_joint": 3,
-    "left_hip_pitch_joint": 4,
-    "left_knee_joint": 5,
-    "torso_joint": 6,
-    "left_hip_yaw_joint": 7,
-    "right_hip_yaw_joint": 8,
-    "NOT USED": 9,
-    "left_ankle_joint": 10,
-    "right_ankle_joint": 11,
-    "right_shoulder_roll_joint": 12,
-    "right_shoulder_pitch_joint": 13,
-    "right_shoulder_yaw_joint": 14,
-    "right_elbow_joint": 15,
-    "left_shoulder_roll_joint": 16,
-    "left_shoulder_pitch_joint": 17,
-    "left_shoulder_yaw_joint": 18,
-    "left_elbow_joint": 19,
-}
-
-JOINT_INDEX_HANDS = {
-    "right_pinky": 0,
-    "right_ring": 1,
-    "right_middle": 2,
-    "right_index": 3,
-    "right_thumb_bend": 4,
-    "right_thumb_rotation": 5,
-    "left_pinky": 6,
-    "left_ring": 7,
-    "left_middle": 8,
-    "left_index": 9,
-    "left_thumb_bend": 10,
-    "left_thumb_rotation": 11,
-}
-
-JOINT_INDEX_WRISTS = {"left_wrist": 0, "right_wrist": 1}
-
-LIMITS_OF_JOINTS_UNITREE_H1 = {
-    0: [-0.43, 0.43],  # right_hip_roll_joint M
-    1: [-3.14, 2.53],  # right_hip_pitch_joint M
-    2: [-0.26, 2.05],  # right_knee_joint L
-    3: [-0.43, 0.43],  # left_hip_roll_joint M
-    4: [-3.14, 2.53],  # left_hip_pitch_joint M
-    5: [0.26, 2.05],  # left_knee_joint L
-    6: [-2.35, 2.35],  # torso_joint M
-    7: [-0.43, 0.43],  # left_hip_yaw_joint M
-    8: [-0.43, 0.43],  # right_hip_yaw_joint M
-    9: [None, None],  # NOT USED
-    10: [-0.87, 0.52],  # left_ankle_joint S
-    11: [-0.87, 0.52],  # right_ankle_joint S
-    12: [-1.9, 0.5],  # right_shoulder_pitch_joint M
-    13: [-2.2, 0.0],  # right_shoulder_roll_joint M
-    14: [-1.5, 1.3],  # right_shoulder_yaw_joint M
-    15: [-1.1, 1.65],  # right_elbow_joint M
-    16: [-1.9, 0.5],  # left_shoulder_pitch_joint M
-    17: [0.0, 2.2],  # left_shoulder_roll_joint M
-    18: [-1.3, 1.5],  # left_shoulder_yaw_joint M
-    19: [-1.1, 1.65],  # left_elbow_joint M
-}
-
-LIMITS_OF_JOINTS_UNITREE_HANDS = {
-    0: [0.0, 1.0],  # right_pinky
-    1: [0.0, 1.0],  # right_ring
-    2: [0.0, 1.0],  # right_middle
-    3: [0.0, 1.0],  # right_index
-    4: [0.0, 1.0],  # right_thumb-bend
-    5: [0.0, 1.0],  # right_thumb-rotation
-    6: [0.0, 1.0],  # left_pinky
-    7: [0.0, 1.0],  # left_ring
-    8: [0.0, 1.0],  # left_middle
-    9: [0.0, 1.0],  # left_index
-    10: [0.0, 1.0],  # left_thumb-bend
-    11: [0.0, 1.0],  # left_thumb-rotation
-}
-
-LIMITS_OF_JOINTS_UNITREE_WRISTS = {
-    0: [-1.1, 4.58],  # left_wrist
-    1: [-6.0, -0.23],  # right_wrist
-}
-
+TARGET_ACTION = 'teleoperation'
+WRIST_SCALE = 5
 
 class LowLevelControlNode(Node):
     def __init__(self):
         super().__init__("low_level_control_with_hands_node")
 
+        self.declare_parameter("target_action", TARGET_ACTION)
+        self.target_action_param = self.get_parameter("target_action").value
+
+        self.robot = h1.RobotData(target_action = self.target_action_param, include_hands_with_fingers = True)
+
         self.active_joints_H1 = [
-            JOINT_INDEX_H1["right_shoulder_roll_joint"],
-            JOINT_INDEX_H1["right_shoulder_pitch_joint"],
-            JOINT_INDEX_H1["right_shoulder_yaw_joint"],
-            JOINT_INDEX_H1["right_elbow_joint"],
-            JOINT_INDEX_H1["left_shoulder_pitch_joint"],
-            JOINT_INDEX_H1["left_shoulder_roll_joint"],
-            JOINT_INDEX_H1["left_shoulder_yaw_joint"],
-            JOINT_INDEX_H1["left_elbow_joint"],
-            JOINT_INDEX_H1["torso_joint"],
+            h1.FROM_NAMES_TO_INDEXES["right_shoulder_roll_joint"],
+            h1.FROM_NAMES_TO_INDEXES["right_shoulder_pitch_joint"],
+            h1.FROM_NAMES_TO_INDEXES["right_shoulder_yaw_joint"],
+            h1.FROM_NAMES_TO_INDEXES["right_elbow_joint"],
+            h1.FROM_NAMES_TO_INDEXES["left_shoulder_pitch_joint"],
+            h1.FROM_NAMES_TO_INDEXES["left_shoulder_roll_joint"],
+            h1.FROM_NAMES_TO_INDEXES["left_shoulder_yaw_joint"],
+            h1.FROM_NAMES_TO_INDEXES["left_elbow_joint"],
+            h1.FROM_NAMES_TO_INDEXES["torso_joint"],
         ]
 
         self.active_joints_hands = [
-            JOINT_INDEX_HANDS["right_pinky"],
-            JOINT_INDEX_HANDS["right_ring"],
-            JOINT_INDEX_HANDS["right_middle"],
-            JOINT_INDEX_HANDS["right_index"],
-            JOINT_INDEX_HANDS["right_thumb_bend"],
-            JOINT_INDEX_HANDS["right_thumb_rotation"],
-            JOINT_INDEX_HANDS["left_pinky"],
-            JOINT_INDEX_HANDS["left_ring"],
-            JOINT_INDEX_HANDS["left_middle"],
-            JOINT_INDEX_HANDS["left_index"],
-            JOINT_INDEX_HANDS["left_thumb_bend"],
-            JOINT_INDEX_HANDS["left_thumb_rotation"],
+            h1.FROM_NAMES_TO_INDEXES["right_pinky"],
+            h1.FROM_NAMES_TO_INDEXES["right_ring"],
+            h1.FROM_NAMES_TO_INDEXES["right_middle"],
+            h1.FROM_NAMES_TO_INDEXES["right_index"],
+            h1.FROM_NAMES_TO_INDEXES["right_thumb_bend"],
+            h1.FROM_NAMES_TO_INDEXES["right_thumb_rotation"],
+            h1.FROM_NAMES_TO_INDEXES["left_pinky"],
+            h1.FROM_NAMES_TO_INDEXES["left_ring"],
+            h1.FROM_NAMES_TO_INDEXES["left_middle"],
+            h1.FROM_NAMES_TO_INDEXES["left_index"],
+            h1.FROM_NAMES_TO_INDEXES["left_thumb_bend"],
+            h1.FROM_NAMES_TO_INDEXES["left_thumb_rotation"],
         ]
 
         self.active_joints_wrists = [
-            JOINT_INDEX_WRISTS["left_wrist"],
-            JOINT_INDEX_WRISTS["right_wrist"],
+            h1.FROM_NAMES_TO_INDEXES["left_wrist"],
+            h1.FROM_NAMES_TO_INDEXES["right_wrist"],
         ]
-
-        # целевая позиция
-        self.target_pos_H1 = {
-            0: 0.0,  # right_hip_roll_joint M
-            1: 0.0,  # right_hip_pitch_joint M
-            2: 0.0,  # right_knee_joint L
-            3: 0.0,  # left_hip_roll_joint M
-            4: 0.0,  # left_hip_pitch_joint M
-            5: 0.0,  # left_knee_joint L
-            6: 0.0,  # torso_joint M
-            7: 0.0,  # left_hip_yaw_joint M
-            8: 0.0,  # right_hip_yaw_joint M
-            9: 0.0,  # NOT USED
-            10: 0.0,  # left_ankle_joint S
-            11: 0.0,  # right_ankle_joint S
-            12: 0.0,  # right_shoulder_pitch_joint M
-            13: 0.0,  # right_shoulder_roll_joint M
-            14: 0.0,  # right_shoulder_yaw_joint M
-            15: 0.0,  # right_elbow_joint M
-            16: 0.0,  # left_shoulder_pitch_joint M
-            17: 0.0,  # left_shoulder_roll_joint M
-            18: 0.0,  # left_shoulder_yaw_joint M
-            19: 0.0,  # left_elbow_joint M
-        }
-
-        self.target_pos_hands = {
-            0: 1.0,  # pinky
-            1: 1.0,  # ring
-            2: 1.0,  # middle
-            3: 1.0,  # index
-            4: 1.0,  # thumb-bend
-            5: 1.0,  # thumb-rotation
-            6: 1.0,  # pinky
-            7: 1.0,  # ring
-            8: 1.0,  # middle
-            9: 1.0,  # index
-            10: 1.0,  # thumb-bend
-            11: 1.0,  # thumb-rotation
-        }
-
-        self.target_pos_wrists = {0: 0.0, 1: -1.0}  # left_wrist  # right_wrist
-
-        # текущая позиция
-        self.current_jpos_H1 = {
-            0: 0.0,  # right_hip_roll_joint M
-            1: 0.0,  # right_hip_pitch_joint M
-            2: 0.0,  # right_knee_joint L
-            3: 0.0,  # left_hip_roll_joint M
-            4: 0.0,  # left_hip_pitch_joint M
-            5: 0.0,  # left_knee_joint L
-            6: 0.0,  # torso_joint M
-            7: 0.0,  # left_hip_yaw_joint M
-            8: 0.0,  # right_hip_yaw_joint M
-            9: 0.0,  # NOT USED
-            10: 0.0,  # left_ankle_joint S
-            11: 0.0,  # right_ankle_joint S
-            12: 0.0,  # right_shoulder_pitch_joint M
-            13: 0.0,  # right_shoulder_roll_joint M
-            14: 0.0,  # right_shoulder_yaw_joint M
-            15: 0.0,  # right_elbow_joint M
-            16: 0.0,  # left_shoulder_pitch_joint M
-            17: 0.0,  # left_shoulder_roll_joint M
-            18: 0.0,  # left_shoulder_yaw_joint M
-            19: 0.0,  # left_elbow_joint M
-        }
-
-        self.current_jpos_hands = {
-            0: 1.0,  # pinky
-            1: 1.0,  # ring
-            2: 1.0,  # middle
-            3: 1.0,  # index
-            4: 1.0,  # thumb-bend
-            5: 1.0,  # thumb-rotation
-            6: 1.0,  # pinky
-            7: 1.0,  # ring
-            8: 1.0,  # middle
-            9: 1.0,  # index
-            10: 1.0,  # thumb-bend
-            11: 1.0,  # thumb-rotation
-        }
-
-        self.current_jpos_wrists = {
-            0: -1.0,
-            1: -1.0,
-        }  # left_wrist  # right_wrist
-
-        # текущая позиция на максимальную дельту приближенная к целевой позиции
-        self.current_jpos_des_H1 = {
-            0: 0.0,  # right_hip_roll_joint M
-            1: 0.0,  # right_hip_pitch_joint M
-            2: 0.0,  # right_knee_joint L
-            3: 0.0,  # left_hip_roll_joint M
-            4: 0.0,  # left_hip_pitch_joint M
-            5: 0.0,  # left_knee_joint L
-            6: 0.0,  # torso_joint M
-            7: 0.0,  # left_hip_yaw_joint M
-            8: 0.0,  # right_hip_yaw_joint M
-            9: 0.0,  # NOT USED
-            10: 0.0,  # left_ankle_joint S
-            11: 0.0,  # right_ankle_joint S
-            12: 0.0,  # right_shoulder_pitch_joint M
-            13: 0.0,  # right_shoulder_roll_joint M
-            14: 0.0,  # right_shoulder_yaw_joint M
-            15: 0.0,  # right_elbow_joint M
-            16: 0.0,  # left_shoulder_pitch_joint M
-            17: 0.0,  # left_shoulder_roll_joint M
-            18: 0.0,  # left_shoulder_yaw_joint M
-            19: 0.0,  # left_elbow_joint M
-        }
-
-        self.current_jpos_des_hands = {
-            0: 1.0,  # pinky
-            1: 1.0,  # ring
-            2: 1.0,  # middle
-            3: 1.0,  # index
-            4: 1.0,  # thumb-bend
-            5: 1.0,  # thumb-rotation
-            6: 1.0,  # pinky
-            7: 1.0,  # ring
-            8: 1.0,  # middle
-            9: 1.0,  # index
-            10: 1.0,  # thumb-bend
-            11: 1.0,  # thumb-rotation
-        }
-
-        self.current_jpos_des_wrists = {
-            0: 0.0,  # left_wrist
-            1: -1.0,  # right_wrist
-        }
 
         # create control_message for hands (fingers)
         self.cmd_msg_hands = MotorCmds()
@@ -336,6 +133,8 @@ class LowLevelControlNode(Node):
         self.velocity_changed = False
         self.declare_parameter("max_joint_velocity_param", MAX_JOINT_VELOCITY)
         self.max_joint_velocity = START_JOINT_VELOCITY
+
+        self.wrist_scale = WRIST_SCALE
 
         # Обявление параметра целевого топика
         self.declare_parameter("target_topic_param", TARGET_TOPIC)
@@ -439,9 +238,12 @@ class LowLevelControlNode(Node):
             return
 
         data_part, impact_part = parts
-        self.impact = (
-            float(impact_part) if impact_part else 0.0
-        )  # Устанавливаем impact в 0.0, если нет значения
+
+        try:
+            self.impact = np.clip(float(impact_part), 0.0, 1.0)
+        except ValueError:
+            self.get_logger().error(f"Invalid impact value: {impact_part}")
+            return 
 
         # Если часть данных пустая или содержит только '{}', пропускаем обработку позы
         if not data_part or data_part == "{}":
@@ -455,60 +257,17 @@ class LowLevelControlNode(Node):
             self.get_logger().debug(f"data = {pose}")
             self.get_logger().debug(f"impact = {self.impact}")
 
-            H1_pose = {}
-            hands_pose = {}
-            wrists_pose = {}
-
             for key, value in pose.items():
                 if (
                     key.isdigit()
                 ):  # Проверяем, является ли ключ числом в строке
-                    num = int(key)
-                    if num == 32 or num == 33:
-                        wrists_pose[num - 32] = value
-                    elif num <= 19:
-                        H1_pose[num] = value
-                    else:
-                        hands_pose[num - 20] = value
-
-            for i in H1_pose:
-                if i in self.active_joints_H1:
-                    if i == JOINT_INDEX_H1["torso_joint"]:
-                        self.target_pos_H1[i] = 0.0
-                    else:
-                        self.get_logger().info(f"h1_pose = {H1_pose[i]}")
-                        self.target_pos_H1[i] = np.clip(
-                            H1_pose.get(
-                                i
-                            ),  # Используем get с значением по умолчанию
-                            LIMITS_OF_JOINTS_UNITREE_H1[i][0],
-                            LIMITS_OF_JOINTS_UNITREE_H1[i][1],
-                        )
-                        self.get_logger().info(
-                            f"h1_pose = {self.target_pos_H1}"
-                        )
-
-            for i in hands_pose:
-                if i in self.active_joints_hands:
-                    self.get_logger().debug(f"hands_pose = {hands_pose[i]}")
-                    self.target_pos_hands[i] = np.clip(
-                        hands_pose.get(
-                            i
-                        ),  # Используем get с значением по умолчанию
-                        LIMITS_OF_JOINTS_UNITREE_HANDS[i][0],
-                        LIMITS_OF_JOINTS_UNITREE_HANDS[i][1],
-                    )
-
-            for i in wrists_pose:
-                if i in self.active_joints_wrists:
-                    self.get_logger().debug(f"wrists_pose = {wrists_pose[i]}")
-                    self.target_pos_wrists[i] = np.clip(
-                        wrists_pose.get(
-                            i
-                        ),  # Используем get с значением по умолчанию
-                        LIMITS_OF_JOINTS_UNITREE_WRISTS[i][0],
-                        LIMITS_OF_JOINTS_UNITREE_WRISTS[i][1],
-                    )
+                    index = int(key)
+                    limits = self.robot.get_joint_info_by_index(index).limits
+                    self.robot.update_target_pose(index, np.clip(
+                        value, 
+                        limits[0],
+                        limits[1]
+                    ))
 
         except json.JSONDecodeError as e:
             self.get_logger().error(f"JSON decode error: {e}")
@@ -519,19 +278,22 @@ class LowLevelControlNode(Node):
         """Обновляем текущее положение"""
         temps = []
         for i in self.active_joints_H1:
-            self.current_jpos_H1[i] = msg.motor_state[i].q
+            message_index = self.robot.get_joint_info_by_index(i).index_in_msg
+            self.robot.update_current_pose(i, msg.motor_state[message_index].q)
             temps.append(msg.motor_state[i].temperature)
         self.max_temperature = max(temps)
 
     def listener_callback_fingers_states(self, msg):
         """Обновляем текущее положение пальцев"""
         for i in self.active_joints_hands:
-            self.current_jpos_hands[i] = msg.states[i].q
+            message_index = self.robot.get_joint_info_by_index(i).index_in_msg
+            self.robot.update_current_pose(i, msg.states[message_index].q)
 
     def listener_callback_wrist_states(self, msg):
         """Обновляем текущее положение кистей"""
         for i in self.active_joints_wrists:
-            self.current_jpos_wrists[i] = msg.states[i].q
+            message_index = self.robot.get_joint_info_by_index(i).index_in_msg
+            self.robot.update_current_pose(i, msg.states[message_index].q)
 
     def timer_callback_temperature(self):
         msg = Float32()
@@ -540,81 +302,74 @@ class LowLevelControlNode(Node):
 
     def timer_callback_arm_sdk(self):
         if self.timer_call_count <= 10 or self.impact == 0.0:
-            self.current_jpos_des_H1 = self.current_jpos_H1.copy()
-            self.get_logger().debug(
-                f"Обновление current_jpos_des_H1 = {self.current_jpos_des_H1}"
-            )
-
-            self.current_jpos_des_hands = self.current_jpos_hands.copy()
-            self.get_logger().debug(
-                f"Обновление current_jpos_des_hands = {self.current_jpos_des_hands}"
-            )
-
-            self.current_jpos_des_wrists = self.current_jpos_wrists.copy()
-            self.get_logger().debug(
-                f"Обновление current_jpos_des_wrists = {self.current_jpos_des_wrists}"
-            )
 
             for i in self.active_joints_hands:
-                self.cmd_msg_hands.cmds[i].q = 1.0
-            self.publisher_cmd.publish(self.cmd_msg_hands)
+                message_index = self.robot.get_joint_info_by_index(i).index_in_msg
+                self.cmd_msg_hands.cmds[message_index].q = 1.0
+                self.publisher_cmd.publish(self.cmd_msg_hands)
+            
+            for i in self.active_joints_H1 + self.active_joints_hands + self.active_joints_wrists:
+                self.robot.update_temporary_pose(i, self.robot.joints_pose_status[i].current_pose)
+                self.get_logger().debug(
+                    f"Обновление temporary_pose = {self.robot.joints_pose_status}"
+                )
 
         else:
             # Установка значений для H1
             self.cmd_msg_H1.motor_cmd[
-                JOINT_INDEX_H1["NOT USED"]
+                h1.FROM_NAMES_TO_INDEXES["IMPACT"]
             ].q = self.impact
             for i in self.active_joints_H1:
-                delta_H1 = self.target_pos_H1[i] - self.current_jpos_des_H1[i]
+                delta_H1 = self.robot.joints_pose_status[i].target_pose - self.robot.joints_pose_status[i].current_pose
                 clamped_delta_H1 = np.clip(
-                    delta_H1, -self.max_joint_delta_H1, self.max_joint_delta_H1
+                    delta_H1, 
+                    -self.max_joint_delta_H1, 
+                    self.max_joint_delta_H1
                 )
-                self.current_jpos_des_H1[i] += clamped_delta_H1
+                self.robot.update_temporary_pose(i,  self.robot.joints_pose_status[i].temporary_pose + clamped_delta_H1)
 
             for j in self.active_joints_H1:
-                coeff_and_mode = determine_coeff_and_mode(j)  # (Kp, Kd, mode)
-                self.cmd_msg_H1.motor_cmd[j].q = self.current_jpos_des_H1[j]
-                self.cmd_msg_H1.motor_cmd[j].dq = 0.0
-                self.cmd_msg_H1.motor_cmd[j].tau = 0.0
-                self.cmd_msg_H1.motor_cmd[j].kp = coeff_and_mode[0]
-                self.cmd_msg_H1.motor_cmd[j].kd = coeff_and_mode[1]
-                self.cmd_msg_H1.motor_cmd[j].mode = coeff_and_mode[2]
+                mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+                coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
+                self.cmd_msg_H1.motor_cmd[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+                self.cmd_msg_H1.motor_cmd[mes_index].dq = 0.0
+                self.cmd_msg_H1.motor_cmd[mes_index].tau = 0.0
+                self.cmd_msg_H1.motor_cmd[mes_index].kp = coeff_and_mode[0]
+                self.cmd_msg_H1.motor_cmd[mes_index].kd = coeff_and_mode[1]
+                self.cmd_msg_H1.motor_cmd[mes_index].mode = coeff_and_mode[2]
 
             # Установка занчений для hands
             for i in self.active_joints_hands:
-                delta_hands = (
-                    self.target_pos_hands[i] - self.current_jpos_des_hands[i]
-                )
+                delta_hands = self.robot.joints_pose_status[i].target_pose - self.robot.joints_pose_status[i].current_pose
                 clamped_delta_hands = np.clip(
                     delta_hands,
                     -self.max_joint_delta_hands,
                     self.max_joint_delta_hands,
                 )
                 clamped_delta_hands = round(clamped_delta_hands, 3)
-                self.current_jpos_des_hands[i] += clamped_delta_hands
-            self.get_logger().debug(f"{self.current_jpos_des_hands}")
+                self.robot.update_temporary_pose(i,  self.robot.joints_pose_status[i].temporary_pose + clamped_delta_hands)
 
-            for i in self.active_joints_hands:
-                self.cmd_msg_hands.cmds[i].q = self.current_jpos_des_hands[i]
+            for j in self.active_joints_hands:
+                mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+                self.cmd_msg_hands.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
 
             # Установка занчений для wrists
             for i in self.active_joints_wrists:
-                delta_wrists = (
-                    self.target_pos_wrists[i] - self.current_jpos_des_wrists[i]
-                )
+                delta_wrists = self.robot.joints_pose_status[i].target_pose - self.robot.joints_pose_status[i].current_pose
                 clamped_delta_wrists = np.clip(
                     delta_wrists, -self.max_joint_wrists, self.max_joint_wrists
                 )
                 clamped_delta_wrists = round(clamped_delta_wrists, 3)
-                self.current_jpos_des_wrists[i] += clamped_delta_wrists
-            self.get_logger().debug(f"{self.current_jpos_des_wrists}")
+                self.robot.update_temporary_pose(i,  self.robot.joints_pose_status[i].temporary_pose + clamped_delta_wrists)
 
-            for i in self.active_joints_wrists:
-                self.cmd_msg_wrists.cmds[i].q = self.current_jpos_des_wrists[i]
-                self.cmd_msg_wrists.cmds[i].dq = 0.0
-                self.cmd_msg_wrists.cmds[i].tau = 0.0
-                self.cmd_msg_wrists.cmds[i].kp = 10.0
-                self.cmd_msg_wrists.cmds[i].kd = 2.0
+            for j in self.active_joints_wrists:
+                mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+                coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
+                self.cmd_msg_wrists.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+                self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
+                self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
+                self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
+                self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
 
         # Подсчет контрольной суммы, использует CRC для проверки целостности команд
         self.crc = CRC()
@@ -626,19 +381,20 @@ class LowLevelControlNode(Node):
 
         end_time = self.get_clock().now()
         duration = end_time - self.start_time  # Duration объект
-        if (
-            self.velocity_changed == False
-            and duration.nanoseconds / 1e9 > TIME_TO_CHANGE_VELOCITY
-        ):
-            self.max_joint_velocity = self.get_parameter(
-                "max_joint_velocity_param"
-            ).value
-            # максимальный угол на который может измениться целевая поза за один оборот ноды
-            self.max_joint_delta_H1 = self.max_joint_velocity * self.control_dt
-            self.max_joint_wrists = (
-                self.max_joint_velocity * 5 * self.control_dt
+        
+        if not self.velocity_changed and duration.nanoseconds/1e9 > TIME_TO_CHANGE_VELOCITY:
+            target_velocity = self.get_parameter("max_joint_velocity_param").value
+            steps_needed = TIME_TO_CHANGE_VELOCITY / self.control_dt  # Общее число шагов
+            velocity_step = (target_velocity - START_JOINT_VELOCITY) / steps_needed
+            
+            self.max_joint_velocity = min(
+                self.max_joint_velocity + velocity_step,
+                target_velocity
             )
-            self.velocity_changed = True
+            self.max_joint_delta = self.max_joint_velocity * self.control_dt
+
+            if math.isclose(self.max_joint_velocity, target_velocity, rel_tol=1e-6):
+                self.velocity_changed = True
 
     def return_control(self):
         """уводит руки в положение для ходьбы"""
@@ -648,65 +404,46 @@ class LowLevelControlNode(Node):
             self.impact -= value_of_step
             self.impact = np.clip(self.impact, 0.0, 1.0)
             self.cmd_msg_H1.motor_cmd[
-                JOINT_INDEX_H1["NOT USED"]
+                h1.FROM_NAMES_TO_INDEXES["IMPACT"]
             ].q = self.impact
             self.get_logger().info(f"Impact = {round(self.impact, 3)}")
 
             self.publisher_arm_sdk.publish(self.cmd_msg_H1)
             time.sleep(self.control_dt)
 
-    # Добавить, что бы ксти поворачивались в перпендикулярное полу положение !!!!!!!!!!!
 
+    def alignment_wrists(self):
+        self.robot.joints_pose_status[32].target_pose = 1.74
+        self.robot.joints_pose_status[33].target_pose = -3.16
+        delta_wrists_left = (self.robot.joints_pose_status[32].target_pose - self.robot.joints_pose_status[32].current_pose)/2
+        delta_wrists_right = (self.robot.joints_pose_status[33].target_pose - self.robot.joints_pose_status[33].current_pose)/2
+
+        for _ in range(2):
+
+            self.robot.update_temporary_pose(32,  self.robot.joints_pose_status[32].temporary_pose + delta_wrists_left)
+            self.robot.update_temporary_pose(33,  self.robot.joints_pose_status[33].temporary_pose + delta_wrists_right)
+
+            for j in self.active_joints_wrists:
+                mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+                coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
+                self.cmd_msg_wrists.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+                self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
+                self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
+                self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
+                self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
+
+            time.sleep(self.control_dt * 100)
+
+        
     def straighten_fingers(self):
+        
         """распрямляет пальцы"""
         for i in self.active_joints_hands:
-            delta_hands = 1.0 - self.current_jpos_des_hands[i]
-            clamped_delta_hands = np.clip(
-                delta_hands,
-                -self.max_joint_delta_hands,
-                self.max_joint_delta_hands,
-            )
-            clamped_delta_hands = round(clamped_delta_hands, 3)
-            self.current_jpos_des_hands[i] += clamped_delta_hands
-            self.get_logger().debug(
-                f"current_jpos_des_hands = {str(self.current_jpos_des_hands)}"
-            )
+            message_index = self.robot.get_joint_info_by_index(i).index_in_msg
+            self.cmd_msg_hands.cmds[message_index].q = 1.0
 
-            for i in self.active_joints_hands:
-                self.cmd_msg_hands.cmds[i].q = 1.0
-
-                self.publisher_cmd.publish(self.cmd_msg_hands)
-                time.sleep(self.control_dt)
-
-
-def determine_coeff_and_mode(index_of_joint_of_unitree_h1: int) -> tuple:
-    """Функция определения коэффиэнтов Kp, Kd и мода для моторов"""
-    size_S = [10, 11]
-    size_L = [2, 5]
-
-    # determine Kp and Kd
-    if index_of_joint_of_unitree_h1 in size_S:
-        Kp = 80.0
-        Kd = 2.0
-
-    elif index_of_joint_of_unitree_h1 in size_L:
-        Kp = 200.0
-        Kd = 5.0
-
-    else:
-        Kp = 100.0
-        Kd = 3.0
-
-    # determine mode for enable
-    if index_of_joint_of_unitree_h1 < 9:
-        mode = 0x0A
-    elif index_of_joint_of_unitree_h1 > 9:
-        mode = 0x01
-    else:
-        mode = 0x00
-
-    return (Kp, Kd, mode)
-
+        self.publisher_cmd.publish(self.cmd_msg_hands)
+        
 
 def main(args=None):
     rclpy.init(args=args)
@@ -722,6 +459,7 @@ def main(args=None):
         node.get_logger().error(e)
 
     finally:
+        node.alignment_wrists()
         node.straighten_fingers()
         if node.impact != 0.0:
             node.return_control()
