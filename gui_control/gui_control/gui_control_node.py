@@ -414,12 +414,15 @@ class ImpactControl:
 class GUIControlNode(Node):
     def __init__(self):
         super().__init__("gui_control_node")
+        self.get_logger().info("Node started")
+        self.root = tk.Tk()
+        self.root.title("Unitree H1 Control")
+        self.running = True
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
         self.publisher = self.create_publisher(
             String, "positions_to_unitree", 10
         )
-
-        self.root = tk.Tk()
-        self.root.title("Unitree H1 Control")
 
         # Create custom style for active entry
         style = ttk.Style()
@@ -431,6 +434,11 @@ class GUIControlNode(Node):
 
     def add_joint_control(self, joint_id, control):
         self.joint_controls[joint_id] = control
+
+    def on_close(self):
+        """Обработчик закрытия окна"""
+        self.running = False
+        self.root.destroy()
 
     def publish_all_joints(self):
         """Publish all joint values in the required format"""
@@ -642,17 +650,39 @@ class GUIControlNode(Node):
         self.impact_control.inc_btn = inc_btn
 
     def run(self):
-        while rclpy.ok():
-            self.root.update()
-            rclpy.spin_once(self, timeout_sec=0.01)
+        """Основной цикл обработки событий"""
+        try:
+            while rclpy.ok() and self.running:
+                self.root.update()
+                rclpy.spin_once(self, timeout_sec=0.01)
+                
+                # Добавляем небольшую задержку, чтобы не нагружать процессор
+                self.root.after(10)
+                
+        except tk.TclError as e:
+            if "application has been destroyed" not in str(e):
+                self.get_logger().error(f"Tkinter error: {e}")
+        except Exception as e:
+            self.get_logger().error(f"Unexpected error: {e}")
+        finally:
+            if rclpy.ok():
+                self.destroy_node()
+                rclpy.shutdown()
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = GUIControlNode()
-    node.run()
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        node = GUIControlNode()
+        node.run()
+    except KeyboardInterrupt:
+        node.get_logger().info("Программа завершена по запросу пользователя")
+    except Exception as e:
+        node.get_logger().error(f"Ошибка: {str(e)}")
+    finally:
+        node.get_logger().info("Node stopped")
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

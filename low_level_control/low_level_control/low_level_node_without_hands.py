@@ -38,8 +38,8 @@ from unitree_sdk2py.utils.crc import CRC
 FREQUENCY = 333.33                       # Control loop frequency (Hz)
 START_JOINT_VELOCITY = 0.5               # Initial joint velocity multiplier
 MAX_JOINT_VELOCITY = 7.0                 # Maximum joint velocity
-TARGET_TOPIC = "arm_sdk"                 # Default target topic
-TIME_TO_CHANGE_VELOCITY = 7.0            # Time to reach max velocity (seconds)
+TARGET_TOPIC = "lowcmd"                  # Default target topic
+TIME_TO_CHANGE_VELOCITY = 20.0            # Time to reach max velocity (seconds)
 TARGET_ACTION = 'teleoperation'          # Default robot action mode
 
 
@@ -102,7 +102,7 @@ class LowLevelControlNode(Node):
         # Subscribers
         self.subscription_LowCmd = self.create_subscription(
             LowState, "lowstate", 
-            self.listener_callback_LowCmd, 10
+            self.listener_callback_lowstate, 10
         )
 
         self.subscription_positions_to_unitree = self.create_subscription(
@@ -194,7 +194,7 @@ class LowLevelControlNode(Node):
         except Exception as e:
             self.get_logger().error(f"Unexpected error: {e}")
 
-    def listener_callback_LowCmd(self, msg):
+    def listener_callback_lowstate(self, msg):
         """Update current joint positions from low state message"""
         temps = []
         for i in self.active_joints_H1:
@@ -228,6 +228,7 @@ class LowLevelControlNode(Node):
         
         self.timer_call_count += 1
         self._update_velocity_profile()
+        
 
     def _update_joint_positions(self):
         """Update joint positions with velocity-limited movement"""
@@ -237,7 +238,7 @@ class LowLevelControlNode(Node):
         # Calculate and apply limited deltas for all joints
         for i in self.active_joints_H1:
             delta = (self.robot.joints_pose_status[i].target_pose - 
-                    self.robot.joints_pose_status[i].current_pose)
+                    self.robot.joints_pose_status[i].temporary_pose)
             clamped_delta = np.clip(delta, -self.max_joint_delta, self.max_joint_delta)
             new_temp_pose = (self.robot.joints_pose_status[i].temporary_pose + 
                            clamped_delta)
@@ -245,6 +246,7 @@ class LowLevelControlNode(Node):
 
         # Prepare motor commands
         for j in self.active_joints_H1:
+            
             mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
             coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
             
@@ -254,28 +256,35 @@ class LowLevelControlNode(Node):
             self.cmd_msg.motor_cmd[mes_index].kp = coeff_and_mode[0]
             self.cmd_msg.motor_cmd[mes_index].kd = coeff_and_mode[1]
             self.cmd_msg.motor_cmd[mes_index].mode = coeff_and_mode[2]
+            
 
     def _update_velocity_profile(self):
         """Gradually increase joint velocity to target over time"""
         if self.velocity_changed:
             return
 
-        end_time = self.get_clock().now()
-        duration = end_time - self.start_time
-        
-        if duration.nanoseconds/1e9 > TIME_TO_CHANGE_VELOCITY:
-            target_velocity = self.get_parameter("max_joint_velocity_param").value
-            steps_needed = TIME_TO_CHANGE_VELOCITY / self.control_dt
-            velocity_step = (target_velocity - START_JOINT_VELOCITY) / steps_needed
-            
-            self.max_joint_velocity = min(
-                self.max_joint_velocity + velocity_step,
-                target_velocity
-            )
+        current_time = self.get_clock().now()
+        duration = (current_time - self.start_time).nanoseconds / 1e9  # в секундах
+
+        if duration >= TIME_TO_CHANGE_VELOCITY:
+            self.max_joint_velocity = self.get_parameter("max_joint_velocity_param").value
+            self.max_joint_delta = self.max_joint_velocity * self.control_dt
+            self.velocity_changed = True
+            return
+
+        # Smooth speed increase
+        target_velocity = self.get_parameter("max_joint_velocity_param").value
+        remaining_time = TIME_TO_CHANGE_VELOCITY - duration
+        remaining_steps = remaining_time / self.control_dt
+
+        if remaining_steps > 0:
+            velocity_step = (target_velocity - self.max_joint_velocity) / remaining_steps
+            self.max_joint_velocity += velocity_step
             self.max_joint_delta = self.max_joint_velocity * self.control_dt
 
-            if math.isclose(self.max_joint_velocity, target_velocity, rel_tol=1e-6):
-                self.velocity_changed = True
+        # Overflow protection
+        if math.isclose(self.max_joint_velocity, target_velocity, rel_tol=1e-6):
+            self.velocity_changed = True
 
     def return_control(self):
         """Gradually reduce control influence to return control to system"""
