@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inspire_hand"
+version = "0.1.0"
+description = "Python library for controlling the Inspire Hand RH56dfq robotic hand"
+readme = "README.md"
+authors = [
+    {name = "Inspire Hand Team", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.6"
+dependencies = [
+    "pyserial>=3.5",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/inspire_hand"
+"Bug Tracker" = "https://github.com/yourusername/inspire_hand/issues"
+
+[project.scripts]
+inspire-hand = "inspire_hand.cli:main" 
