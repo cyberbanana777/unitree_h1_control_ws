@@ -11,8 +11,9 @@
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>low_level_control</depend>
-  <depend>cmd_to_high_level_control_package</depend>
+  <exec_depend>ros2launch</exec_depend>
+  <exec_depend>low_level_control</exec_depend>
+  <exec_depend>cmd_to_high_level_control_package</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
