@@ -38,7 +38,7 @@ from unitree_sdk2py.utils.crc import CRC
 FREQUENCY = 333.33                       # Control loop frequency (Hz)
 START_JOINT_VELOCITY = 0.5               # Initial joint velocity multiplier
 MAX_JOINT_VELOCITY = 7.0                 # Maximum joint velocity
-TARGET_TOPIC = "lowcmd"                  # Default target topic
+TARGET_TOPIC = "arm_sdk"                  # Default target topic
 TIME_TO_CHANGE_VELOCITY = 20.0            # Time to reach max velocity (seconds)
 TARGET_ACTION = 'teleoperation'          # Default robot action mode
 

@@ -15,7 +15,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name, [path_to_bin]),
     ],
-    install_requires=["setuptools", "black", "isort", "flake8"],
+    install_requires=["setuptools"],
     zip_safe=True,
     maintainer="cyberbanana777",
     maintainer_email="sashagrachev2005@gmail.com",

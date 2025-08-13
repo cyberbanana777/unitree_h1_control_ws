@@ -23,8 +23,8 @@ from rclpy.node import Node
 from inspire_hand import InspireHand
 from unitree_go.msg import MotorCmds, MotorState, MotorStates
 
-TOPIC_CMD = "inspire_hands/cmds"
-TOPIC_STATES = "inspire_hands/states"
+TOPIC_CMD = "inspire/cmd"
+TOPIC_STATES = "inspire/state"
 FREQUENCY = 100  # Reduced frequency 100 Hz
 NORMALIZE_CONST = 1000
 MAX_ANGLE = 1000  # Maximum device angle
@@ -42,6 +42,8 @@ class ControlNode(Node):
         try:
             self.left_hand = InspireHand(port="/dev/ttyUSB0", slave_id=1)
             self.right_hand = InspireHand(port="/dev/ttyUSB0", slave_id=2)
+            self.left_hand.open()
+            self.right_hand.open()
             self.left_hand.open_all_fingers()
             self.right_hand.open_all_fingers()
             self.left_hand.set_all_finger_speeds(self.velocity_limit)
@@ -123,7 +125,7 @@ class ControlNode(Node):
                 state.dq = self.dq[i]
                 state.ddq = self.ddq[i]
                 state.tau_est = 0.0
-                state.temperature = float(temperatures[i])
+                state.temperature = int(temperatures[i])
                 state.mode = 0x01
                 msg.states.append(state)
 
@@ -139,6 +141,9 @@ class ControlNode(Node):
         try:
             self.left_hand.open_all_fingers()
             self.right_hand.open_all_fingers()
+            self.left_hand.close()
+            self.right_hand.close()
+
             self.get_logger().info("Hands opened")
         except Exception:
             self.get_logger().warning("Error during shutdown")
