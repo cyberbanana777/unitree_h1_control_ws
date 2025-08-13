@@ -7,7 +7,7 @@ def generate_launch_description():
         [
             Node(
                 package="low_level_control",
-                executable="low_level_control_with_hands",
+                executable="low_level_control_with_hands_node",
             ),
             Node(
                 package="low_level_control",

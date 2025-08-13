@@ -1,7 +1,7 @@
 from setuptools import setup
 
 package_name = "low_level_control"
-path_to_bin = "resource/communication_pack/build/inspire_hand"
+path_to_bin = "resource/communication_pack/bin/inspire_hand"
 
 setup(
     name=package_name,

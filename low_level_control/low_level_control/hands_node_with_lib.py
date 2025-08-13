@@ -40,8 +40,8 @@ class ControlNode(Node):
 
         # Initialize hands with error handling
         try:
-            self.left_hand = InspireHand(port="/dev/ttyUSB0", slave_id=1)
-            self.right_hand = InspireHand(port="/dev/ttyUSB0", slave_id=2)
+            self.left_hand = InspireHand(port="/dev/ttyUSB0", baudrate=115200, slave_id=1)
+            self.right_hand = InspireHand(port="/dev/ttyUSB0", baudrate=115200, slave_id=2)
             self.left_hand.open()
             self.right_hand.open()
             self.left_hand.open_all_fingers()

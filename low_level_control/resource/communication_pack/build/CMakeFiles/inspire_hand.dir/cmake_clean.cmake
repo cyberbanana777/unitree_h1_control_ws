@@ -1,6 +1,5 @@
 file(REMOVE_RECURSE
   "CMakeFiles/inspire_hand.dir/inspire_ctrl.cpp.o"
-  "CMakeFiles/inspire_hand.dir/inspire_ctrl.cpp.o.d"
   "inspire_hand"
   "inspire_hand.pdb"
 )
