@@ -21,7 +21,7 @@ setup(
     maintainer_email="sashagrachev2005@gmail.com",
     description="Implements low-level control for Unitree H1 robot via ROS 2,\
                 managing arm joints, fingers and wrists.",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
@@ -29,7 +29,6 @@ setup(
             "low_level_control_without_hands_node = low_level_control.low_level_node_without_hands:main",
             "wrist_control_node = low_level_control.wrist_control_node:main",
             "hands_init_node = low_level_control.hands_init:main",
-            'hands_node_with_lib = low_level_control.hands_node_with_lib:main',
         ],
     },
 )

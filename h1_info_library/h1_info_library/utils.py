@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
+
 def determine_coeff_and_mode(index_of_joint_of_unitree_h1: int) -> tuple:
     """Determine motor coefficients and mode by joint index.
 

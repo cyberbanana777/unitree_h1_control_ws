@@ -19,7 +19,7 @@ setup(
     maintainer_email="sasha_grachev2005@mail.ru",
     description="This is a python3 library for comfortable programming Unitree H1. \
         It lib include reference info and optimized data structure for programming robot.",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [],

@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
+
 LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR = {
     0: (-0.43, 0.43),  # right_hip_roll_joint
     1: (-3.14, 2.53),  # right_hip_pitch_joint

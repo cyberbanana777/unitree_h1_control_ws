@@ -8,7 +8,7 @@
     managing arm joints, fingers and wrists.
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <depend>rclpy</depend>
   <depend>unitree_go</depend>

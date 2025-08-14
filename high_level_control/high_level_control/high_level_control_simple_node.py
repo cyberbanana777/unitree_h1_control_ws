@@ -4,8 +4,9 @@
 # All rights reserved.
 #
 # This file is part of high_level_control package and is based on the Unitree Robotics SDK.
-# See LICENSE in the project root for license information.
+# See LICENSE_BY_VENDOR in the project root for license information.
 
+# Modificated by Alice Zenina and Alexander Grachev from RTU MIREA (Russia)
 # MODIFICATIONS:
 # 1. Added new commands: "Start" (id=2) and "Stop_move" (id=9)
 # 2. Improved user interface:
@@ -17,6 +18,10 @@
 # 5. Enhanced output formatting with f-strings
 # 6. Added detailed script annotation in docstring
 # 7. Removed unused imports (math, ChannelSubscriber, SportModeState_)
+#
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
 
 """
 АННОТАЦИЯ

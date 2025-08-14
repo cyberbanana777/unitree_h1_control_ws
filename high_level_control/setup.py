@@ -21,7 +21,7 @@ setup(
         control the Unitree H1 robot using high-level commands (such as \
         damping, readiness, and balancing, etc.) as if it were a remote\
         control.",
-    license="BSD 3-Clause",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

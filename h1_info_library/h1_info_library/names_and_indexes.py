@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
+
 FROM_NAMES_TO_INDEXES = {
     "right_hip_roll_joint": 0,
     "right_hip_pitch_joint": 1,

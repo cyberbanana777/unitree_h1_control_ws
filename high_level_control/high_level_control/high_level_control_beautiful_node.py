@@ -7,8 +7,9 @@
 # redistributed under the terms of the BSD 3-Clause License.
 # Modifications (c) 2025 by Alexander Grachev and Alice Zenina from RTU MIREA
 # (Russia), licensed under the same BSD 3-Clause License.
-# See LICENSE in the project root for full license text.
+# See LICENSE_BY_VENDOR in the project root for full license text.
 
+# Modificated by Alice Zenina and Alexander Grachev from RTU MIREA (Russia)
 # MODIFICATIONS:
 # - Completely redesigned the interface (Rich library, interactive prompts,
 #   command tables).
@@ -16,6 +17,10 @@
 # - Implemented error handling and safe shutdown.
 # - Improved code structure (Command, TestOption, UserInterface classes).
 # - Added localization (Russian/English).
+#
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
 
 """
 АННОТАЦИЯ

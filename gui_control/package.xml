@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>GUI for controlling Unitree H1 robot joints via ROS2.</description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>

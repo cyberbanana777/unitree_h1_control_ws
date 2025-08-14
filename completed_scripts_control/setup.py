@@ -27,7 +27,7 @@ setup(
     description="In this package, you will find python launch files\
                 that launch specific node configurations,\
                 as indicated in the name of the launch files",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [],

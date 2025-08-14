@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String

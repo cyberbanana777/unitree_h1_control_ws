@@ -8,7 +8,7 @@
     H1 robot via ROS 2.
   </description>
   <maintainer email="sashagrachev2005@gmail.com">cyberbanana777</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>

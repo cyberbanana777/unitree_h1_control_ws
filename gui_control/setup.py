@@ -25,7 +25,7 @@ setup(
     maintainer="cyberbanana777",
     maintainer_email="sashagrachev2005@gmail.com",
     description="GUI for controlling Unitree H1 robot joints via ROS2.",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

@@ -8,7 +8,7 @@
     publishing geometry_msgs/msg/Twist messages in ROS2 topic cmd_vel.
   </description>
   <maintainer email="sashagrachev@gmail.com">cyberbanana777</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <depend>geometry_msgs</depend>
   <depend>rclpy</depend>

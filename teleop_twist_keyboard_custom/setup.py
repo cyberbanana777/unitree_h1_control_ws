@@ -19,7 +19,7 @@ setup(
     maintainer_email="sashagrachev2005@gmail.com",
     description="Implements teleoperation control for robots via keyboard,\
                 publishing geometry_msgs/msg/Twist messages in ROS2 topic cmd_vel.",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

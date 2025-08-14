@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
+
 """
 АННОТАЦИЯ
 Узел wrist_control_node ROS2 управляет двигателями DM4310 через интерфейс CAN.

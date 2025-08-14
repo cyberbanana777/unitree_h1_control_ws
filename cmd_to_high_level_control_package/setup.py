@@ -16,7 +16,7 @@ setup(
     maintainer_email="sashagrachev2005@gmail.com",
     description="Programm Converts velocity commands (Twist) to control signals for Unitree \
         H1 robot via ROS 2.",
-    license="TODO: License declaration",
+    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

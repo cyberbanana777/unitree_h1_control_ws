@@ -34,12 +34,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-# Modifications by Alice Zenina and Alexander Grachev from RTU MIREA (Russia):
+# Modifications by Alice Zenina and Alexander Grachev RTU MIREA (Russia):
 # - Ported from ROS1 to ROS2
 # - Added Y-axis control support
 # - Added speed limits (min/max)
 # - Improved parameter handling
 # - Code structure optimization
+#
+# Copyright (c) 2025 Alice Zenina and Alexander Grachev RTU MIREA (Russia)
+# SPDX-License-Identifier: MIT
+# Details in the LICENSE file in the root of the package.
 
 """
 АННОТАЦИЯ
