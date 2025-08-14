@@ -29,8 +29,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "gui_control_node = gui_control.gui_control_node:main",
-            "check_position_to_unitree_node = gui_control.check_position_to_unitree_node:main",
+            "gui_control_node = gui_control.gui_control_node:main"
         ],
     },
 )

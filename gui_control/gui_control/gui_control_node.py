@@ -203,7 +203,9 @@ class JointControl:
         self.limits_label.grid_remove()
 
         # Rest of the initialization
-        self.value_entry.insert(0, "0.0")
+        initial_value = "1.0" if 20 <= joint_id <= 31 else "0.0"
+        self.value_entry.insert(0, initial_value)
+        self.cur_label.config(text=initial_value)  
         self.setup_bindings()
 
     def setup_bindings(self):
