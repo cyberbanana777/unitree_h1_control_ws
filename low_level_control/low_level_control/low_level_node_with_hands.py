@@ -296,11 +296,8 @@ class LowLevelControlNode(Node):
             for i in (self.active_joints_H1 + 
                      self.active_joints_hands + 
                      self.active_joints_wrists):
-                current_pose = self.robot.joints_pose_status[i].current_pose
+                current_pose = self.robot.get_current_pose(i)
                 self.robot.update_temporary_pose(i, current_pose)
-                self.get_logger().debug(
-                    f"Updating temporary_pose = {self.robot.joints_pose_status}"
-                )
         else:
             # Active control phase - update all joints
             self._update_H1_joints()
@@ -323,10 +320,10 @@ class LowLevelControlNode(Node):
         
         # Calculate and apply limited deltas for H1 joints
         for i in self.active_joints_H1:
-            delta = (self.robot.joints_pose_status[i].target_pose - 
-                    self.robot.joints_pose_status[i].temporary_pose)
+            delta = (self.robot.get_target_pose(i) - 
+                    self.robot.get_temporary_pose(i))
             clamped_delta = np.clip(delta, -self.max_joint_delta_H1, self.max_joint_delta_H1)
-            new_temp_pose = (self.robot.joints_pose_status[i].temporary_pose + 
+            new_temp_pose = (self.robot.get_temporary_pose(i) + 
                            clamped_delta)
             self.robot.update_temporary_pose(i, new_temp_pose)
 
@@ -335,7 +332,7 @@ class LowLevelControlNode(Node):
             mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
             coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
             
-            self.cmd_msg_H1.motor_cmd[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+            self.cmd_msg_H1.motor_cmd[mes_index].q = self.robot.get_temporary_pose(j)
             self.cmd_msg_H1.motor_cmd[mes_index].dq = 0.0
             self.cmd_msg_H1.motor_cmd[mes_index].tau = 0.0
             self.cmd_msg_H1.motor_cmd[mes_index].kp = coeff_and_mode[0]
@@ -345,32 +342,32 @@ class LowLevelControlNode(Node):
     def _update_hand_joints(self):
         """Update hand joint commands with velocity-limited movement"""
         for i in self.active_joints_hands:
-            delta = (self.robot.joints_pose_status[i].target_pose - 
-                    self.robot.joints_pose_status[i].temporary_pose)
+            delta = (self.robot.get_target_pose(i) - 
+                    self.robot.get_temporary_pose(i))
             clamped_delta = np.clip(
                 delta,
                 -self.max_joint_delta_hands,
                 self.max_joint_delta_hands,
             )
             clamped_delta = round(clamped_delta, 3)
-            new_temp_pose = (self.robot.joints_pose_status[i].temporary_pose + 
+            new_temp_pose = (self.robot.get_temporary_pose(i) + 
                            clamped_delta)
             self.robot.update_temporary_pose(i, new_temp_pose)
 
         for j in self.active_joints_hands:
             mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
-            self.cmd_msg_hands.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+            self.cmd_msg_hands.cmds[mes_index].q = self.robot.get_temporary_pose(j)
 
     def _update_wrist_joints(self):
         """Update wrist joint commands with velocity-limited movement"""
         for i in self.active_joints_wrists:
-            delta = (self.robot.joints_pose_status[i].target_pose - 
-                    self.robot.joints_pose_status[i].temporary_pose)
+            delta = (self.robot.get_target_pose(i) - 
+                    self.robot.get_temporary_pose(i))
             clamped_delta = np.clip(
                 delta, -self.max_joint_delta_wrists, self.max_joint_delta_wrists
             )
             clamped_delta = round(clamped_delta, 3)
-            new_temp_pose = (self.robot.joints_pose_status[i].temporary_pose + 
+            new_temp_pose = (self.robot.get_temporary_pose(i) + 
                            clamped_delta)
             self.robot.update_temporary_pose(i, new_temp_pose)
 
@@ -378,7 +375,7 @@ class LowLevelControlNode(Node):
             mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
             coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
             
-            self.cmd_msg_wrists.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+            self.cmd_msg_wrists.cmds[mes_index].q = self.robot.get_temporary_pose(j)
             self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
             self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
             self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
@@ -429,22 +426,22 @@ class LowLevelControlNode(Node):
 
     def alignment_wrists(self):
         """Move wrists to neutral position"""
-        self.robot.joints_pose_status[32].target_pose = 1.74   # Left wrist
-        self.robot.joints_pose_status[33].target_pose = -3.16  # Right wrist
+        self.robot.update_target_pose(32, 1.74)  # Left wrist
+        self.robot.update_target_pose(33, -3.16)    # Right wrist
         
         # Calculate movement deltas
-        delta_left = (self.robot.joints_pose_status[32].target_pose - 
-                     self.robot.joints_pose_status[32].current_pose) / 2
-        delta_right = (self.robot.joints_pose_status[33].target_pose - 
-                      self.robot.joints_pose_status[33].current_pose) / 2
+        delta_left = (self.robot.get_target_pose(32) - 
+                     self.robot.get_current_pose(32)) / 2
+        delta_right = (self.robot.get_target_pose(33) - 
+                      self.robot.get_current_pose(33)) / 2
 
         for _ in range(2):
             # Update temporary poses
             self.robot.update_temporary_pose(
-                32, self.robot.joints_pose_status[32].temporary_pose + delta_left
+                32, self.robot.get_temporary_pose(32) + delta_left
             )
             self.robot.update_temporary_pose(
-                33, self.robot.joints_pose_status[33].temporary_pose + delta_right
+                33, self.robot.get_temporary_pose(33) + delta_right
             )
 
             # Prepare wrist commands
@@ -452,7 +449,7 @@ class LowLevelControlNode(Node):
                 mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
                 coeff_and_mode = h1.determine_coeff_and_mode(j)
                 
-                self.cmd_msg_wrists.cmds[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+                self.cmd_msg_wrists.cmds[mes_index].q = self.robot.get_temporary_pose(j)
                 self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
                 self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
                 self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]

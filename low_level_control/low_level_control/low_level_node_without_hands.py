@@ -19,7 +19,7 @@ ANNOTATION
 Implements a low-level ROS 2 node for controlling Unitree H1 robot's arms, without
 fingers and wrists. Core functionality: processing target poses from JSON 
 messages via positions_to_unitree topic, smooth joint velocity ramping with 
-per-cycle angle delta limits, motor temperature monitoring. Key technologies: 
+per-cycle angle delta limits, motor temperature monitoring. Key technologies:
 ROS 2 (rclpy), Unitree SDK, CRC command validation. Critical constraints: 
 hardcoded PID coefficients, dependency on proprietary unitree_sdk2py 
 and h1_info_library.
@@ -217,11 +217,8 @@ class LowLevelControlNode(Node):
         if self.timer_call_count <= 10 or self.impact == 0.0:
             # Initialization phase or zero impact - maintain current positions
             for i in self.active_joints_H1:
-                current_pose = self.robot.joints_pose_status[i].current_pose
+                current_pose = self.robot.get_current_pose(i)
                 self.robot.update_temporary_pose(i, current_pose)
-                self.get_logger().debug(
-                    f"Updating temporary_pose = {self.robot.joints_pose_status}"
-                )
         else:
             # Active control phase
             self._update_joint_positions()
@@ -241,10 +238,10 @@ class LowLevelControlNode(Node):
         
         # Calculate and apply limited deltas for all joints
         for i in self.active_joints_H1:
-            delta = (self.robot.joints_pose_status[i].target_pose - 
-                    self.robot.joints_pose_status[i].temporary_pose)
+            delta = (self.robot.get_target_pose(i) - 
+                    self.robot.get_temporary_pose(i))
             clamped_delta = np.clip(delta, -self.max_joint_delta, self.max_joint_delta)
-            new_temp_pose = (self.robot.joints_pose_status[i].temporary_pose + 
+            new_temp_pose = (self.robot.get_temporary_pose(i) + 
                            clamped_delta)
             self.robot.update_temporary_pose(i, new_temp_pose)
 
@@ -254,7 +251,7 @@ class LowLevelControlNode(Node):
             mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
             coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
             
-            self.cmd_msg.motor_cmd[mes_index].q = self.robot.joints_pose_status[j].temporary_pose
+            self.cmd_msg.motor_cmd[mes_index].q = self.robot.get_temporary_pose(j)
             self.cmd_msg.motor_cmd[mes_index].dq = 0.0
             self.cmd_msg.motor_cmd[mes_index].tau = 0.0
             self.cmd_msg.motor_cmd[mes_index].kp = coeff_and_mode[0]

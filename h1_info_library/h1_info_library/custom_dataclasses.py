@@ -292,6 +292,26 @@ class RobotData:
             raise ValueError(f"Joint with index {abs_index} not found")
         joint_pose.temporary_pose = new_value
 
+    def get_current_pose(self, abs_index: int) -> float:
+        """Get the current_pose for the joint with the specified abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        return joint_pose.current_pose
+
+    def get_target_pose(self, abs_index: int) -> float:
+        """Get the target_pose for the joint with the specified abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        return joint_pose.target_pose
+
+    def get_temporary_pose(self, abs_index: int) -> float:
+        """Get the temporary_pose for the joint with the specified abs_index."""
+        joint_pose = next((p for p in self.joints_pose_status if p.abs_index == abs_index), None)
+        if joint_pose is None:
+            raise ValueError(f"Joint with index {abs_index} not found")
+        return joint_pose.temporary_pose
 
 if __name__ == "__main__":
     robot = RobotData(
