@@ -14,11 +14,12 @@
 (пароль указан в коде).
 
 ANNOTATION
-It launches the inspire_hand executable file to work with the Inspire Hand manipulator
-via UART.
-Automatically passes sudo password, handles process output and implements graceful Ctrl+C
-termination. Designed for ROS 2 low_level_control package to control robotic devices.
-Requires Linux environment and sudo privileges (password hardcoded).
+It launches the inspire_hand executable file to work with the Inspire Hand 
+manipulator via UART.
+Automatically passes sudo password, handles process output and implement
+graceful Ctrl+C termination. Designed for ROS 2 low_level_control package
+to control robotic devices. Requires Linux environment and sudo privileges
+(password hardcoded).
 """
 
 import os

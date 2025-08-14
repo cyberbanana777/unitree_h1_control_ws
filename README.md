@@ -321,5 +321,9 @@ Copyright (c) 2025 Алиса Зенина и Александр Грачев Р
 
 ## Благодарности
 Этот проект использует/модифицирует код из [репозитория Unitree Robotics SDK](https://github.com/unitreerobotics), который лицензирован в соответствии с **BSD 3-Clause License**.
+Этот проект модифицирует код из [репозитория ros-teleop/twist_teleop_keyboard](https://github.com/ros-teleop/teleop_twist_keyboard?ysclid=mebkz5791x655138144), который лицензирован в соответствии с **BSD License 2.0**.
+Этот проект использует код из [репозитория dmBots/motor-control-routine](https://github.com/dmBots/motor-control-routine/tree/master/), который лицензирован в соответствии с **MIT**.
+**Благодарим всех, кто косвенно участвовал в разработке!**
+
 ## Предложения и корректировки
 Если Вы нашли, ошибку, неточность, у Вас есть предложения по улучшению или вопросы, то напишите в телеграмм [сюда](https://t.me/Alex_19846) (Александр) или [сюда](https://t.me/Kika_01) (Алиса).
