@@ -69,6 +69,8 @@ class LowLevelControlNode(Node):
 
         # Define active joints
         self.active_joints_H1 = [
+            
+            # arms
             h1.FROM_NAMES_TO_INDEXES["right_shoulder_roll_joint"],
             h1.FROM_NAMES_TO_INDEXES["right_shoulder_pitch_joint"],
             h1.FROM_NAMES_TO_INDEXES["right_shoulder_yaw_joint"],
@@ -78,6 +80,18 @@ class LowLevelControlNode(Node):
             h1.FROM_NAMES_TO_INDEXES["left_shoulder_yaw_joint"],
             h1.FROM_NAMES_TO_INDEXES["left_elbow_joint"],
             h1.FROM_NAMES_TO_INDEXES["torso_joint"],
+
+            # legs
+            h1.FROM_INDEXES_TO_NAMES["right_hip_roll_joint"],
+            h1.FROM_INDEXES_TO_NAMES["right_hip_pitch_joint"],
+            h1.FROM_INDEXES_TO_NAMES["right_knee_joint"],
+            h1.FROM_INDEXES_TO_NAMES["left_hip_roll_joint"],
+            h1.FROM_INDEXES_TO_NAMES["left_hip_pitch_joint"],
+            h1.FROM_INDEXES_TO_NAMES["left_knee_joint"],
+            h1.FROM_INDEXES_TO_NAMES["left_hip_yaw_joint"],
+            h1.FROM_INDEXES_TO_NAMES["right_hip_yaw_joint"],
+            h1.FROM_INDEXES_TO_NAMES["left_ankle_joint"],
+            h1.FROM_INDEXES_TO_NAMES["right_ankle_joint"],
         ]
 
         self.active_joints_hands = [
