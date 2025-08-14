@@ -19,10 +19,6 @@ setup(
             os.path.join("share", package_name, "resource"),
             glob("resource/*.png"),
         ),
-        (
-            os.path.join("share", package_name, "resource"),
-            glob("resource/*.jpg"),
-        ),
     ],
     install_requires=["setuptools"],
     zip_safe=True,

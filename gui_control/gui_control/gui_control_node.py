@@ -119,7 +119,7 @@ class ImageViewer:
 
         package_share_dir = get_package_share_directory("gui_control")
         image_path = os.path.join(
-            package_share_dir, "resource", "unitree_h1_joints.png"
+            package_share_dir, "resource", "h1_with_hands.png"
         )
 
         try:
