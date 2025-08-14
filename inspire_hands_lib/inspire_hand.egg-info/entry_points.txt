@@ -1,2 +1,0 @@
-[console_scripts]
-inspire-hand = inspire_hand.cli:main
