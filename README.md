@@ -1,7 +1,34 @@
 # unitree_h1_control_ws
 В данном репозитории лежат ROS2-пакеты, которые позволяют контролировать движения робота Unitree H1. Пакеты реализовывают как low-level управление, так и high-level управление.
 
-## 📦 Содержание Репозитория
+## 📚 Оглавление
+
+1. [📦 Содержание репозитория](#-содержание-репозитория)
+2. [🚀 Быстрый старт](#-быстрый-старт)
+3. [⚙️ Предварительные требования](#️-предварительные-требования)
+4. [🧪 Использование](#-использование)
+   - 4.1 [Запуск узлов](#-запуск-узлов)
+   - 4.2 [Запуск Launch файлов](#-запуск-launch-файлов)
+5. [📚 Кастомные библиотеки](#-кастомные-библиотеки)
+   - 5.1 [`h1_info_library`](#h1_info_library)
+6. [📡 Интерфейс (топики, сервисы, действия, параметры)](#-интерфейс-топики-сервисы-действия-параметры)
+   - 6.1 [Пакет 1: `cmd_to_high_level_control_package`](#пакет-1-cmd_to_high_level_control_package)
+   - 6.2 [Пакет 2: `high_level_control`](#пакет-2-high_level_control)
+   - 6.3 [Пакет 3: `low_level_control`](#пакет-3-low_level_control)
+   - 6.4 [Пакет 4: `gui_control`](#пакет-4-gui_control)
+   - 6.5 [Пакет 5: `teleop_twist_keyboard_custom`](#пакет-5-teleop_twist_keyboard_custom)
+7. [🗺️ Архитектура](#️-архитектура)
+   - 7.1 [`control_H1_with_hands_launch`](#control_h1_with_hands_launch)
+   - 7.2 [`control_H1_without_hands_launch`](#control_h1_without_hands_launch)
+   - 7.3 [`control_for_slam_with_hands_launch`](#control_for_slam_with_hands_launch)
+   - 7.4 [`control_for_slam_without_hands_launch`](#control_for_slam_without_hands_launch)
+8. [Лицензия](#лицензия)
+9. [Благодарности](#благодарности)
+10. [Предложения и корректировки](#предложения-и-корректировки)
+
+---
+
+## 📦 Содержание репозитория
 *   **`cmd_to_high_level_control_package/`**: Программа, анализирующая команды от **`teleop_twist_keyboard_custom`** и приводящая Unitree H1 в движение с помощью `high_level` команд.
 * **`completed_scripts_control/`**: Содержит python launch-файлы, которые запускают конфигурации нод из данного репозитория для задач соответствующих названиям launch-файлов.
 *   **`docs/`**: Дополнительная документация (если есть).
@@ -18,7 +45,9 @@
 *   **`save.bash`**: Скрипт для быстрой выгрузки на Github
 *   **`LICENSE`**: Лицензия, под которой распространяется данное программное обеспечение
 
-## 🚀 Быстрый Старт
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
+## 🚀 Быстрый старт
 Пошаговая инструкция для **быстрого** запуска демо или основной функциональности. Предполагаем, что ROS2 (Foxy) уже установлен.
 
 1.  **Клонировать репозиторий** в `src` вашего workspace:
@@ -67,7 +96,11 @@ ros2 launch completed_scripts_control control_for_slam_with_hands_launch.py
 ```bash
 ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 ```
-## ⚙️ Предварительные Требования
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
+
+## ⚙️ Предварительные требования
 
 Всё, что нужно *до* шагов "Быстрого Старта":
 
@@ -76,13 +109,15 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 *   **Ключевые ROS2 пакеты:** `rclpy`, `std_msgs`, `geometry_msgs`, `unitree_go`
 *   **Сторонние зависимости:** numpy(pip), serial(pip), tkinter(pip) rich(pip), libboost-all-dev(apt), libspdlog-dev(apt)
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 ## 🧪 Использование
 ### **Запуск узлов:**
-#### **cmd_to_high_level_control_package**
+#### **`cmd_to_high_level_control_package`**
 ```bash
 ros2 run cmd_to_high_level_control_package cmd_to_high_level_control_node
 ```
-#### **high_level_control**
+#### **`high_level_control`**
 Минималистичный вывод в консоль:
 ```bash
 ros2 run high_level_control simple_node
@@ -91,7 +126,7 @@ ros2 run high_level_control simple_node
 ```bash
 ros2 run high_level_control beautiful_node
 ```
-#### **low_level_control**
+#### **`low_level_control`**
 ##### Без параметра
 ```bash
 ros2 run low_level_control low_level_control_without_hands_node
@@ -115,14 +150,17 @@ ros2 run low_level_control hands_init_node
 ```bash
 ros2 run low_level_control low_level_control_with_hands_node --ros-args -p target_topic_param:="lowcmd" -p max_joint_velocity_param:=1.5
 ```
-#### **gui_control**
+#### **`gui_control`**
 ```bash
 ros2 run gui_control gui_control_node
 ```
-#### **teleop_twist_keyboard_custom**
+#### **`teleop_twist_keyboard_custom`**
 ```bash
 ros2 run teleop_twist_keyboard_custom teleop_node
 ```
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 
 ### **Запуск Launch файлов:**
 #### Запуск телеуправления с руками
@@ -155,6 +193,8 @@ ros2 launch completed_scripts_control control_for_slam_without_hands_launch.py
 **Запускаемые ноды** (в формате `пакет` -> `зависимость`):
 - `low_level_control` -> `low_level_control_without_hands_node`
 - `cmd_to_high_level_control_package` -> `cmd_to_high_level_control_node`
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
 ## 📚 Кастомные библиотеки
 ### **`h1_info_library`**
@@ -200,7 +240,10 @@ h1_info_library
 
 Нумерация суставов робота представлена ниже.
 ![unitree_h1_joints](docs/h1_with_hands.png)
-## 📡 Интерфейс (Топики, Сервисы, Действия, Параметры)
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
+## 📡 Интерфейс (топики, сервисы, действия, параметры)
 Детальная спецификация API пакетов.
 ### **Пакет 1: `cmd_to_high_level_control_package`**
 #### **Узел: `cmd_to_high_level_control_node`**
@@ -217,6 +260,8 @@ h1_info_library
 | :---------- | :------------------- | :-------------------------------------------- |
 | `time_step` | `float (0.5)`        | Длительность движения при однократном нажатии |
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 ### **Пакет 2: `high_level_control`**
 #### **Узел: `high_level_control_simple_node`**
 - **Рабочие топики:**
@@ -232,6 +277,8 @@ h1_info_library
 | :--------- | :------------------- | :------------------------- | :----------------------------------------------- |
 | Публикация | `/api/loco/request`  | `unitree_api/msg/Request`  | Запрос на выполнение high-level-команды          |
 | Подписка   | `/api/loco/response` | `unitree_api/msg/Response` | Ответ на запрос о  выполнении high-level-команды |
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
 ### **Пакет 3: `low_level_control`**
 #### **Узел: `low_level_control_with_hands_node`**
@@ -283,6 +330,9 @@ h1_info_library
 #### **Узел: `hands_init_node`**
 - **Рабочие топики:** -
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
+
 ### **Пакет 4: `gui_control`**
 #### **Узел: `gui_control_node`**
 - **Рабочие топики:**
@@ -291,6 +341,7 @@ h1_info_library
 | :--------- | :---------------------- | :-------------------- | :---------------------------------------------------------- |
 | Публикация | `/positions_to_unitree` | `std_msgs/msg/String` | Целевые положения для всех суставов робота в формате `JSON` |
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
 ### **Пакет 5: `teleop_twist_keyboard_custom`**
 #### **Узел: `teleop_twist_keyboard_custom`**
@@ -307,16 +358,20 @@ h1_info_library
 | `stamped`  | `Bool (False)`       | Добавление штампа времени в сообщение |
 | `frame_id` | `String ('')`        | Система координат (frame)             |
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 ## 🗺️ Архитектура
 Здесь представлены скрины из rqt_graph при различных запущенных сценариях.
-### control_H1_with_hands_launch
+### `control_H1_with_hands_launch`
 ![control_H1_with_hands_launch](docs/control_H1_with_hands.png)
-### control_H1_without_hands_launch
+### `control_H1_without_hands_launch`
 ![control_H1_without_hands_launch](docs/control_H1_without_hands.png)
-### control_for_slam_with_hands_launch
+### `control_for_slam_with_hands_launch`
 ![control_for_slam_with_hands_launch](docs/control_for_slam_with_hands.png)
-### control_for_slam_without_hands_launch
+### `control_for_slam_without_hands_launch`
 ![control_for_slam_without_hands_launch](docs/control_for_slam_without_hands.png)
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
 
 ## Лицензия
@@ -325,11 +380,17 @@ Copyright (c) 2025 Алиса Зенина и Александр Грачев Р
 Данное программное обеспечение распространяется под [лицензией MIT](LICENSE).  
 Разрешается свободное использование, копирование, модификация и распространение при условии сохранения уведомления об авторских правах и текста лицензии.
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 ## Благодарности
 Этот проект использует/модифицирует код из [репозитория Unitree Robotics SDK](https://github.com/unitreerobotics), который лицензирован в соответствии с **BSD 3-Clause License**.
 Этот проект модифицирует код из [репозитория ros-teleop/twist_teleop_keyboard](https://github.com/ros-teleop/teleop_twist_keyboard?ysclid=mebkz5791x655138144), который лицензирован в соответствии с **BSD License 2.0**.
 Этот проект использует код из [репозитория dmBots/motor-control-routine](https://github.com/dmBots/motor-control-routine/tree/master/), который лицензирован в соответствии с **MIT**.
 **Благодарим всех, кто косвенно участвовал в разработке!**
 
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
+
 ## Предложения и корректировки
 Если Вы нашли, ошибку, неточность, у Вас есть предложения по улучшению или вопросы, то напишите в телеграмм [сюда](https://t.me/Alex_19846) (Александр) или [сюда](https://t.me/Kika_01) (Алиса).
+
+<p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
