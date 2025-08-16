@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
+CMAKE_SOURCE_DIR = /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build
+CMAKE_BINARY_DIR = /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

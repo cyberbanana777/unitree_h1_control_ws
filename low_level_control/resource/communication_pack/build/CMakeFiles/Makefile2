@@ -44,10 +44,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
+CMAKE_SOURCE_DIR = /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build
+CMAKE_BINARY_DIR = /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -74,14 +74,14 @@ clean: CMakeFiles/inspire_hand.dir/clean
 CMakeFiles/inspire_hand.dir/all:
 	$(MAKE) -f CMakeFiles/inspire_hand.dir/build.make CMakeFiles/inspire_hand.dir/depend
 	$(MAKE) -f CMakeFiles/inspire_hand.dir/build.make CMakeFiles/inspire_hand.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles --progress-num=1,2 "Built target inspire_hand"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles --progress-num=1,2 "Built target inspire_hand"
 .PHONY : CMakeFiles/inspire_hand.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/inspire_hand.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/inspire_hand.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles 0
 .PHONY : CMakeFiles/inspire_hand.dir/rule
 
 # Convenience name for target.

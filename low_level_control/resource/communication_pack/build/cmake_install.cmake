@@ -1,4 +1,4 @@
-# Install script for directory: /home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
+# Install script for directory: /home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

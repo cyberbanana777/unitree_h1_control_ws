@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++17 -g -O0 -fPIC -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/include/ddscxx -I/usr/local/include/iceoryx/v2.0.2 -I/home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/include 
+CXX_INCLUDES = -I/usr/local/include/ddscxx -I/usr/local/include/iceoryx/v2.0.2 -I/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/include 
 

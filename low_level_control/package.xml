@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>low_level_control</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>
     Implements low-level control for Unitree H1 robot via ROS 2, 
     managing arm joints, fingers and wrists.
@@ -13,8 +13,8 @@
   <depend>rclpy</depend>
   <depend>unitree_go</depend>
   <depend>std_msgs</depend>
-  <depend>inspire_hand_lib</depend>
-
+  
+  <depend>libfmt-dev</depend>
   <depend>libboost-all-dev</depend>
   <depend>libspdlog-dev</depend>
 

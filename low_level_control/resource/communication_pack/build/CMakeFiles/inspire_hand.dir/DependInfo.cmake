@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/inspire_ctrl.cpp" "/home/unitree/unitree_development/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles/inspire_hand.dir/inspire_ctrl.cpp.o"
+  "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/inspire_ctrl.cpp" "/home/banana-killer/unitree_workspaces_and_repos/unitree_h1_control_ws/src/low_level_control/resource/communication_pack/build/CMakeFiles/inspire_hand.dir/inspire_ctrl.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
