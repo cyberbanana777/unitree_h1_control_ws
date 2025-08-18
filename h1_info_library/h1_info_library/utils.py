@@ -47,7 +47,7 @@ def determine_coeff_and_mode(index_of_joint_of_unitree_h1: int) -> tuple:
         Kd = 5.0
 
     elif index_of_joint_of_unitree_h1 in size_XS:
-        Kp = 10.0
+        Kp = 20.0
         Kd = 2.0
 
     elif index_of_joint_of_unitree_h1 in fingers:
