@@ -440,36 +440,55 @@ class LowLevelControlNode(Node):
 
     def alignment_wrists(self):
         """Move wrists to neutral position"""
+
+        self.get_logger().warn('WRISTS WRIST WRIST')
         self.robot.update_target_pose(32, 1.74)  # Left wrist
         self.robot.update_target_pose(33, -3.16)    # Right wrist
         
         # Calculate movement deltas
-        delta_left = (self.robot.get_target_pose(32) - 
-                     self.robot.get_current_pose(32)) / 2
-        delta_right = (self.robot.get_target_pose(33) - 
-                      self.robot.get_current_pose(33)) / 2
+        # delta_left = (self.robot.get_target_pose(32) - 
+        #              self.robot.get_current_pose(32)) / 2
+        # delta_right = (self.robot.get_target_pose(33) - 
+        #               self.robot.get_current_pose(33)) / 2
 
-        for _ in range(2):
-            # Update temporary poses
-            self.robot.update_temporary_pose(
-                32, self.robot.get_temporary_pose(32) + delta_left
-            )
-            self.robot.update_temporary_pose(
-                33, self.robot.get_temporary_pose(33) + delta_right
-            )
+        # for _ in range(2):
+        #     # Update temporary poses
+        #     self.robot.update_temporary_pose(
+        #         32, self.robot.get_temporary_pose(32) + delta_left
+        #     )
+        #     self.robot.update_temporary_pose(
+        #         33, self.robot.get_temporary_pose(33) + delta_right
+        #     )
 
-            # Prepare wrist commands
-            for j in self.active_joints_wrists:
-                mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
-                coeff_and_mode = h1.determine_coeff_and_mode(j)
+        #     # Prepare wrist commands
+        #     for j in self.active_joints_wrists:
+        #         mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+        #         coeff_and_mode = h1.determine_coeff_and_mode(j)
                 
-                self.cmd_msg_wrists.cmds[mes_index].q = self.robot.get_temporary_pose(j)
-                self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
-                self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
-                self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
-                self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
+        #         self.cmd_msg_wrists.cmds[mes_index].q = self.robot.get_temporary_pose(j)
+        #         self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
+        #         self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
+        #         self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
+        #         self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
 
-            time.sleep(self.control_dt * 100)
+        #     self.publisher_wrist_cmds.publish(self.cmd_msg_wrists)
+        #     self.get_logger().warn(f'{self.cmd_msg_wrists}')
+
+        #     time.sleep(self.control_dt * 100)
+
+        
+    #     for j in self.active_joints_wrists:
+    #         mes_index = self.robot.get_joint_info_by_index(j).index_in_msg
+    #         coeff_and_mode = h1.determine_coeff_and_mode(j)  # (Kp, Kd, mode)
+            
+    #         self.cmd_msg_wrists.cmds[mes_index].q = self.robot.get_target_pose(j)
+    #         self.cmd_msg_wrists.cmds[mes_index].dq = 0.0
+    #         self.cmd_msg_wrists.cmds[mes_index].tau = 0.0
+    #         self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
+    #         self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
+                
+    #     self.publisher_wrist_cmds.publish(self.cmd_msg_wrists)
+
 
     def straighten_fingers(self):
         """Straighten all fingers to default position"""
@@ -491,7 +510,6 @@ def main(args=None):
         node.get_logger().error(f"Node error: {e}")
     finally:
         # Cleanup procedures
-        node.alignment_wrists()
         node.straighten_fingers()
         
         if node.impact != 0.0:
