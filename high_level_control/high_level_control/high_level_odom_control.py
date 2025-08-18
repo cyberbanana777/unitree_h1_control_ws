@@ -12,6 +12,7 @@ import json
 LOCO_SERVICE_NAME = "loco"
 
 
+
 """
 " service api version
 """
@@ -152,7 +153,7 @@ class OdomClient(Client):
         self.SetVelocity(vx, vy, vyaw, duration)
 
 
-FREQUENCY = 200
+FREQUENCY = 10
 
 
 
@@ -163,7 +164,7 @@ def main():
         ChannelFactoryInitialize(0)
     my_client = OdomClient()
     my_client.Init()
-    my_client.SetTimeout(1.0 /  FREQUENCY)
+    my_client.SetTimeout(1.0)
     my_client.EnableOdom()
     time.sleep(1)
     input('Press any key to start')
@@ -171,7 +172,7 @@ def main():
     while True:
         try:
             print(my_client.GetOdom())
-            # time.sleep(1.0 / FREQUENCY)
+            time.sleep(1.0 / FREQUENCY)
         except KeyboardInterrupt:
             print('Stop node')
             break

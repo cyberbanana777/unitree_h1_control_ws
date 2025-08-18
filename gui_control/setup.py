@@ -29,7 +29,8 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "gui_control_node = gui_control.gui_control_node:main"
+            "gui_control_node = gui_control.gui_control_node:main",
+            "gui_check_motors_node = gui_control.gui_check_motors_node:main"
         ],
     },
 )

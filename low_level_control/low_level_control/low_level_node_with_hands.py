@@ -469,7 +469,10 @@ class LowLevelControlNode(Node):
                 self.cmd_msg_wrists.cmds[mes_index].kp = coeff_and_mode[0]
                 self.cmd_msg_wrists.cmds[mes_index].kd = coeff_and_mode[1]
 
-            time.sleep(self.control_dt * 100)
+            self.publisher_wrist_cmds.publish(self.cmd_msg_wrists)
+
+
+            time.sleep(self.control_dt * 10)
 
     def straighten_fingers(self):
         """Straighten all fingers to default position"""
