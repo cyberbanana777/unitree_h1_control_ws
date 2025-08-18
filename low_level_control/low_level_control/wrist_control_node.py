@@ -32,11 +32,13 @@ Node gracefully terminates by disabling motors and closing connection.
 
 import numpy as np
 import rclpy
+import time
 import serial
 from rclpy.node import Node
 from unitree_go.msg import MotorCmds, MotorState, MotorStates
 
 from .DM_CAN import DM_Motor_Type, Motor, MotorControl
+
 
 # Constants
 TOPIC_CMD = "wrist/cmds"
@@ -182,6 +184,40 @@ class PubSubNode(Node):
 
     def shutdown(self):
         """Gracefully shutdown node by disabling motors and closing connection."""
+        left_q_end = 1.74  # Left wrist
+        right_q_end = -3.16 
+
+        # Apply position limits
+        target_position_left = np.clip(
+            float(left_q_end),
+            MOTOR_LIMITS[LEFT_ALIAS][0],
+            MOTOR_LIMITS[LEFT_ALIAS][1],
+        )
+        target_position_right = np.clip(
+            float(right_q_end),
+            MOTOR_LIMITS[RIGHT_ALIAS][0],
+            MOTOR_LIMITS[RIGHT_ALIAS][1],
+        )        
+    
+        self.motor_controler.controlMIT(
+            self.motor_left,
+            10.0,  # kp
+            2.0,  # kd
+            target_position_left,  # target position
+            0.0,  # target velocity
+            0.0,  # torque
+        )
+
+        self.motor_controler.controlMIT(
+            self.motor_right,
+            10.0,  # kp
+            2.0,  # kd
+            target_position_right,  # target position
+            0.0,  # target velocity
+            0.0,  # torque
+        )
+
+        time.sleep(0.5)
         self.motor_controler.disable(self.motor_left)
         self.motor_controler.disable(self.motor_right)
         self.serial_device.close()
