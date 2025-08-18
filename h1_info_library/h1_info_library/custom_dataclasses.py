@@ -25,6 +25,13 @@ from h1_info_library.limits import (LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATIO
                                     LIMITS_OF_JOINTS_WITH_HANDS_FROM_VENDOR)
 from h1_info_library.names_and_indexes import FROM_INDEXES_TO_NAMES, FROM_NAMES_TO_INDEXES
 
+# Mapping from integer codes to motor type names.
+TYPES_OF_MOTOR = {
+    0: "default_body_joint",
+    1: "finger_joint",
+    2: "wrist_joint",
+}
+
 
 @dataclass
 class MotorInfo:
@@ -63,14 +70,6 @@ class MotorPose:
     current_pose: float
     temporary_pose: float
 
-
-# Mapping from integer codes to motor type names.
-TYPES_OF_MOTOR = {
-    0: "default_body_joint",
-    1: "finger_joint",
-    2: "wrist_joint",
-}
-
 @dataclass
 class CheckMotors:
     """
@@ -80,7 +79,7 @@ class CheckMotors:
         abs_index (int): Unique identifier of the motor.
         type (str): Motor type (e.g., 'main_joint' or 'finger_joint').
         name_joint (str): Human-readable joint name.
-        temperature (float): Current temperature in °C.
+        temperature (int): Current temperature in °C.
         error (int): Error code (0 = no error).
         index_in_msg (int): Index in the serial communication message.
     """
@@ -93,52 +92,69 @@ class CheckMotors:
 
 
 class RobotState:
+    """Represents the state of all motors in the robot, including joints and fingers."""
+    
     def __init__(self, include_hands_with_fingers: bool = True) -> None:
-        self.motors_info: Dict[int, CheckMotors] = {}  # Изменили на motors_info
+        """Initialize the robot state.
+        
+        Args:
+            include_hands_with_fingers: If True, includes finger joints (motors 20-31).
+        """
+        self.motors_info: dict[int, CheckMotors] = {}
         self._initialize_motors(include_hands_with_fingers)
+
 
     def _initialize_motors(self, include_hands: bool) -> None:
         """Initialize all motors in the robot."""
-        # Main joints (0-19)
+        
+        # Main body joints (0-19)
         for i in range(20):
             self.motors_info[i] = CheckMotors(
-                abs_index=i,
-                type=TYPES_OF_MOTOR[0],
-                name_joint=FROM_INDEXES_TO_NAMES[i],
-                temperature=0,
-                error=0,
-                index_in_msg=i,
+                abs_index = i,
+                type = TYPES_OF_MOTOR[0],
+                name_joint = FROM_INDEXES_TO_NAMES[i],
+                temperature = 0,
+                error = 0,
+                index_in_msg = i,
             )
 
+        # Finger joints (20-31) - only if enabled
         if include_hands:
-            # Finger joints (20-31)
             for i in range(12):
                 abs_index = 20 + i
                 self.motors_info[abs_index] = CheckMotors(
-                    abs_index=abs_index,
-                    type=TYPES_OF_MOTOR[1],
-                    name_joint=FROM_INDEXES_TO_NAMES[i],
-                    temperature=0,
-                    error=0,
-                    index_in_msg=20 + i,
+                    abs_index = abs_index,
+                    type = TYPES_OF_MOTOR[1],
+                    name_joint = FROM_INDEXES_TO_NAMES[i],
+                    temperature = 0,
+                    error = 0,
+                    index_in_msg = 20 + i,
                 )
 
+
+    # --------------------- Basic Accessors ---------------------
     def get_motor(self, abs_index: int) -> CheckMotors:
-        """Get motor by absolute index. Raises ValueError if not found."""
+        """Get motor by absolute index.
+        
+        Raises:
+            ValueError: If motor with given index doesn't exist.
+        """
         if abs_index not in self.motors_info:
             raise ValueError(f"Motor with abs_index={abs_index} does not exist")
         return self.motors_info[abs_index]
 
-    def get_all_abs_indices(self) -> List[int]:
+    def get_all_abs_indices(self) -> list[int]:
         """Return all absolute indices in ascending order."""
         return sorted(self.motors_info.keys())
 
+
+    # --------------------- Property Accessors ---------------------
     def get_joint_name_by_abs_index(self, abs_index: int) -> str:
         """Get the joint name by its absolute index."""
         return self.get_motor(abs_index).name_joint
     
     def get_type_by_abs_index(self, abs_index: int) -> str:
-        """Get the joint name by its absolute index."""
+        """Get the joint type by its absolute index."""
         return self.get_motor(abs_index).type
 
     def get_error_by_abs_index(self, abs_index: int) -> int:
@@ -149,6 +165,8 @@ class RobotState:
         """Get the temperature of a motor by its absolute index."""
         return self.get_motor(abs_index).temperature
 
+
+    # --------------------- Property Setters ---------------------
     def update_temperature_by_abs_index(self, abs_index: int, temperature: float) -> None:
         """Update the temperature of a motor by its absolute index."""
         self.get_motor(abs_index).temperature = temperature
@@ -157,12 +175,11 @@ class RobotState:
         """Update the error code of a motor by its absolute index."""
         self.get_motor(abs_index).error = error
 
+
+    # --------------------- Message Protocol Helpers ---------------------
     def get_msg_index_by_abs_index(self, abs_index: int) -> int:
         """Get the message index of a motor by its absolute index."""
         return self.get_motor(abs_index).index_in_msg
-
-
-        
 
 class RobotData:
     """
