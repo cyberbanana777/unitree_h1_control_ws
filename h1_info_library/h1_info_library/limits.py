@@ -49,7 +49,7 @@ LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION = {
     5: (0.26, 2.05),  # left_knee_joint L
     6: (-2.35, 2.35),  # torso_joint M
     7: (-0.43, 0.43),  # left_hip_yaw_joint M
-    8: (-0.43, 0.43),  # right_hip_yaw_joint M
+    8: (-1.3, 1.5),  # right_hip_yaw_joint M
     9: (0.0, 1.0),  # IMPACT
     10: (-0.87, 0.52),  # left_ankle_joint S
     11: (-0.87, 0.52),  # right_ankle_joint S
@@ -73,6 +73,8 @@ LIMITS_OF_JOINTS_WITH_HANDS_FOR_TELEOPERATION = {
     29: (0.0, 1.0),  # left_index
     30: (0.0, 1.0),  # left_thumb-bend
     31: (0.0, 1.0),  # left_thumb-rotation
-    32: (-1.1, 4.58),  # left_wrist
-    33: (-6.0, -0.23),  # right_wrist
+    32: (-0.5, 3.1),  # left_wrist
+    33: (-4.5, -1.2),  # right_wrist
 }
+    # 32: (-0.65, 2.65),  # left_wrist
+    # 33: (-4.0, -2.0),  # right_wrist
