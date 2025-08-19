@@ -45,7 +45,7 @@ from unitree_sdk2py.utils.crc import CRC
 # Node configuration constants
 FREQUENCY = 333.33                       # Hz
 START_JOINT_VELOCITY = 0.5               # Initial joint velocity multiplier
-MAX_JOINT_VELOCITY = 7.0                 # Max joint velocity
+MAX_JOINT_VELOCITY = 7.0                # Max joint velocity
 MAX_FINGER_VELOCITY = 0.6                # Max finger velocity
 TARGET_TOPIC = "arm_sdk"                 # Default target topic
 TIME_TO_CHANGE_VELOCITY = 20.0            # Seconds to reach max velocity
