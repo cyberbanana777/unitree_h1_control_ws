@@ -16,8 +16,6 @@ from typing import Tuple
 from rich.console import Console
 from rich.style import Style
 from rich.table import Table
-from typing import List 
-from typing import List, Dict
 
 
 
@@ -143,7 +141,7 @@ class RobotState:
             raise ValueError(f"Motor with abs_index={abs_index} does not exist")
         return self.motors_info[abs_index]
 
-    def get_all_abs_indices(self) -> list[int]:
+    def get_all_abs_indices(self):
         """Return all absolute indices in ascending order."""
         return sorted(self.motors_info.keys())
 
