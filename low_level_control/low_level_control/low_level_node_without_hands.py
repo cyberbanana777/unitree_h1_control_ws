@@ -52,8 +52,8 @@ class LowLevelControlNode(Node):
         super().__init__("low_level_control_without_hands_node")
         
         # Initialize parameters
-        self.declare_parameter("target_action", TARGET_ACTION)
-        self.target_action_param = self.get_parameter("target_action").value
+        self.declare_parameter("target_action_param", TARGET_ACTION)
+        self.target_action_param = self.get_parameter("target_action_param").value
 
         # Initialize robot data
         self.robot = h1.RobotData(
