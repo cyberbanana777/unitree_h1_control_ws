@@ -94,7 +94,7 @@ ros2 launch completed_scripts_control control_h1_base.launch.py
 *   **Поддерживаемые версии ROS2:** Foxy
 *   **Поддерживаемые платформы:** Ubuntu 20.04
 *   **Ключевые ROS2 пакеты:** `rclpy`, `std_msgs`, `geometry_msgs`, `unitree_go`
-*   **Сторонние зависимости:** numpy(pip), serial(pip), tkinter(pip) rich(pip), libboost-all-dev(apt), libspdlog-dev(apt)
+*   **Сторонние зависимости:** `numpy(pip)`, `serial(pip)`, `tkinter(pip)`, `rich(pip)`, `libboost-all-dev(apt)`, `libspdlog-dev(apt)`
 
 <p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
