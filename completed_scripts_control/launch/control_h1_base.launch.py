@@ -38,11 +38,28 @@ def generate_launch_description():
         choices=['other', 'teleoperation'],
     )
 
+    controled_by_cmd_vel_arg = DeclareLaunchArgument(
+        'controled_by_cmd_vel',
+        default_value='False',
+        description='Enable robot control by cmd_vel.',
+        choices=['True', 'False'],
+    )
+
+    time_step_arg = DeclareLaunchArgument(
+        'time_step',
+        default_value='0.5',
+        description='Time step delay for control of move ',
+    )
+
     # Node parameters
     common_params = {
         'target_topic_param': LaunchConfiguration('target_topic'),
         'max_joint_velocity_param': LaunchConfiguration('max_joint_velocity'),
         'target_action_param': LaunchConfiguration('target_action'),
+    }
+
+    slam_params = {
+        'time_step_param': LaunchConfiguration('time_step'),\
     }
 
     # Conditions for selecting the mode
@@ -52,6 +69,10 @@ def generate_launch_description():
 
     without_hands_condition = PythonExpression([
         '"', LaunchConfiguration('mode'), '" == "without_hands"'
+    ])
+
+    cmd_vel_condition = PythonExpression([
+        '"', LaunchConfiguration('controled_by_cmd_vel'), '" == "True"'
     ])
 
     # Nodes for the mode with hands
@@ -82,11 +103,22 @@ def generate_launch_description():
         condition=IfCondition(without_hands_condition)
     )
 
+    h1_move_node = Node(
+        package="cmd_to_high_level_control_package",
+        executable="cmd_to_high_level_control_node",
+        parameters=[slam_params],
+        condition=IfCondition(cmd_vel_condition),
+    )
+
     return LaunchDescription([
         mode_arg,
         target_topic_arg,
         max_joint_velocity_arg,
         target_action_arg,
+        controled_by_cmd_vel_arg,
+        time_step_arg,
+
         *with_hands_nodes,
-        without_hands_node
+        without_hands_node,
+        h1_move_node,
     ])
