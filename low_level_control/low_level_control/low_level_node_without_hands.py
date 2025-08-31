@@ -9,8 +9,8 @@
 Реализует низкоуровневый ROS 2 узел для управления роботом Unitree H1, 
 включая руки без пальцев и запястей. Основные функции: обработка целевых поз
 из JSON-сообщений через топик positions_to_unitree, плавное изменение 
-скорости суставов с ограничением максимального угла поворота за цикл, 
-контроль температуры приводов. Ключевые технологии: ROS 2 (rclpy), 
+скорости суставов с ограничением максимального угла поворота за цикл. 
+Ключевые технологии: ROS 2 (rclpy), 
 Unitree SDK, CRC-проверка команд. Важные ограничения: жестко заданные 
 PID-коэффициенты, зависимость от проприетарных библиотек unitree_sdk2py 
 и h1_info_library.
@@ -19,7 +19,7 @@ ANNOTATION
 Implements a low-level ROS 2 node for controlling Unitree H1 robot's arms, without
 fingers and wrists. Core functionality: processing target poses from JSON 
 messages via positions_to_unitree topic, smooth joint velocity ramping with 
-per-cycle angle delta limits, motor temperature monitoring. Key technologies:
+per-cycle angle delta limits. Key technologies:
 ROS 2 (rclpy), Unitree SDK, CRC command validation. Critical constraints: 
 hardcoded PID coefficients, dependency on proprietary unitree_sdk2py 
 and h1_info_library.
@@ -41,7 +41,7 @@ from unitree_sdk2py.utils.crc import CRC
 # Node configuration constants
 FREQUENCY = 333.33                       # Control loop frequency (Hz)
 START_JOINT_VELOCITY = 0.5               # Initial joint velocity multiplier
-MAX_JOINT_VELOCITY = 7.0                 # Maximum joint velocity
+MAX_JOINT_VELOCITY = 4.0                 # Maximum joint velocity
 TARGET_TOPIC = "arm_sdk"                  # Default target topic
 TIME_TO_CHANGE_VELOCITY = 20.0            # Time to reach max velocity (seconds)
 TARGET_ACTION = 'teleoperation'          # Default robot action mode
@@ -90,7 +90,6 @@ class LowLevelControlNode(Node):
 
         # Control parameters
         self.impact = 0.0                          # Control influence factor
-        self.max_temperature = -1.0                # Maximum joint temperature
         self.velocity_changed = False              # Velocity ramp-up flag
         self.start_time = self.get_clock().now()   # Node start time
         
@@ -148,24 +147,11 @@ class LowLevelControlNode(Node):
             LowCmd, self.target_topic, 10
         )
         
-        self.publisher_temperature = self.create_publisher(
-            String, "max_temperature", 10
-        )
-
         # Timers
         self.timer_arm_sdk = self.create_timer(
             self.control_dt, self.timer_callback_arm_sdk
         )
         
-        self.timer_temperature = self.create_timer(
-            1.0, self.timer_callback_temperature
-        )
-
-    def timer_callback_temperature(self):
-        """Publish maximum joint temperature"""
-        msg = String()
-        msg.data = str(self.max_temperature)
-        self.publisher_temperature.publish(msg)
 
     def listener_callback_positions_to_unitree(self, msg):
         """
@@ -214,12 +200,9 @@ class LowLevelControlNode(Node):
 
     def listener_callback_lowstate(self, msg):
         """Update current joint positions from low state message"""
-        temps = []
         for i in self.active_joints_H1:
             message_index = self.robot.get_joint_info_by_index(i).index_in_msg
             self.robot.update_current_pose(i, msg.motor_state[message_index].q)
-            temps.append(msg.motor_state[i].temperature)
-        self.max_temperature = max(temps)
 
     def timer_callback_arm_sdk(self):
         """

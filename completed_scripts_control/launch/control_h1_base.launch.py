@@ -80,13 +80,31 @@ def generate_launch_description():
         Node(
             package="low_level_control",
             executable="low_level_control_with_hands_node",
+            name="low_level_control_with_hands_node",
+            namespace="control",
             parameters=[common_params],
-            condition=IfCondition(with_hands_condition)
+            condition=IfCondition(with_hands_condition),
+            remappings=[
+                ("lowstate", "/lowstate"),
+                ('positions_to_unitree', '/positions_to_unitree'),
+                ('arm_sdk', '/arm_sdk'),
+                ('lowcmd', '/lowcmd'),
+                ('inspire/cmd', '/inspire/cmd'),
+                ('inspire/state', '/inspire/state'),
+                ('wrist/cmds', '/wrist/cmds'),
+                ("wrist/states", '/wrist/states'),
+            ],
         ),
         Node(
             package="low_level_control",
+            namespace="control",
             executable="wrist_control_node",
-            condition=IfCondition(with_hands_condition)
+            name="wrist_control_node",
+            condition=IfCondition(with_hands_condition),
+            remappings=[
+                ('wrist/cmds', '/wrist/cmds'),
+                ("wrist/states", '/wrist/states'),
+            ],    
         ),
         Node(
             package="low_level_control",
@@ -99,13 +117,23 @@ def generate_launch_description():
     without_hands_node = Node(
         package="low_level_control",
         executable="low_level_control_without_hands_node",
+        name="low_level_control_without_hands_node",
+        namespace="control",
         parameters=[common_params],
-        condition=IfCondition(without_hands_condition)
+        condition=IfCondition(without_hands_condition),
+        remappings=[
+            ("lowstate", "/lowstate"),
+            ('positions_to_unitree', '/positions_to_unitree'),
+            ('arm_sdk', '/arm_sdk'),
+            ('lowcmd', '/lowcmd'),
+        ],
     )
 
     h1_move_node = Node(
         package="cmd_to_high_level_control_package",
         executable="cmd_to_high_level_control_node",
+        name="cmd_to_high_level_control_node",
+        namespace="control",
         parameters=[slam_params],
         condition=IfCondition(cmd_vel_condition),
     )
