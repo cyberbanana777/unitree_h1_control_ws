@@ -391,14 +391,14 @@ h1_info_library
 
 ## 🌐 RQT-grahs's
 Здесь представлены скрины из rqt_graph при различных запущенных сценариях.
-### `control_h1_base.launch.py mode:=with_hands target_action:=teleoperation`
-![control_H1_with_hands_launch](docs/control_H1_with_hands.png)
-### `control_h1_base.launch.py mode:=without_hands target_action:=teleoperation`
-![control_H1_without_hands_launch](docs/control_H1_without_hands.png)
+### `control_h1_base.launch.py mode:=with_hands`
+![control_with_hands](docs/control_with_hands.png)
+### `control_h1_base.launch.py mode:=without_hands`
+![control_without_hands](docs/control_without_hands.png)
 ### `control_h1_base.launch.py mode:=with_hands controled_by_cmd_vel:=True`
-![control_for_slam_with_hands_launch](docs/control_for_slam_with_hands.png)
+![control_with_hands_with_cmd](docs/control_with_hands_with_cmd.png)
 ### `control_h1_base.launch.py mode:=without_hands controled_by_cmd_vel:=True`
-![control_for_slam_without_hands_launch](docs/control_for_slam_without_hands.png)
+![control_without_hands_with_cmd](docs/control_without_hands_with_cmd.png)
 
 <p align="right" style="margin-top: 20px;"><a href="#-оглавление" style="text-decoration: none;">🔝 Вернуться к оглавлению</a></p>
 
