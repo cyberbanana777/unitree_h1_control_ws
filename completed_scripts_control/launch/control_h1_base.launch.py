@@ -136,7 +136,11 @@ def generate_launch_description():
         namespace="control",
         parameters=[slam_params],
         condition=IfCondition(cmd_vel_condition),
+        remappings=[
+            ('cmd_vel', '/cmd_vel'),
+        ]
     )
+
 
     return LaunchDescription([
         mode_arg,
