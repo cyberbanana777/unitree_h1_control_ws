@@ -1,4 +1,3 @@
-
 import sys
 from unitree_sdk2py.rpc.client import Client
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
@@ -62,7 +61,6 @@ def main():
     '''
     Simple odometry reader
     '''
-
     if len(sys.argv) > 1:
         ChannelFactoryInitialize(0, INTERFACE)
     else:

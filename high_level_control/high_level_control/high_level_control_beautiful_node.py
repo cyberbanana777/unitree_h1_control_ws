@@ -13,7 +13,7 @@
 # MODIFICATIONS:
 # - Completely redesigned the interface (Rich library, interactive prompts,
 #   command tables).
-# - Added new commands (START, STOP_MOVE).
+# - Added new commands (START, STOP_MOVE, ENABLE_ODOM, DISABLE_ODOM, GET_ODOM).
 # - Implemented error handling and safe shutdown.
 # - Improved code structure (Command, TestOption, UserInterface classes).
 # - Added localization (Russian/English).

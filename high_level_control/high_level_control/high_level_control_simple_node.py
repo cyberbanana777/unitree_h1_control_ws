@@ -8,7 +8,8 @@
 
 # Modificated by Alice Zenina and Alexander Grachev from RTU MIREA (Russia)
 # MODIFICATIONS:
-# 1. Added new commands: "Start" (id=2) and "Stop_move" (id=9)
+# 1. Added new commands: "Start" (id=2), "Stop_move" (id=9),
+#    "Enable_odom" (id=10), "Disable_odom" (id=11), "Get_odom" (id=12) 
 # 2. Improved user interface:
 #    - Added automatic listing of available functions at startup
 #    - Added better error handling with try-except blocks
