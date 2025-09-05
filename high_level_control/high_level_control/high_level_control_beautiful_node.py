@@ -50,6 +50,8 @@ from rich.style import Style
 from rich.table import Table
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.h1.loco.h1_loco_client import LocoClient
+from high_level_control import OdomClient
+
 
 # Interface settings
 INTERFACE = "wlp0s20f3"
@@ -70,6 +72,9 @@ class Command(Enum):
     HIGH_STAND = (7, "high stand", "High stance")
     ZERO_TORQUE = (8, "zero torque", "Zero torque")
     STOP_MOVE = (9, "stop_move", "Stop movement")
+    ENABLE_ODOM = (10, "enable_odom", "Enable odometry")
+    DISABLE_ODOM = (11, "disable_odom", "Disable odometry")
+    GET_ODOM = (12, "get_odom", "Get odometry")
 
     def __init__(self, id: int, cmd_name: str, description: str):
         self._id = id
@@ -197,32 +202,39 @@ class UserInterface:
         return True
 
 
-def execute_command(client: LocoClient, option: TestOption):
+def execute_command(loco_client: LocoClient, odom_client: OdomClient, option: TestOption):
     """Executes selected command"""
     if option.id is None:
         return
 
     try:
         if option.id == Command.DAMP.id:
-            client.Damp()
+            loco_client.Damp()
         elif option.id == Command.STAND_UP.id:
-            client.StandUp()
+            loco_client.StandUp()
         elif option.id == Command.START.id:
-            client.Start()
+            loco_client.Start()
         elif option.id == Command.MOVE_FORWARD.id:
-            client.Move(0.3, 0, 0)
+            loco_client.Move(0.3, 0, 0)
         elif option.id == Command.MOVE_LATERAL.id:
-            client.Move(0, 0.3, 0)
+            loco_client.Move(0, 0.3, 0)
         elif option.id == Command.MOVE_ROTATE.id:
-            client.Move(0, 0, 0.3)
+            loco_client.Move(0, 0, 0.3)
         elif option.id == Command.LOW_STAND.id:
-            client.LowStand()
+            loco_client.LowStand()
         elif option.id == Command.HIGH_STAND.id:
-            client.HighStand()
+            loco_client.HighStand()
         elif option.id == Command.ZERO_TORQUE.id:
-            client.ZeroTorque()
+            loco_client.ZeroTorque()
         elif option.id == Command.STOP_MOVE.id:
-            client.StopMove()
+            loco_client.StopMove()
+        elif option.id == Command.ENABLE_ODOM.id:
+            odom_client.EnableOdom()
+        elif option.id == Command.DISABLE_ODOM.id:
+            odom_client.DisableOdom()
+        elif option.id == Command.GET_ODOM.id:
+            data = odom_client.GetOdom()
+            print(f'Odom: {data}')
 
         time.sleep(1)
     except Exception as e:
@@ -242,16 +254,22 @@ def main():
     sport_client.SetTimeout(10.0)
     sport_client.Init()
 
+    odom_client = OdomClient()
+    odom_client.Init()
+    odom_client.SetTimeout(1.0)
+
     ui = UserInterface()
 
     try:
         while ui.handle_input():
-            execute_command(sport_client, ui.test_option)
+            execute_command(sport_client, odom_client, ui.test_option)
     except KeyboardInterrupt:
         console.print("\n[yellow]ℹ Shutting down...[/yellow]")
     except Exception as e:
         console.print(f"[red]✖ Fatal error:[/red] {e}")
     finally:
+        odom_client.DisableOdom()
+        sport_client.StopMove()
         console.print("[green]✔ Client stopped[/green]")
 
 

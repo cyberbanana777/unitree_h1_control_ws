@@ -45,6 +45,7 @@ from dataclasses import dataclass
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.h1.loco.h1_loco_client import LocoClient
+from high_level_control import OdomClient
 
 INTERFACE = "wlp0s20f3"
 
@@ -66,6 +67,9 @@ option_list = [
     TestOption(name="high stand", id=7),
     TestOption(name="zero torque", id=8),
     TestOption(name="Stop_move", id=9),
+    TestOption(name="Enable_odom", id=10),
+    TestOption(name="Disable_odom", id=11),
+    TestOption(name="Get_odom", id=12),
 ]
 
 
@@ -131,6 +135,11 @@ def main():
     sport_client.SetTimeout(10.0)
     sport_client.Init()
 
+    odom_client = OdomClient()
+    odom_client.Init()
+    odom_client.SetTimeout(1.0)
+
+
     while True:
         try:
             user_interface.terminal_handle()
@@ -160,6 +169,16 @@ def main():
                 sport_client.ZeroTorque()
             elif test_option.id == 9:
                 sport_client.StopMove()
+            elif test_option.id == 10:
+                odom_client.EnableOdom()
+            elif test_option.id == 11:
+                odom_client.DisableOdom()
+            elif test_option.id == 12:  
+                data = odom_client.GetOdom()
+                print(f"Odom: {data}")
+            else:
+                print("Invalid test option. Please try again.")
+
 
             time.sleep(1)
         except KeyboardInterrupt:
@@ -169,6 +188,8 @@ def main():
             print(f"Error: {e}")
             break
 
+    odom_client.DisableOdom()
+    sport_client.StopMove()
 
 if __name__ == "__main__":
     main()
