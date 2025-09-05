@@ -16,7 +16,7 @@ setup(
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="cyberbanana777",
-    maintainer_email="sasha_grachev2005@mail.ru",
+    maintainer_email="sashagrachev2005@gmail.com",
     description="This is a python3 library for comfortable programming Unitree H1. \
         It lib include reference info and optimized data structure for programming robot.",
     license="MIT",
